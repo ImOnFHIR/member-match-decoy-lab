@@ -14,7 +14,8 @@
     "validator:get": "mkdir -p .tools && curl -fL -o .tools/validator_cli.jar https://github.com/hapifhir/org.hl7.fhir.core/releases/download/7.0.4/validator_cli.jar",
     "validate:fhir": "npm run -s convert && bash scripts/validate-fhir.sh",
     "manifest:build": "npm run -s build && node scripts/manifest.mjs build",
-    "manifest:check": "npm run -s build && node scripts/manifest.mjs check"
+    "manifest:check": "npm run -s build && node scripts/manifest.mjs check",
+    "serve": "npm run -s build && node dist/src/serve.js"
   },
   "license": "Apache-2.0",
   "devDependencies": {

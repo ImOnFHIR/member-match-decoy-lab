@@ -19,11 +19,13 @@ npm run decoys:lint    # every decoy has a trap and an expected outcome
 npm run convert        # decoys -> fixtures/requests/*.json ($member-match input Parameters)
 npm run validator:get  # one-time: fetch the HL7 validator (Java 17+)
 npm run validate:fhir  # validate the requests against HRex 1.2.0
+npm run serve          # local $member-match endpoint on 127.0.0.1:8650
 npm run manifest:check # ground truth is digest-locked and stable
 npm run leak:check     # leak guard; needs a banlist outside this repo (LEAK_GUARD_CONFIG)
 ```
 
 - [DECOYS.md](DECOYS.md): the traps and their correct answers
+- [src/matchers/c057/PROVENANCE.md](src/matchers/c057/PROVENANCE.md): where matcher A comes from and what changed
 - [docs/SPEC_NOTES.md](docs/SPEC_NOTES.md): what building against HRex turned up
 
 ## Licence
