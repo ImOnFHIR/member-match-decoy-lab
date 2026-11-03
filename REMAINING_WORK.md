@@ -1,10 +1,10 @@
 # Remaining work
 
 ## 2026-11-03 session
-Completed: 1 (scaffold, da68a19); 2 (DECOYS.md + decoys/decoys.json + decoys:lint; reviewed by Nick by voice)
-Remaining: 3–11
-Deviations: Repo is public from the first commit (Nick, 2026-11-03). `npm test -- <name>` filters test files by name through `scripts/test.mjs`. Lab adds synthetic Quill family and gender (not in C-055). C-059 leak guard not yet ported: its banlist config must not be copied into this public repo; port the code with an HMAC-only or out-of-repo banlist before task 3 fixtures land.
-Test results: npm test 11/11 pass; decoys:lint ✓ 6 cases, 3 survive an ID match; gitleaks clean.
+Completed: 1 (scaffold, da68a19); 2 (decoys, reviewed by Nick by voice, eef5160); 3 (converter + HRex validation); leak guard ported (C-059)
+Remaining: 4–11
+Deviations: Repo is public from the first commit (Nick, 2026-11-03). `npm test -- <name>` filters test files by name through `scripts/test.mjs`. Lab adds synthetic Quill family and gender (not in C-055). C-059 leak guard ported with its banlist kept outside the repo (care-continuum-lab config plus ~/.config/member-match-decoy-lab/banlist.json); fails closed if none is found. Validator allows one known HRex false positive (docs/SPEC_NOTES.md #1). MemberPatient carries a synthetic new-plan identifier so Consent.patient meets US Core (SPEC_NOTES #2). Java: Homebrew openjdk@21; validator 7.0.4 in .tools/ (gitignored).
+Test results: npm test 40/40 pass; validate:fhir 6/6 files 0 errors (6 known, 0 unknown); leak:check 0 violations; decoys:lint ✓ 6 cases, 3 survive an ID match; gitleaks clean.
 Spend to date: $0 of $50
 PENDING decisions: none (DECOYS.md 1–5 decided). D3b's 'payer cannot segment sensitive data' is a declared lab assumption.
 Nick hours this week: 0.2 of 1.75

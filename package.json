@@ -8,7 +8,11 @@
   "scripts": {
     "build": "tsc -p .",
     "test": "node scripts/test.mjs",
-    "decoys:lint": "node scripts/decoys-lint.mjs"
+    "decoys:lint": "node scripts/decoys-lint.mjs",
+    "leak:check": "python3 tools/check-neutrality.py",
+    "convert": "npm run -s build && node scripts/convert.mjs",
+    "validator:get": "mkdir -p .tools && curl -fL -o .tools/validator_cli.jar https://github.com/hapifhir/org.hl7.fhir.core/releases/download/7.0.4/validator_cli.jar",
+    "validate:fhir": "npm run -s convert && bash scripts/validate-fhir.sh"
   },
   "license": "Apache-2.0",
   "devDependencies": {
