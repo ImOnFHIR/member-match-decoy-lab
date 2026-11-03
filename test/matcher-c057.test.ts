@@ -4,7 +4,7 @@ import { readFileSync } from "node:fs";
 import type { AddressInfo } from "node:net";
 import { loadDecoys } from "../src/decoys.js";
 import { roster } from "../src/population.js";
-import { createEndpoint, type DecisionLog } from "../src/server.js";
+import { createEndpoint, handle, type DecisionLog } from "../src/server.js";
 import { c057Matcher } from "../src/matchers/c057/index.js";
 import { levenshtein, nameSim, dobSim } from "../src/matchers/c057/compare.js";
 import { decide } from "../src/matchers/c057/decide.js";
@@ -72,6 +72,21 @@ for (const c of set.cases) {
     else assert.equal(r.body.issue[0].details.coding[0].code, what);
   });
 }
+
+test("matcher-c057-tuned: a user-set auto-confirm of 0.85 confirms D1 (Jr. scores 0.87)", async () => {
+  const tuned = { matchers: [c057Matcher({ name: "c057-tuned", autoConfirm: 0.85 })], roster: roster(set), consent: { asOf: set.asOf, canSegmentSensitive: false } };
+  const r: any = await handle(tuned, "c057-tuned", fixture("D1-senior-junior"));
+  assert.equal(r.status, 200);
+  assert.equal(r.body.parameter[0].valueIdentifier.value, "SYN-MEM-2001-02");
+  const strict: any = await handle({ ...tuned, matchers: [c057Matcher({ name: "x", autoConfirm: 0.9 })] }, "x", fixture("D1-senior-junior"));
+  assert.equal(strict.status, 422);
+});
+
+test("matcher-c057: consent is checked by the wrapper, not the endpoint", async () => {
+  const noConsentCheck = { name: "naive", decide: () => ({ kind: "match" as const, memberId: "SYN-MEM-1001-01", rationale: "ignores consent" }) };
+  const r: any = await handle({ matchers: [noConsentCheck], roster: roster(set), consent: { asOf: set.asOf, canSegmentSensitive: false } }, "naive", fixture("D3-consent-expired"));
+  assert.equal(r.status, 200, "the endpoint must not rescue a matcher that ignores consent");
+});
 
 test("matcher-c057: every decision is logged with a rationale", () => {
   assert.ok(logs.length >= set.cases.length);

@@ -10,6 +10,18 @@ A lab for Da Vinci HRex `$member-match`. Each synthetic request carries a plante
 
 Status: v0 under construction (target 2026-12-02). Progress is in [REMAINING_WORK.md](REMAINING_WORK.md).
 
+## Matchers
+
+| Name | What it is |
+|---|---|
+| `c057` | Nick's identity matcher (C-057), ported. Auto-confirms a sole probabilistic candidate at 0.90 or above. |
+| `c057-tuned` | The same matcher with a user-set auto-confirm line: `C057_AUTO_CONFIRM=0.85` (the default). |
+| `baseline` | Tiered rules: identifier first, then name, DOB and gender, applied only while there's still a tie. |
+| `baseline-strict` | The same candidates, but every field must agree even after the identifier has picked one member. |
+| `llm` | (task 7) An LLM adjudicator. |
+
+Every matcher checks consent itself (HRex mm-11); the endpoint doesn't.
+
 ## Run
 
 ```sh

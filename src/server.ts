@@ -1,14 +1,15 @@
 /**
  * Local $member-match endpoint. Loopback only, no auth, synthetic data only.
  *   POST /<matcher>/Patient/$member-match   (also /<matcher>/$member-match)
- * Order per request: parse → HRex consent gate (mm-11) → matcher → 200 Parameters | 422 OperationOutcome.
+ * Order per request: parse → matcher → 200 Parameters | 422 OperationOutcome.
+ * Consent (HRex mm-11) is each matcher's job, not the endpoint's (Nick, 2026-11-03).
  * Every decision is logged with its rationale.
  */
 import { createServer, type Server } from "node:http";
 import type { Matcher } from "./matchers/types.js";
 import type { Member } from "./population.js";
 import { parseRequest, BadRequest } from "./request.js";
-import { consentGate, type ConsentContext } from "./consent.js";
+import type { ConsentContext } from "./consent.js";
 import { matchResponse, refusal } from "./fhir.js";
 
 export interface DecisionLog { matcher: string; status: number; reason?: string; memberId?: string; rationale: string }
@@ -31,9 +32,7 @@ export async function handle(opts: EndpointOptions, matcherName: string, body: u
     if (!(e instanceof BadRequest)) throw e;
     return { status: 400, body: refusal("bad-request", e.message), log: { matcher: m.name, status: 400, reason: "bad-request", rationale: e.message } };
   }
-  const gate = consentGate(req, opts.consent);
-  if (!gate.ok) return { status: 422, body: refusal("consent", gate.reason), log: { matcher: m.name, status: 422, reason: "consent", rationale: `endpoint consent gate: ${gate.reason}` } };
-  const d = await m.decide(req, opts.roster);
+  const d = await m.decide(req, opts.roster, opts.consent);
   if (d.kind === "match") {
     if (!opts.roster.some((r) => r.memberId === d.memberId)) throw new Error(`${m.name} returned a member not on the roster`);
     return { status: 200, body: matchResponse(d.memberId), log: { matcher: m.name, status: 200, memberId: d.memberId, rationale: d.rationale } };

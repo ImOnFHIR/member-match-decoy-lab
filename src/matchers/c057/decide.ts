@@ -1,5 +1,6 @@
 // Ported from care-continuum-lab pocs/identity-service/src/core.mjs matchPipeline() @ 7422a34.
 // Same branches, same order; events replaced by a single decision (see PROVENANCE.md).
+// Lab addition: the auto-confirm line is a parameter (default C-057's 0.90) for the tunable variant.
 import { compare, type Comparison, type Facet, type Identity } from "./compare.js";
 import { THRESHOLDS, type ThresholdProfile } from "./config.js";
 
@@ -8,7 +9,7 @@ export type C057Outcome =
   | { status: "under-review"; why: "det-conflict" | "ambiguous" | "probable"; candidates: string[]; cmp: Comparison }
   | { status: "minted" };
 
-export function decide(record: Facet, identities: Identity[], profile: ThresholdProfile): C057Outcome {
+export function decide(record: Facet, identities: Identity[], profile: ThresholdProfile, autoConfirm: number = THRESHOLDS.autoConfirmStandard): C057Outcome {
   const candidates: { id: string; cmp: Comparison }[] = [];
   for (const identity of identities) {
     const cmp = compare(record, identity);
@@ -24,7 +25,7 @@ export function decide(record: Facet, identities: Identity[], profile: Threshold
   if (prob.length >= 2) return { status: "under-review", why: "ambiguous", candidates: prob.map((p) => p.id), cmp: prob[0].cmp };
   if (prob.length === 1) {
     const c = prob[0];
-    if (profile === "standard" && c.cmp.score >= THRESHOLDS.autoConfirmStandard)
+    if (profile === "standard" && c.cmp.score >= autoConfirm)
       return { status: "confirmed", method: "probabilistic", identity: c.id, cmp: c.cmp };
     return { status: "under-review", why: "probable", candidates: [c.id], cmp: c.cmp };
   }

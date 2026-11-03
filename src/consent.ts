@@ -1,7 +1,7 @@
 /**
  * HRex mm-11: "If consent is provided, inability to comply with consent requirements SHALL
- * return a 422 status code." This gate lives in the shared endpoint, not in any matcher, so
- * every matcher is held to the same consent rule.
+ * return a 422 status code." A helper the rule-based matchers call explicitly. The endpoint
+ * does not apply it: each matcher handles consent itself, and the LLM arm gets no helper.
  */
 import type { MatchRequest } from "./request.js";
 import { POLICY } from "./converter.js";
