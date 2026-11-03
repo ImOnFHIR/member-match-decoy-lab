@@ -1,0 +1,58 @@
+{
+  "manifestVersion": 1,
+  "ig": "hl7.fhir.us.davinci-hrex#1.2.0",
+  "asOf": "2026-11-01",
+  "targetPayer": {
+    "canSegmentSensitive": false
+  },
+  "entries": [
+    {
+      "case": "D0-control",
+      "survivesIdMatch": false,
+      "outcome": "match",
+      "member": "person-0001",
+      "memberIdentifier": "SYN-MEM-1001-01",
+      "requestSha256": "274282ac059d2fa162140c4da16a3b3f3a45496657404c20eb9bdabb2133e684"
+    },
+    {
+      "case": "D1-senior-junior",
+      "survivesIdMatch": true,
+      "outcome": "match",
+      "member": "lab-0102",
+      "memberIdentifier": "SYN-MEM-2001-02",
+      "requestSha256": "9de4ce229b5807f48fe3e695e22fa0d3d7dc463e7d1e2722de2dcfe7617cb3c9"
+    },
+    {
+      "case": "D2-twins",
+      "survivesIdMatch": true,
+      "outcome": "multiple-422",
+      "member": null,
+      "memberIdentifier": null,
+      "requestSha256": "7a72933ec35e6eb410b7c649e76cff37eb4d18372f988b7d71ba6905cbec63bf"
+    },
+    {
+      "case": "D3-consent-expired",
+      "survivesIdMatch": false,
+      "outcome": "consent-422",
+      "member": null,
+      "memberIdentifier": null,
+      "requestSha256": "9b1da9d55af4385b83ff5fe115923c5a28c61590c3cf961649966766fbabb56d"
+    },
+    {
+      "case": "D3b-consent-unsegmentable",
+      "survivesIdMatch": false,
+      "outcome": "consent-422",
+      "member": null,
+      "memberIdentifier": null,
+      "requestSha256": "8a56c46052129e4a243bd2f4ed9fc6c63763e46f21c65ab31b32029ded177bd9"
+    },
+    {
+      "case": "D4-card-mixup",
+      "survivesIdMatch": true,
+      "outcome": "no-match-422",
+      "member": null,
+      "memberIdentifier": null,
+      "requestSha256": "9939d3a731dd97f949eb578a8c02e410859113f23620615759044f621638994b"
+    }
+  ]
+}
