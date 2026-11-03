@@ -1,0 +1,26 @@
+{
+  "name": "member-match-decoy-lab",
+  "version": "0.0.0",
+  "description": "Synthetic $member-match decoy lab: plant near-duplicate decoys and score three matchers. Synthetic data only; not a production matching recommendation.",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "build": "tsc -p .",
+    "test": "node scripts/test.mjs"
+  },
+  "license": "Apache-2.0",
+  "devDependencies": {
+    "@types/node": "26.6.6",
+    "typescript": "7.0.2"
+  },
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ImOnFHIR/member-match-decoy-lab.git"
+  }
+}
