@@ -21,7 +21,7 @@ for (const c of d.cases) {
   if (!people.has(c.request?.patient)) err(c.id, `unknown request.patient ${c.request?.patient}`);
   if (!c.request?.card?.subscriberId && !c.request?.card?.memberId)
     err(c.id, "card needs subscriberId or memberId (HRex deterministic minimum)");
-  if (!["valid", "expired", "none"].includes(c.request?.consent)) err(c.id, "consent must be valid|expired|none");
+  if (!["valid", "expired", "regular", "none"].includes(c.request?.consent)) err(c.id, "consent must be valid|expired|regular|none");
   const o = c.expected?.outcome;
   if (!d.outcomes.includes(o)) err(c.id, `expected.outcome must be one of ${d.outcomes.join("|")}`);
   if (o === "match") {

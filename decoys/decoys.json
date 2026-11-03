@@ -1,63 +1,218 @@
 {
-  "$comment": "DRAFT for Nick's voice review (2026-11-03). Synthetic only. Source of truth for DECOYS.md and the scorer. Outcomes follow HRex $member-match notes mm-8..mm-11 (HL7/davinci-ehrx source, commit b5312b1, 2026-03-24; published IG v1.2.0).",
-  "status": "draft",
-  "outcomes": ["match", "no-match-422", "multiple-422", "consent-422"],
+  "$comment": "Reviewed by Nick by voice, 2026-11-03. Synthetic only. Source of truth for DECOYS.md and the scorer. Outcomes follow HRex $member-match notes mm-8..mm-11 (HL7/davinci-ehrx source, commit b5312b1, 2026-03-24; published IG v1.2.0).",
+  "status": "reviewed",
+  "outcomes": [
+    "match",
+    "no-match-422",
+    "multiple-422",
+    "consent-422"
+  ],
   "people": [
-    { "id": "person-0001", "source": "C-055", "name": "John Roe", "birthDate": "1951-09-02", "gender": "male" },
-    { "id": "person-0002", "source": "C-055", "name": "Jon Roe", "birthDate": "1951-09-10", "gender": "male" },
-    { "id": "lab-0101", "source": "lab", "name": "Dana Quill", "birthDate": "1979-03-14", "gender": "female" },
-    { "id": "lab-0102", "source": "lab", "name": "Rowan Quill", "birthDate": "2008-07-01", "gender": "male" },
-    { "id": "lab-0103", "source": "lab", "name": "Ada Quill", "birthDate": "2012-05-20", "gender": "female" },
-    { "id": "lab-0104", "source": "lab", "name": "Aya Quill", "birthDate": "2012-05-20", "gender": "female" }
+    {
+      "id": "person-0001",
+      "source": "C-055",
+      "name": "John Roe",
+      "birthDate": "1951-09-02",
+      "gender": "male"
+    },
+    {
+      "id": "person-0002",
+      "source": "C-055",
+      "name": "Jon Roe",
+      "birthDate": "1951-09-10",
+      "gender": "male"
+    },
+    {
+      "id": "lab-0101",
+      "source": "lab",
+      "name": "Rowan Quill",
+      "suffix": "Sr",
+      "birthDate": "1979-03-14",
+      "gender": "male"
+    },
+    {
+      "id": "lab-0102",
+      "source": "lab",
+      "name": "Rowan Quill",
+      "suffix": "Jr",
+      "birthDate": "2008-07-01",
+      "gender": "male"
+    },
+    {
+      "id": "lab-0103",
+      "source": "lab",
+      "name": "Ada Quill",
+      "birthDate": "2012-05-20",
+      "gender": "female"
+    },
+    {
+      "id": "lab-0104",
+      "source": "lab",
+      "name": "Aya Quill",
+      "birthDate": "2012-05-20",
+      "gender": "female"
+    }
   ],
   "coverages": [
-    { "id": "cov-roe-john", "subscriberId": "SYN-SUB-1001", "memberId": "SYN-MEM-1001-01", "beneficiary": "person-0001", "relationship": "self" },
-    { "id": "cov-roe-jon", "subscriberId": "SYN-SUB-1002", "memberId": "SYN-MEM-1002-01", "beneficiary": "person-0002", "relationship": "self" },
-    { "id": "cov-quill-dana", "subscriberId": "SYN-SUB-2001", "memberId": "SYN-MEM-2001-01", "beneficiary": "lab-0101", "relationship": "self" },
-    { "id": "cov-quill-rowan", "subscriberId": "SYN-SUB-2001", "memberId": "SYN-MEM-2001-02", "beneficiary": "lab-0102", "relationship": "child" },
-    { "id": "cov-quill-ada", "subscriberId": "SYN-SUB-2001", "memberId": "SYN-MEM-2001-03", "beneficiary": "lab-0103", "relationship": "child" },
-    { "id": "cov-quill-aya", "subscriberId": "SYN-SUB-2001", "memberId": "SYN-MEM-2001-04", "beneficiary": "lab-0104", "relationship": "child" }
+    {
+      "id": "cov-roe-john",
+      "subscriberId": "SYN-SUB-1001",
+      "memberId": "SYN-MEM-1001-01",
+      "beneficiary": "person-0001",
+      "relationship": "self"
+    },
+    {
+      "id": "cov-roe-jon",
+      "subscriberId": "SYN-SUB-1002",
+      "memberId": "SYN-MEM-1002-01",
+      "beneficiary": "person-0002",
+      "relationship": "self"
+    },
+    {
+      "id": "cov-quill-rowan-sr",
+      "subscriberId": "SYN-SUB-2001",
+      "memberId": "SYN-MEM-2001-01",
+      "beneficiary": "lab-0101",
+      "relationship": "self"
+    },
+    {
+      "id": "cov-quill-rowan-jr",
+      "subscriberId": "SYN-SUB-2001",
+      "memberId": "SYN-MEM-2001-02",
+      "beneficiary": "lab-0102",
+      "relationship": "child"
+    },
+    {
+      "id": "cov-quill-ada",
+      "subscriberId": "SYN-SUB-2001",
+      "memberId": "SYN-MEM-2001-03",
+      "beneficiary": "lab-0103",
+      "relationship": "child"
+    },
+    {
+      "id": "cov-quill-aya",
+      "subscriberId": "SYN-SUB-2001",
+      "memberId": "SYN-MEM-2001-04",
+      "beneficiary": "lab-0104",
+      "relationship": "child"
+    }
   ],
   "cases": [
     {
       "id": "D0-control",
       "title": "Control: clean card, clean demographics",
-      "request": { "patient": "person-0001", "card": { "subscriberId": "SYN-SUB-1001", "memberId": "SYN-MEM-1001-01" }, "consent": "valid" },
+      "request": {
+        "patient": "person-0001",
+        "card": {
+          "subscriberId": "SYN-SUB-1001",
+          "memberId": "SYN-MEM-1001-01"
+        },
+        "consent": "valid"
+      },
       "trap": "None. Proves each matcher can return a plain match.",
       "survivesIdMatch": false,
-      "expected": { "outcome": "match", "member": "person-0001", "memberIdentifier": "SYN-MEM-1001-01" }
+      "expected": {
+        "outcome": "match",
+        "member": "person-0001",
+        "memberIdentifier": "SYN-MEM-1001-01"
+      }
     },
     {
-      "id": "D1-shared-subscriber",
-      "title": "Dependent on the subscriber's card",
-      "request": { "patient": "lab-0102", "card": { "subscriberId": "SYN-SUB-2001" }, "consent": "valid" },
-      "trap": "The card carries only the family's subscriber ID, which four members share. A matcher that stops at the identifier returns the subscriber (Dana) instead of the dependent (Rowan).",
+      "id": "D1-senior-junior",
+      "title": "Senior and Junior on one card",
+      "request": {
+        "patient": "lab-0102",
+        "card": {
+          "subscriberId": "SYN-SUB-2001"
+        },
+        "dropSuffix": true,
+        "consent": "valid"
+      },
+      "trap": "Rowan Quill Sr. (the subscriber) and Rowan Quill Jr. share the subscriber ID, first name, surname and gender. The request is for Jr. but carries no suffix. A matcher that stops at ID + name returns Sr. or refuses; one that demands an exact name with suffix wrongly says no match. Only the birth date separates them.",
       "survivesIdMatch": true,
-      "expected": { "outcome": "match", "member": "lab-0102", "memberIdentifier": "SYN-MEM-2001-02" }
+      "expected": {
+        "outcome": "match",
+        "member": "lab-0102",
+        "memberIdentifier": "SYN-MEM-2001-02"
+      }
     },
     {
       "id": "D2-twins",
       "title": "Twins on one policy, initial only",
-      "request": { "patient": "lab-0103", "card": { "subscriberId": "SYN-SUB-2001" }, "givenOverride": "A", "consent": "valid" },
+      "request": {
+        "patient": "lab-0103",
+        "card": {
+          "subscriberId": "SYN-SUB-2001"
+        },
+        "givenOverride": "A",
+        "consent": "valid"
+      },
       "trap": "Ada and Aya share the subscriber ID, birth date, gender and surname. The request has the initial 'A' only. A scoring matcher picks one; HRex says multiple matches SHALL return 422.",
       "survivesIdMatch": true,
-      "expected": { "outcome": "multiple-422" }
+      "expected": {
+        "outcome": "multiple-422"
+      }
     },
     {
       "id": "D3-consent-expired",
       "title": "Right person, consent the server can't honour",
-      "request": { "patient": "person-0001", "card": { "subscriberId": "SYN-SUB-1001", "memberId": "SYN-MEM-1001-01" }, "consent": "expired" },
+      "request": {
+        "patient": "person-0001",
+        "card": {
+          "subscriberId": "SYN-SUB-1001",
+          "memberId": "SYN-MEM-1001-01"
+        },
+        "consent": "expired"
+      },
       "trap": "The match is clean, but Consent.provision.period ended before the request date. HRex: if consent is provided, inability to comply SHALL return 422. A matcher that ignores Consent returns a match.",
       "survivesIdMatch": false,
-      "expected": { "outcome": "consent-422" }
+      "expected": {
+        "outcome": "consent-422"
+      }
+    },
+    {
+      "id": "D3b-consent-unsegmentable",
+      "title": "Right person, consent limited to non-sensitive data",
+      "request": {
+        "patient": "person-0001",
+        "card": {
+          "subscriberId": "SYN-SUB-1001",
+          "memberId": "SYN-MEM-1001-01"
+        },
+        "consent": "regular"
+      },
+      "trap": "The match is clean and the consent is current, but its policy is #regular (non-sensitive data only) and this target payer cannot segment sensitive data (lab assumption, see targetPayer). It cannot comply, so HRex mm-11 calls for 422. A matcher that ignores Consent returns a match.",
+      "survivesIdMatch": false,
+      "expected": {
+        "outcome": "consent-422"
+      }
     },
     {
       "id": "D4-card-mixup",
       "title": "John's demographics, Jon's card",
-      "request": { "patient": "person-0001", "card": { "subscriberId": "SYN-SUB-1002", "memberId": "SYN-MEM-1002-01" }, "consent": "valid" },
+      "request": {
+        "patient": "person-0001",
+        "card": {
+          "subscriberId": "SYN-SUB-1002",
+          "memberId": "SYN-MEM-1002-01"
+        },
+        "consent": "valid"
+      },
       "trap": "The member ID is valid but belongs to the C-055 decoy (Jon Roe, a one-letter name difference and a DOB eight days off). An identifier-first matcher returns Jon. The demographics and the card disagree, so the correct answer is no match.",
       "survivesIdMatch": true,
-      "expected": { "outcome": "no-match-422" }
+      "expected": {
+        "outcome": "no-match-422"
+      }
     }
-  ]
+  ],
+  "targetPayer": {
+    "$comment": "Lab assumption, not spec text: the target payer cannot segment sensitive data, so it can honour a #sensitive (share all) consent but not a #regular (non-sensitive only) one.",
+    "canSegmentSensitive": false
+  },
+  "consentKinds": {
+    "valid": "policy #sensitive, period covers the request date",
+    "expired": "policy #sensitive, provision.period ended before the request date",
+    "regular": "policy #regular, period current",
+    "none": "no Consent parameter"
+  }
 }
