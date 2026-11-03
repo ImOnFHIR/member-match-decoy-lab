@@ -7,7 +7,8 @@
   },
   "scripts": {
     "build": "tsc -p .",
-    "test": "node scripts/test.mjs"
+    "test": "node scripts/test.mjs",
+    "decoys:lint": "node scripts/decoys-lint.mjs"
   },
   "license": "Apache-2.0",
   "devDependencies": {
