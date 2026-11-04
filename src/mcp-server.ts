@@ -15,9 +15,15 @@ import { loadDecoys } from "./decoys.js";
 import { befriend, renderText, renderSummary } from "./report.js";
 import { toView } from "./report-view.js";
 import { describe, toolMeta, resultMeta, type About, type Preset } from "./tool-meta.js";
+import { existsSync, readFileSync } from "node:fs";
+
+/** The in-Claude view (MCP Apps). Built by `npm run ui:build`; if it isn't built, the tool simply has no view. */
+export const VIEW_URI = "ui://member-match-decoy-lab/view.html";
+export const VIEW_MIME = "text/html;profile=mcp-app";
 
 /** Repo root, so the server works whatever directory the MCP client starts it from. */
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..", "..");
+const VIEW_FILE = `${ROOT}/dist/ui/view.html`;
 const set = loadDecoys(`${ROOT}/decoys/decoys.json`);
 const FREE = MATCHER_INFO.filter((m) => !m.costsMoney);
 
@@ -98,7 +104,11 @@ export function createMcpServer(): McpServer {
       },
       outputSchema,
       annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false },
-      _meta: toolMeta({ about: ABOUT, presets: PRESETS, cost: { free: true }, form: { advanced: ["relaxed_confidence", "detail"] } }),
+      _meta: {
+        ...toolMeta({ about: ABOUT, presets: PRESETS, cost: { free: true }, form: { advanced: ["relaxed_confidence", "detail"] } }),
+        // MCP Apps: both key forms, as @modelcontextprotocol/ext-apps registerAppTool writes them.
+        ...(existsSync(VIEW_FILE) ? { ui: { resourceUri: VIEW_URI }, "ui/resourceUri": VIEW_URI } : {}),
+      },
     },
     async ({ matchers, cases, relaxed_confidence, detail }) => {
       const env = relaxed_confidence === undefined ? {} : { RELAXED_CONFIDENCE: String(relaxed_confidence) };
@@ -109,6 +119,10 @@ export function createMcpServer(): McpServer {
       return { content: [{ type: "text", text }], structuredContent: { ...sb }, _meta: resultMeta(toView(sb)) };
     },
   );
+  if (existsSync(VIEW_FILE)) {
+    server.registerResource("Member-match decoy test view", VIEW_URI, { mimeType: VIEW_MIME, description: "Shows a score_member_match result as a card." },
+      async () => ({ contents: [{ uri: VIEW_URI, mimeType: VIEW_MIME, text: readFileSync(VIEW_FILE, "utf8") }] }));
+  }
   return server;
 }
 
