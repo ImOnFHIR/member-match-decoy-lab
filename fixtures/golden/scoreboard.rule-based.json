@@ -2,7 +2,7 @@
   "manifestDigest": "afd4a0787ca3976f425dba1e1fcd78cf1964d62249a0ddab09ffc14b5750dc62",
   "matchers": [
     {
-      "matcher": "c057",
+      "matcher": "identity-strict",
       "counts": {
         "true-match": 1,
         "correct-no-match": 1,
@@ -17,7 +17,7 @@
       "total": 6
     },
     {
-      "matcher": "c057-tuned",
+      "matcher": "identity-relaxed",
       "counts": {
         "true-match": 2,
         "correct-no-match": 1,
@@ -32,7 +32,7 @@
       "total": 6
     },
     {
-      "matcher": "baseline",
+      "matcher": "id-first",
       "counts": {
         "true-match": 2,
         "correct-no-match": 0,
@@ -47,7 +47,7 @@
       "total": 6
     },
     {
-      "matcher": "baseline-strict",
+      "matcher": "check-every-field",
       "counts": {
         "true-match": 2,
         "correct-no-match": 1,
@@ -64,242 +64,266 @@
   ],
   "rows": [
     {
-      "matcher": "c057",
+      "matcher": "identity-strict",
       "case": "D0-control",
       "expected": "match",
       "expectedMember": "SYN-MEM-1001-01",
       "reasonMismatch": false,
       "wrongPerson": null,
+      "subjectMemberId": "SYN-MEM-1001-01",
       "observed": "match SYN-MEM-1001-01",
       "category": "true-match"
     },
     {
-      "matcher": "c057",
+      "matcher": "identity-strict",
       "case": "D1-senior-junior",
       "expected": "match",
       "expectedMember": "SYN-MEM-2001-02",
       "reasonMismatch": false,
       "wrongPerson": null,
+      "subjectMemberId": "SYN-MEM-2001-02",
       "observed": "422 review-required",
       "category": "missed-match"
     },
     {
-      "matcher": "c057",
+      "matcher": "identity-strict",
       "case": "D2-twins",
       "expected": "multiple-422",
       "expectedMember": null,
       "reasonMismatch": false,
       "wrongPerson": null,
+      "subjectMemberId": "SYN-MEM-2001-03",
       "observed": "422 multiple-matches",
       "category": "correct-multiple"
     },
     {
-      "matcher": "c057",
+      "matcher": "identity-strict",
       "case": "D3-consent-expired",
       "expected": "consent-422",
       "expectedMember": null,
       "reasonMismatch": false,
       "wrongPerson": null,
+      "subjectMemberId": "SYN-MEM-1001-01",
       "observed": "422 consent",
       "category": "consent-constrained"
     },
     {
-      "matcher": "c057",
+      "matcher": "identity-strict",
       "case": "D3b-consent-unsegmentable",
       "expected": "consent-422",
       "expectedMember": null,
       "reasonMismatch": false,
       "wrongPerson": null,
+      "subjectMemberId": "SYN-MEM-1001-01",
       "observed": "422 consent",
       "category": "consent-constrained"
     },
     {
-      "matcher": "c057",
+      "matcher": "identity-strict",
       "case": "D4-card-mixup",
       "expected": "no-match-422",
       "expectedMember": null,
       "reasonMismatch": true,
       "wrongPerson": null,
+      "subjectMemberId": "SYN-MEM-1001-01",
       "observed": "422 review-required",
       "category": "correct-no-match"
     },
     {
-      "matcher": "c057-tuned",
+      "matcher": "identity-relaxed",
       "case": "D0-control",
       "expected": "match",
       "expectedMember": "SYN-MEM-1001-01",
       "reasonMismatch": false,
       "wrongPerson": null,
+      "subjectMemberId": "SYN-MEM-1001-01",
       "observed": "match SYN-MEM-1001-01",
       "category": "true-match"
     },
     {
-      "matcher": "c057-tuned",
+      "matcher": "identity-relaxed",
       "case": "D1-senior-junior",
       "expected": "match",
       "expectedMember": "SYN-MEM-2001-02",
       "reasonMismatch": false,
       "wrongPerson": null,
+      "subjectMemberId": "SYN-MEM-2001-02",
       "observed": "match SYN-MEM-2001-02",
       "category": "true-match"
     },
     {
-      "matcher": "c057-tuned",
+      "matcher": "identity-relaxed",
       "case": "D2-twins",
       "expected": "multiple-422",
       "expectedMember": null,
       "reasonMismatch": false,
       "wrongPerson": null,
+      "subjectMemberId": "SYN-MEM-2001-03",
       "observed": "422 multiple-matches",
       "category": "correct-multiple"
     },
     {
-      "matcher": "c057-tuned",
+      "matcher": "identity-relaxed",
       "case": "D3-consent-expired",
       "expected": "consent-422",
       "expectedMember": null,
       "reasonMismatch": false,
       "wrongPerson": null,
+      "subjectMemberId": "SYN-MEM-1001-01",
       "observed": "422 consent",
       "category": "consent-constrained"
     },
     {
-      "matcher": "c057-tuned",
+      "matcher": "identity-relaxed",
       "case": "D3b-consent-unsegmentable",
       "expected": "consent-422",
       "expectedMember": null,
       "reasonMismatch": false,
       "wrongPerson": null,
+      "subjectMemberId": "SYN-MEM-1001-01",
       "observed": "422 consent",
       "category": "consent-constrained"
     },
     {
-      "matcher": "c057-tuned",
+      "matcher": "identity-relaxed",
       "case": "D4-card-mixup",
       "expected": "no-match-422",
       "expectedMember": null,
       "reasonMismatch": true,
       "wrongPerson": null,
+      "subjectMemberId": "SYN-MEM-1001-01",
       "observed": "422 review-required",
       "category": "correct-no-match"
     },
     {
-      "matcher": "baseline",
+      "matcher": "id-first",
       "case": "D0-control",
       "expected": "match",
       "expectedMember": "SYN-MEM-1001-01",
       "reasonMismatch": false,
       "wrongPerson": null,
+      "subjectMemberId": "SYN-MEM-1001-01",
       "observed": "match SYN-MEM-1001-01",
       "category": "true-match"
     },
     {
-      "matcher": "baseline",
+      "matcher": "id-first",
       "case": "D1-senior-junior",
       "expected": "match",
       "expectedMember": "SYN-MEM-2001-02",
       "reasonMismatch": false,
       "wrongPerson": null,
+      "subjectMemberId": "SYN-MEM-2001-02",
       "observed": "match SYN-MEM-2001-02",
       "category": "true-match"
     },
     {
-      "matcher": "baseline",
+      "matcher": "id-first",
       "case": "D2-twins",
       "expected": "multiple-422",
       "expectedMember": null,
       "reasonMismatch": true,
       "wrongPerson": null,
+      "subjectMemberId": "SYN-MEM-2001-03",
       "observed": "422 no-match",
       "category": "correct-multiple"
     },
     {
-      "matcher": "baseline",
+      "matcher": "id-first",
       "case": "D3-consent-expired",
       "expected": "consent-422",
       "expectedMember": null,
       "reasonMismatch": false,
       "wrongPerson": null,
+      "subjectMemberId": "SYN-MEM-1001-01",
       "observed": "422 consent",
       "category": "consent-constrained"
     },
     {
-      "matcher": "baseline",
+      "matcher": "id-first",
       "case": "D3b-consent-unsegmentable",
       "expected": "consent-422",
       "expectedMember": null,
       "reasonMismatch": false,
       "wrongPerson": null,
+      "subjectMemberId": "SYN-MEM-1001-01",
       "observed": "422 consent",
       "category": "consent-constrained"
     },
     {
-      "matcher": "baseline",
+      "matcher": "id-first",
       "case": "D4-card-mixup",
       "expected": "no-match-422",
       "expectedMember": null,
       "reasonMismatch": false,
       "wrongPerson": "SYN-MEM-1002-01",
+      "subjectMemberId": "SYN-MEM-1001-01",
       "observed": "match SYN-MEM-1002-01",
       "category": "decoy-confusion"
     },
     {
-      "matcher": "baseline-strict",
+      "matcher": "check-every-field",
       "case": "D0-control",
       "expected": "match",
       "expectedMember": "SYN-MEM-1001-01",
       "reasonMismatch": false,
       "wrongPerson": null,
+      "subjectMemberId": "SYN-MEM-1001-01",
       "observed": "match SYN-MEM-1001-01",
       "category": "true-match"
     },
     {
-      "matcher": "baseline-strict",
+      "matcher": "check-every-field",
       "case": "D1-senior-junior",
       "expected": "match",
       "expectedMember": "SYN-MEM-2001-02",
       "reasonMismatch": false,
       "wrongPerson": null,
+      "subjectMemberId": "SYN-MEM-2001-02",
       "observed": "match SYN-MEM-2001-02",
       "category": "true-match"
     },
     {
-      "matcher": "baseline-strict",
+      "matcher": "check-every-field",
       "case": "D2-twins",
       "expected": "multiple-422",
       "expectedMember": null,
       "reasonMismatch": true,
       "wrongPerson": null,
+      "subjectMemberId": "SYN-MEM-2001-03",
       "observed": "422 no-match",
       "category": "correct-multiple"
     },
     {
-      "matcher": "baseline-strict",
+      "matcher": "check-every-field",
       "case": "D3-consent-expired",
       "expected": "consent-422",
       "expectedMember": null,
       "reasonMismatch": false,
       "wrongPerson": null,
+      "subjectMemberId": "SYN-MEM-1001-01",
       "observed": "422 consent",
       "category": "consent-constrained"
     },
     {
-      "matcher": "baseline-strict",
+      "matcher": "check-every-field",
       "case": "D3b-consent-unsegmentable",
       "expected": "consent-422",
       "expectedMember": null,
       "reasonMismatch": false,
       "wrongPerson": null,
+      "subjectMemberId": "SYN-MEM-1001-01",
       "observed": "422 consent",
       "category": "consent-constrained"
     },
     {
-      "matcher": "baseline-strict",
+      "matcher": "check-every-field",
       "case": "D4-card-mixup",
       "expected": "no-match-422",
       "expectedMember": null,
       "reasonMismatch": false,
       "wrongPerson": null,
+      "subjectMemberId": "SYN-MEM-1001-01",
       "observed": "422 no-match",
       "category": "correct-no-match"
     }

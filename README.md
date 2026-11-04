@@ -2,63 +2,89 @@
 
 > **Synthetic data only; not a production matching recommendation.**
 
-A lab for Da Vinci HRex `$member-match`. Each synthetic request carries a planted near-duplicate "decoy". Three matchers answer it, and a scorer counts what each one got right:
-
-- an event-sourced matcher
-- a simple deterministic baseline
-- an LLM adjudicator
+When one health plan asks another "who is this member?" (Da Vinci HRex `$member-match`), a wrong answer sends one person's records to someone else. This lab plants look-alike members and consent problems in synthetic requests, runs several ways of matching against them, and reports in plain English who found the right person, who rightly refused, and who sent records to the wrong person.
 
 Status: v0 under construction (target 2026-12-02). Progress is in [REMAINING_WORK.md](REMAINING_WORK.md).
 
-## Scoreboard (rule-based matchers, `npm run score`)
+## What happened
 
-```
-matcher          true match  no-match ✓  multiple ✓   consent ✓ DECOY CONF.   consent ✗      missed   score
-c057                      1           1           1           2           ·           ·           1     5/6
-c057-tuned                2           1           1           2           ·           ·           ·     6/6
-baseline                  2           ·           1           2           1           ·           ·     5/6
-baseline-strict           2           1           1           2           ·           ·           ·     6/6
-```
+**1 of 4 matchers sent someone's records to the wrong person: ID-first rules.** Given John Roe's details on Jon Roe's card, it trusted the card and sent Jon Roe's records.
 
-`baseline` trusts the member ID and returns Jon's records for John's request (D4): that's the decoy confusion. Any 422 where a 422 is due counts as correct; the run lists refusals whose reason differs.
+| Matcher | Right | What it got wrong |
+|---|---|---|
+| Identity matcher, strict | 5 of 6 | Refused Rowan Quill Jr, who was the right answer (safe, but a miss) |
+| Identity matcher, relaxed | 6 of 6 | |
+| ID-first rules | 5 of 6 | **Sent Jon Roe's records in answer to a request for John Roe** |
+| Check-every-field rules | 6 of 6 | |
 
-## Matchers
+See every answer on the [scoreboard page](report/scoreboard.html) (open it in a browser), or run `npm run score` for the same report in the terminal.
 
-| Name | What it is |
-|---|---|
-| `c057` | Nick's identity matcher (C-057), ported. Auto-confirms a sole probabilistic candidate at 0.90 or above. |
-| `c057-tuned` | The same matcher with a user-set auto-confirm line: `C057_AUTO_CONFIRM=0.85` (the default). |
-| `baseline` | Tiered rules: identifier first, then name, DOB and gender, applied only while there's still a tie. |
-| `baseline-strict` | The same candidates, but every field must agree even after the identifier has picked one member. |
-| `llm` | An LLM adjudicator (Claude Sonnet 5.5 by default; `LLM_MODEL=claude-opus-5-5` reruns it on Opus). It gets the HRex rules but no consent helper. |
+## The matchers
 
-Every matcher checks consent itself (HRex mm-11); the endpoint doesn't.
+| Name | Id | What it does |
+|---|---|---|
+| Identity matcher, strict | `identity-strict` | Nick's event-sourced identity matcher (C-057) at its own setting: accepts a look-alike only when at least 90% sure; otherwise sends it to human review. |
+| Identity matcher, relaxed | `identity-relaxed` | The same matcher, accepting a look-alike at a confidence you set: `RELAXED_CONFIDENCE=85` (75–100, default 85). |
+| ID-first rules | `id-first` | Trusts the member or subscriber ID on the card; uses name, birth date and gender only to break ties. A common way to build member match. |
+| Check-every-field rules | `check-every-field` | Finds the card's ID, then insists that name, birth date and gender all agree. |
+| AI adjudicator, with rules | `ai-with-rules` | Claude reads the request and the member list, given the HRex matching rules. Costs a few cents per run. |
+| AI adjudicator, no rules | `ai-no-rules` | The same, told nothing about the HRex rules. |
 
-## Run
+Each matcher checks consent itself; the endpoint doesn't help. The AI matchers default to Claude Sonnet 5.5; `LLM_MODEL=claude-opus-5-5` reruns them on Opus.
+
+## The decoys
+
+Six synthetic requests, each with a trap. Details and the spec text behind each right answer are in [DECOYS.md](DECOYS.md).
+
+- **Control:** a clean request for John Roe. Everyone should find him.
+- **Senior and Junior on one card:** same name, same card; only the birth date tells which Rowan is asking.
+- **Twins on one policy:** same birth date, and the request gives only the initial A. The right answer is to refuse.
+- **Expired consent:** the right person, but his permission to share has ended. Refuse.
+- **Consent the plan can't honour:** the permission excludes sensitive data, which this plan can't separate out. Refuse.
+- **John's details, Jon's card:** the card belongs to a near-twin name. Refuse.
+
+## Run it
 
 ```sh
 npm ci
-npm test               # unit tests (node:test)
-npm run decoys:lint    # every decoy has a trap and an expected outcome
+npm run score                    # the plain-English report (free, offline)
+npm run report                   # rebuild report/scoreboard.html
+npm run score -- --ai            # add the AI adjudicator (needs ANTHROPIC_API_KEY and the SMS spend alert)
+npm run score -- --ai-no-rules   # add the AI adjudicator without the HRex rules
+RELAXED_CONFIDENCE=90 npm run score
+```
+
+For developers:
+
+```sh
+npm test               # all tests (node:test)
+npm run decoys:lint    # every decoy has a trap, a plain sentence and a right answer
 npm run convert        # decoys -> fixtures/requests/*.json ($member-match input Parameters)
 npm run validator:get  # one-time: fetch the HL7 validator (Java 17+)
 npm run validate:fhir  # validate the requests against HRex 1.2.0
 npm run serve          # local $member-match endpoint on 127.0.0.1:8650
-npm run manifest:check # ground truth is digest-locked and stable
-npm run score          # scoreboard: every matcher x every decoy (add --llm / --llm-norules)
-npm run build && npx @modelcontextprotocol/inspector node dist/mcp.js   # MCP: one read-only tool, score_member_match
-npm run spend:check    # LLM spend vs the $50/month ceiling; SMS alert configured?
-npm run llm:try        # live LLM run (needs ANTHROPIC_API_KEY and the SMS alert)
+npm run manifest:check # the answer key is fingerprint-locked
+npm run spend:check    # AI spend vs the $50/month ceiling; SMS alert configured?
+npm run llm:try        # one live AI run, decision by decision
 npm run leak:check     # leak guard; needs a banlist outside this repo (LEAK_GUARD_CONFIG)
 ```
 
-- [DECOYS.md](DECOYS.md): the traps and their correct answers
-- [src/matchers/c057/PROVENANCE.md](src/matchers/c057/PROVENANCE.md): where matcher A comes from and what changed
+- [src/matchers/c057/PROVENANCE.md](src/matchers/c057/PROVENANCE.md): where the identity matcher comes from and what changed
 - [docs/SPEC_NOTES.md](docs/SPEC_NOTES.md): what building against HRex turned up
 
-## MCP tool
+## Use it from an MCP client
 
-`node dist/mcp.js` is a stdio MCP server with one read-only tool, `score_member_match`. It takes optional `matchers`, `cases` and `c057AutoConfirm` and returns the scoreboard as structured content plus a text table. It runs only the rule-based matchers: the LLM isn't exposed, so a tool call can never spend money. It makes no network calls beyond 127.0.0.1.
+`node dist/mcp.js` (after `npm run build`) is an MCP server with one read-only tool, **`score_member_match`** ("Test member-match matchers against look-alike decoys"). It takes three optional settings:
+
+- `matchers`: which matchers to test. Default: all four rule-based ones.
+- `cases`: which decoys to run. Default: all six.
+- `relaxed_confidence`: 75–100, how sure the relaxed identity matcher must be.
+
+It returns the plain-English report, plus the same results as structured data. It never runs the AI matchers, so a call is free, and nothing leaves the machine.
+
+```sh
+npx @modelcontextprotocol/inspector node dist/mcp.js
+```
 
 Claude Code config example:
 

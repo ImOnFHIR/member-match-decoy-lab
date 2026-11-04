@@ -8,6 +8,8 @@ export interface CoverageRec { id: string; subscriberId: string; memberId: strin
 export interface Case {
   id: string;
   title: string;
+  /** One plain sentence (≤ 20 words) for people: the report, the page, the video. */
+  plain: string;
   request: { patient: string; card: { subscriberId?: string; memberId?: string }; consent: ConsentKind; givenOverride?: string; dropSuffix?: boolean };
   trap: string;
   survivesIdMatch: boolean;

@@ -18,7 +18,7 @@ export function c057Matcher(opts: C057Options = {}): Matcher {
   if (!(autoConfirm >= THRESHOLDS.probable && autoConfirm <= 1))
     throw new Error(`autoConfirm must be between ${THRESHOLDS.probable} (C-057's probable line) and 1; got ${autoConfirm}`);
   return {
-    name: opts.name ?? "c057",
+    name: opts.name ?? "identity-strict",
     decide(req, roster, payer) {
       // C-057 has no consent concept of its own (its gate is purpose-of-use). The wrapper
       // applies HRex mm-11 explicitly, as any rule-based implementer would have to.

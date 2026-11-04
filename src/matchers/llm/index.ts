@@ -96,7 +96,7 @@ export interface LlmMatcherOptions {
   spend: SpendGuard;
   decisionLogPath?: string;
   name?: string;
-  /** false: the prompt has no HRex rule text (the "llm-norules" variant). Default true. */
+  /** false: the prompt has no HRex rule text (the "ai-no-rules" matcher). Default true. */
   rules?: boolean;
 }
 
@@ -108,7 +108,7 @@ export function llmMatcher(o: LlmMatcherOptions): Matcher {
   let client = o.client;
   const logPath = o.decisionLogPath ?? ".runs/llm-decisions.jsonl";
   const system = o.rules === false ? SYSTEM_PROMPT_NO_RULES : SYSTEM_PROMPT;
-  const name = o.name ?? (o.rules === false ? "llm-norules" : "llm");
+  const name = o.name ?? (o.rules === false ? "ai-no-rules" : "ai-with-rules");
   return {
     name,
     async decide(req, roster, payer): Promise<Decision> {

@@ -41,7 +41,7 @@ function setup(decision: LlmDecision | null, o: { ceiling?: number; usage?: any;
 
 test("matcher-llm: a match decision becomes a 200 with the member's UMB", async () => {
   const s = setup({ decision: "match", memberId: "SYN-MEM-1001-01", rationale: "member ID, name, DOB agree" });
-  const r: any = await handle(s.opts, "llm", fixture("D0-control"));
+  const r: any = await handle(s.opts, "ai-with-rules", fixture("D0-control"));
   assert.equal(r.status, 200);
   assert.equal(r.body.parameter[0].valueIdentifier.value, "SYN-MEM-1001-01");
   assert.match(r.log.rationale, /claude-sonnet-5-5: member ID/);
@@ -50,7 +50,7 @@ test("matcher-llm: a match decision becomes a 200 with the member's UMB", async 
 test("matcher-llm: each refusal kind becomes a 422 with that reason", async () => {
   for (const d of ["no-match", "multiple-matches", "consent", "review-required"] as const) {
     const s = setup({ decision: d, memberId: null, rationale: "x" });
-    const r: any = await handle(s.opts, "llm", fixture("D2-twins"));
+    const r: any = await handle(s.opts, "ai-with-rules", fixture("D2-twins"));
     assert.equal(r.status, 422);
     assert.equal(r.body.issue[0].details.coding[0].code, d);
   }
@@ -58,13 +58,13 @@ test("matcher-llm: each refusal kind becomes a 422 with that reason", async () =
 
 test("matcher-llm: no consent helper — a model that ignores an expired consent is not rescued", async () => {
   const s = setup({ decision: "match", memberId: "SYN-MEM-1001-01", rationale: "looks fine" });
-  const r: any = await handle(s.opts, "llm", fixture("D3-consent-expired"));
+  const r: any = await handle(s.opts, "ai-with-rules", fixture("D3-consent-expired"));
   assert.equal(r.status, 200);
 });
 
 test("matcher-llm: every decision is logged with its rationale, model and cost", async () => {
   const s = setup({ decision: "no-match", memberId: null, rationale: "demographics disagree with the card" });
-  await handle(s.opts, "llm", fixture("D4-card-mixup"));
+  await handle(s.opts, "ai-with-rules", fixture("D4-card-mixup"));
   const [line] = readFileSync(join(s.dir, "decisions.jsonl"), "utf8").trim().split("\n").map((l) => JSON.parse(l));
   assert.equal(line.decision.rationale, "demographics disagree with the card");
   assert.equal(line.model, "claude-sonnet-5-5");
@@ -73,17 +73,17 @@ test("matcher-llm: every decision is logged with its rationale, model and cost",
 
 test("matcher-llm: a memberId not on the roster is an error, never a match", async () => {
   const s = setup({ decision: "match", memberId: "SYN-MEM-9999-99", rationale: "x" });
-  await assert.rejects(handle(s.opts, "llm", fixture("D0-control")), /not on the roster/);
+  await assert.rejects(handle(s.opts, "ai-with-rules", fixture("D0-control")), /not on the roster/);
 });
 
 test("matcher-llm: a refusal stop reason or unparseable output is an error", async () => {
-  await assert.rejects(handle(setup({ decision: "no-match", memberId: null, rationale: "x" }, { stop: "refusal" }).opts, "llm", fixture("D0-control")), /refused/);
-  await assert.rejects(handle(setup(null).opts, "llm", fixture("D0-control")), /no parseable decision/);
+  await assert.rejects(handle(setup({ decision: "no-match", memberId: null, rationale: "x" }, { stop: "refusal" }).opts, "ai-with-rules", fixture("D0-control")), /refused/);
+  await assert.rejects(handle(setup(null).opts, "ai-with-rules", fixture("D0-control")), /no parseable decision/);
 });
 
 test("matcher-llm: a fallback model is recorded in the rationale", async () => {
   const s = setup({ decision: "no-match", memberId: null, rationale: "x" }, { model: "claude-opus-5-5" });
-  const r: any = await handle(s.opts, "llm", fixture("D4-card-mixup"));
+  const r: any = await handle(s.opts, "ai-with-rules", fixture("D4-card-mixup"));
   assert.match(r.log.rationale, /served by claude-opus-5-5/);
 });
 
@@ -109,14 +109,14 @@ test("spend: cost uses list prices", () => {
 
 test("spend: a call whose worst case would cross the ceiling is never sent", async () => {
   const s = setup({ decision: "no-match", memberId: null, rationale: "x" }, { ceiling: 0.01 });
-  await assert.rejects(handle(s.opts, "llm", fixture("D0-control")), SpendCeilingError);
+  await assert.rejects(handle(s.opts, "ai-with-rules", fixture("D0-control")), SpendCeilingError);
   assert.equal(s.f.calls.length, 0, "the model must not be called");
 });
 
 test("spend: the 80% alert is sent once when the line is crossed", async () => {
   // ceiling $0.2 → alert at $0.16. One real (fake-model) call, then recorded spend past the line.
   const s = setup({ decision: "no-match", memberId: null, rationale: "x" }, { ceiling: 0.2 });
-  await handle(s.opts, "llm", fixture("D0-control"));
+  await handle(s.opts, "ai-with-rules", fixture("D0-control"));
   assert.equal(s.a.sent.length, 0);
   await s.spend.afterCall("claude-sonnet-5-5", { input_tokens: 80_000, output_tokens: 0 }, "pad"); // +$0.16
   await s.spend.afterCall("claude-sonnet-5-5", { input_tokens: 1, output_tokens: 0 }, "pad");      // still over: no second alert
@@ -132,7 +132,7 @@ test("spend: fail closed — an undeliverable alert blocks further calls", async
   await assert.rejects(spend.afterCall("claude-sonnet-5-5", { input_tokens: 400_000, output_tokens: 0 }, "pad"), /SMS down/);
   const f = fake({ decision: "no-match", memberId: null, rationale: "x" });
   const m = llmMatcher({ client: f.client, spend, decisionLogPath: join(dir, "d.jsonl") });
-  await assert.rejects(handle({ matchers: [m], roster: roster(set), consent: payer }, "llm", fixture("D0-control")), /SMS down/);
+  await assert.rejects(handle({ matchers: [m], roster: roster(set), consent: payer }, "ai-with-rules", fixture("D0-control")), /SMS down/);
   assert.equal(f.calls.length, 0);
 });
 
@@ -162,7 +162,7 @@ test("matcher-llm: the no-rules variant drops only the HRex rule text", async ()
   const seen: string[] = [];
   const client: LlmClient = { call: async (m, sys, u, mt) => { seen.push(sys); return f.client.call(m, sys, u, mt); } };
   const m = llmMatcher({ client, spend: guard(dir), rules: false, decisionLogPath: join(dir, "d.jsonl") });
-  assert.equal(m.name, "llm-norules");
-  await handle({ matchers: [m], roster: roster(set), consent: payer }, "llm-norules", fixture("D0-control"));
+  assert.equal(m.name, "ai-no-rules");
+  await handle({ matchers: [m], roster: roster(set), consent: payer }, "ai-no-rules", fixture("D0-control"));
   assert.equal(seen[0], SYSTEM_PROMPT_NO_RULES);
 });

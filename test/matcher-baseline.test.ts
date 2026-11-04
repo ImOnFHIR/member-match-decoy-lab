@@ -5,7 +5,7 @@ import { loadDecoys } from "../src/decoys.js";
 import { roster } from "../src/population.js";
 import { handle } from "../src/server.js";
 import { baselineMatcher } from "../src/matchers/baseline/index.js";
-import { buildMatchers } from "../src/matchers/registry.js";
+import { buildMatchers, MATCHER_INFO, relaxedConfidence } from "../src/matchers/registry.js";
 import { REASON_SYSTEM } from "../src/fhir.js";
 
 const set = loadDecoys();
@@ -16,12 +16,12 @@ const outcome = (r: any) => r.status === 200 ? r.body.parameter[0].valueIdentifi
 
 // Observed behaviour, not ground truth (the scorer compares with the manifest).
 const OBSERVED: Record<string, Record<string, string>> = {
-  baseline: {
+  "id-first": {
     "D0-control": "SYN-MEM-1001-01", "D1-senior-junior": "SYN-MEM-2001-02", "D2-twins": "no-match",
     "D3-consent-expired": "consent", "D3b-consent-unsegmentable": "consent",
     "D4-card-mixup": "SYN-MEM-1002-01", // trusts the member ID: returns the decoy (Jon) for John's request
   },
-  "baseline-strict": {
+  "check-every-field": {
     "D0-control": "SYN-MEM-1001-01", "D1-senior-junior": "SYN-MEM-2001-02", "D2-twins": "no-match",
     "D3-consent-expired": "consent", "D3b-consent-unsegmentable": "consent", "D4-card-mixup": "no-match",
   },
@@ -61,9 +61,10 @@ test("matcher-baseline: request suffix must agree when present", () => {
   assert.equal((baselineMatcher("strict").decide({ ...base, suffix: "Jr", birthDate: "1990-01-01", subscriberId: "S1" }, p, payer) as any).reason, "no-match");
 });
 
-test("registry: C057_AUTO_CONFIRM sets the tuned variant; bad values are refused", () => {
-  assert.deepEqual(buildMatchers({}).map((m) => m.name), ["c057", "c057-tuned", "baseline", "baseline-strict"]);
-  assert.throws(() => buildMatchers({ C057_AUTO_CONFIRM: "abc" }));
-  assert.throws(() => buildMatchers({ C057_AUTO_CONFIRM: "0.5" }), /between 0.75/);
-  assert.throws(() => buildMatchers({ C057_AUTO_CONFIRM: "1.2" }));
+test("registry: plain names; RELAXED_CONFIDENCE is a percentage from 75 to 100", () => {
+  assert.deepEqual(buildMatchers({}).map((m) => m.name), ["identity-strict", "identity-relaxed", "id-first", "check-every-field"]);
+  for (const m of buildMatchers({})) assert.ok(MATCHER_INFO.some((i) => i.id === m.name && i.label && i.summary), m.name);
+  assert.equal(relaxedConfidence({}), 0.85);
+  assert.equal(relaxedConfidence({ RELAXED_CONFIDENCE: "90" }), 0.9);
+  for (const bad of ["abc", "50", "0.85", "120"]) assert.throws(() => buildMatchers({ RELAXED_CONFIDENCE: bad }), /75 to 100/, bad);
 });

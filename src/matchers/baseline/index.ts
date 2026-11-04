@@ -33,7 +33,7 @@ export type BaselineMode = "tiered" | "strict";
 
 export function baselineMatcher(mode: BaselineMode = "tiered"): Matcher {
   return {
-    name: mode === "tiered" ? "baseline" : "baseline-strict",
+    name: mode === "tiered" ? "id-first" : "check-every-field",
     decide(req, roster, payer): Decision {
       const consent = consentGate(req, payer);
       if (!consent.ok) return { kind: "refuse", reason: "consent", rationale: `consent check (mm-11): ${consent.reason}` };

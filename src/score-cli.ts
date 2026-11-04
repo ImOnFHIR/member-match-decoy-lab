@@ -1,35 +1,34 @@
 /**
- * npm run score                      — rule-based matchers (free, offline)
- * npm run score -- --llm             — plus the LLM matcher (HRex rules in its prompt)
- * npm run score -- --llm-norules     — plus the LLM matcher without the rule text
- * npm run score -- --json            — machine-readable scoreboard on stdout
- * npm run score -- D4-card-mixup ... — only these cases
- * Env: C057_AUTO_CONFIRM (c057-tuned), LLM_MODEL (default claude-sonnet-5-5).
- * Writes .runs/scoreboard.json. Exit 0 whatever the scores; exit 2 if the lock or the spend guard stops the run.
+ * npm run score                      — the four rule-based matchers (free, offline)
+ * npm run score -- --ai              — plus the AI adjudicator, given the HRex rules (costs a few cents)
+ * npm run score -- --ai-no-rules     — plus the AI adjudicator, given no rules
+ * npm run score -- --json            — the scoreboard as JSON
+ * npm run score -- D4-card-mixup ... — only these decoys
+ * Settings: RELAXED_CONFIDENCE=85 (75–100), LLM_MODEL=claude-sonnet-5-5.
+ * Writes .runs/scoreboard.json. Exit 2 if the answer-key lock or the spend guard stops the run.
  */
 import { mkdirSync, writeFileSync } from "node:fs";
 import { buildMatchers } from "./matchers/registry.js";
 import { runScoreboard } from "./run.js";
-import { render } from "./scorer.js";
+import { befriend, renderText } from "./report.js";
+import { loadDecoys } from "./decoys.js";
 import { missingAlertEnv } from "./alert.js";
-import { SYNTHETIC_BANNER } from "./index.js";
 
 const args = process.argv.slice(2);
 const flags = new Set(args.filter((a) => a.startsWith("--")));
 const cases = args.filter((a) => !a.startsWith("--"));
-const llm = flags.has("--llm"), llmNoRules = flags.has("--llm-norules");
+const ai = flags.has("--ai"), aiNoRules = flags.has("--ai-no-rules");
 
-if ((llm || llmNoRules) && missingAlertEnv().length) {
+if ((ai || aiNoRules) && missingAlertEnv().length) {
   console.error(`Refusing to spend: the SMS spend alert is not configured (set ${missingAlertEnv().join(", ")}).`);
   process.exit(2);
 }
 
 try {
-  const sb = await runScoreboard({ matchers: buildMatchers(process.env, { llm, llmNoRules }), cases });
+  const sb = befriend(await runScoreboard({ matchers: buildMatchers(process.env, { ai, aiNoRules }), cases }), loadDecoys());
   mkdirSync(".runs", { recursive: true });
   writeFileSync(".runs/scoreboard.json", JSON.stringify(sb, null, 2) + "\n");
-  if (flags.has("--json")) console.log(JSON.stringify(sb, null, 2));
-  else console.log(`${SYNTHETIC_BANNER}\n\n${render(sb)}`);
+  console.log(flags.has("--json") ? JSON.stringify(sb, null, 2) : renderText(sb));
 } catch (e) {
   console.error(`✗ ${(e as Error).message}`);
   process.exit(2);

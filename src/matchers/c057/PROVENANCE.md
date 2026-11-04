@@ -15,4 +15,4 @@ Ported from `ImOnFHIR/care-continuum-lab`, `pocs/identity-service/` at commit `7
 - `Coverage.identifier` of type MB maps to C-057's `memberId` key.
 - `Coverage.subscriberId` maps to nothing: C-057 has no subscriber-ID key.
 - **Consent (HRex mm-11):** C-057 has no consent concept; its gate is purpose-of-use. The wrapper calls the shared `consentGate()` before matching, as any rule-based implementer would have to. The endpoint doesn't check consent, so each matcher handles it itself (Nick, 2026-11-03).
-- **`c057-tuned` variant:** the same matcher with a user-set auto-confirm line, `C057_AUTO_CONFIRM` (default 0.85). It has to sit between 0.75 (C-057's probable line) and 1. C-057's own value of 0.90 stays as `c057`.
+- **Names on the scoreboard** (renamed 2026-11-04 so people can read them): `identity-strict` is C-057 at its own 0.90 auto-confirm line (was `c057`). `identity-relaxed` (was `c057-tuned`) is the same matcher with a user-set line, `RELAXED_CONFIDENCE` as a percentage from 75 to 100 (default 85). The floor of 75 is C-057's probable line.

@@ -63,7 +63,7 @@ const OBSERVED: Record<string, [number, string]> = {
 
 for (const c of set.cases) {
   test(`matcher-c057 ${c.id}: endpoint answers, response well-formed`, async () => {
-    const r = await post("/c057/Patient/$member-match", fixture(c.id));
+    const r = await post("/identity-strict/Patient/$member-match", fixture(c.id));
     assert.equal(r.type, "application/fhir+json");
     assertWellFormed(r);
     const [status, what] = OBSERVED[c.id];
@@ -73,9 +73,9 @@ for (const c of set.cases) {
   });
 }
 
-test("matcher-c057-tuned: a user-set auto-confirm of 0.85 confirms D1 (Jr. scores 0.87)", async () => {
-  const tuned = { matchers: [c057Matcher({ name: "c057-tuned", autoConfirm: 0.85 })], roster: roster(set), consent: { asOf: set.asOf, canSegmentSensitive: false } };
-  const r: any = await handle(tuned, "c057-tuned", fixture("D1-senior-junior"));
+test("identity-relaxed: a user-set confidence of 85% confirms D1 (Jr. scores 0.87)", async () => {
+  const tuned = { matchers: [c057Matcher({ name: "identity-relaxed", autoConfirm: 0.85 })], roster: roster(set), consent: { asOf: set.asOf, canSegmentSensitive: false } };
+  const r: any = await handle(tuned, "identity-relaxed", fixture("D1-senior-junior"));
   assert.equal(r.status, 200);
   assert.equal(r.body.parameter[0].valueIdentifier.value, "SYN-MEM-2001-02");
   const strict: any = await handle({ ...tuned, matchers: [c057Matcher({ name: "x", autoConfirm: 0.9 })] }, "x", fixture("D1-senior-junior"));
@@ -94,9 +94,9 @@ test("matcher-c057: every decision is logged with a rationale", () => {
 });
 
 test("matcher-c057: short route, bad JSON, wrong resource, unknown matcher", async () => {
-  assert.equal((await post("/c057/$member-match", fixture("D0-control"))).status, 200);
-  assert.equal((await post("/c057/$member-match", "{not json")).status, 400);
-  assert.equal((await post("/c057/$member-match", { resourceType: "Patient" })).status, 400);
+  assert.equal((await post("/identity-strict/$member-match", fixture("D0-control"))).status, 200);
+  assert.equal((await post("/identity-strict/$member-match", "{not json")).status, 400);
+  assert.equal((await post("/identity-strict/$member-match", { resourceType: "Patient" })).status, 400);
   assert.equal((await post("/nope/$member-match", fixture("D0-control"))).status, 404);
 });
 

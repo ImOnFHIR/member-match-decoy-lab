@@ -17,6 +17,8 @@ for (const c of d.cases) {
   if (ids.has(c.id)) err(c.id, "duplicate id");
   ids.add(c.id);
   if (!c.trap?.trim()) err(c.id, "missing trap");
+  if (!c.plain?.trim()) err(c.id, "missing plain sentence");
+  else if (c.plain.trim().split(/\s+/).length > 20) err(c.id, "plain sentence is over 20 words");
   if (typeof c.survivesIdMatch !== "boolean") err(c.id, "survivesIdMatch must be true/false");
   if (!people.has(c.request?.patient)) err(c.id, `unknown request.patient ${c.request?.patient}`);
   if (!c.request?.card?.subscriberId && !c.request?.card?.memberId)

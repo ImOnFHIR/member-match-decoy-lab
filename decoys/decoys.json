@@ -126,6 +126,7 @@
     {
       "id": "D0-control",
       "title": "Control: clean card, clean demographics",
+      "plain": "A clean request for John Roe: right card, right details. Everyone should find him.",
       "request": {
         "patient": "person-0001",
         "card": {
@@ -145,6 +146,7 @@
     {
       "id": "D1-senior-junior",
       "title": "Senior and Junior on one card",
+      "plain": "Father and son, same name, same card. Only the birth date tells which Rowan is asking.",
       "request": {
         "patient": "lab-0102",
         "card": {
@@ -164,6 +166,7 @@
     {
       "id": "D2-twins",
       "title": "Twins on one policy, initial only",
+      "plain": "Twin sisters on one card, same birth date; the request gives only the initial A.",
       "request": {
         "patient": "lab-0103",
         "card": {
@@ -181,6 +184,7 @@
     {
       "id": "D3-consent-expired",
       "title": "Right person, consent the server can't honour",
+      "plain": "The right person, but his permission to share ended last year.",
       "request": {
         "patient": "person-0001",
         "card": {
@@ -198,6 +202,7 @@
     {
       "id": "D3b-consent-unsegmentable",
       "title": "Right person, consent limited to non-sensitive data",
+      "plain": "The right person, but his permission excludes sensitive data, which this plan cannot separate out.",
       "request": {
         "patient": "person-0001",
         "card": {
@@ -215,6 +220,7 @@
     {
       "id": "D4-card-mixup",
       "title": "John's demographics, Jon's card",
+      "plain": "John Roe's details with the card of Jon Roe, a near-twin name born eight days later.",
       "request": {
         "patient": "person-0001",
         "card": {

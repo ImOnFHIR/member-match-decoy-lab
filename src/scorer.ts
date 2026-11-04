@@ -26,6 +26,18 @@ export const CATEGORIES = [
 export type Category = (typeof CATEGORIES)[number];
 export const CORRECT = new Set<Category>(["true-match", "correct-no-match", "correct-multiple", "consent-constrained"]);
 
+/** What each result means, in words a reader can use without the code. */
+export const CATEGORY_INFO: Record<Category, { label: string; meaning: string }> = {
+  "true-match": { label: "Found the right person", meaning: "One member was the person in the request, and the matcher returned that member." },
+  "correct-no-match": { label: "Rightly refused: not this person", meaning: "The card and the person don't agree, so nobody should be returned. The matcher refused (HRex 422)." },
+  "correct-multiple": { label: "Rightly refused: can't tell apart", meaning: "More than one member fits the request equally. HRex says refuse (422), and the matcher did." },
+  "consent-constrained": { label: "Rightly refused: consent", meaning: "The consent sent with the request can't be honoured, so HRex says refuse (422). The matcher did." },
+  "decoy-confusion": { label: "Wrong person", meaning: "The matcher returned a member who is not the person asking, or returned someone when it should have refused. This is how one person's records reach another." },
+  "consent-ignored": { label: "Ignored consent", meaning: "The matcher returned the right person despite a consent the plan can't honour." },
+  "missed-match": { label: "Missed the right person", meaning: "One member was the right answer, but the matcher refused. Safe, but the member's records don't move." },
+  "error": { label: "No usable answer", meaning: "The matcher crashed or answered in a form that isn't a valid $member-match response." },
+};
+
 export interface Answer { status: number; body?: any; error?: string }
 export type Observed =
   | { kind: "match"; memberIdentifier: string }
@@ -41,6 +53,8 @@ export interface Row {
   category: Category;
   reasonMismatch: boolean;
   wrongPerson: string | null;
+  /** God view: who the request is really about. */
+  subjectMemberId: string;
 }
 
 const EXPECTED_REASON: Record<string, string> = { "no-match-422": "no-match", "multiple-422": "multiple-matches", "consent-422": "consent" };
@@ -63,7 +77,7 @@ export function observe(a: Answer): Observed {
 
 export function scoreOne(matcher: string, e: ManifestEntry, a: Answer): Row {
   const o = observe(a);
-  const base = { matcher, case: e.case, expected: e.outcome, expectedMember: e.memberIdentifier, reasonMismatch: false, wrongPerson: null as string | null };
+  const base = { matcher, case: e.case, expected: e.outcome, expectedMember: e.memberIdentifier, reasonMismatch: false, wrongPerson: null as string | null, subjectMemberId: e.subjectMemberId };
   if (o.kind === "error") return { ...base, observed: `error: ${o.detail}`, category: "error" };
   if (o.kind === "match") {
     const observed = `match ${o.memberIdentifier}`;
@@ -103,19 +117,4 @@ export function tally(rows: Row[], manifestDigest: string): Scoreboard {
     }),
     rows,
   };
-}
-
-const SHORT: Record<Category, string> = {
-  "true-match": "true match", "correct-no-match": "no-match ✓", "correct-multiple": "multiple ✓", "consent-constrained": "consent ✓",
-  "decoy-confusion": "DECOY CONF.", "consent-ignored": "consent ✗", "missed-match": "missed", "error": "error",
-};
-
-export function render(sb: Scoreboard): string {
-  const cols = CATEGORIES;
-  const w = Math.max(8, ...sb.matchers.map((m) => m.matcher.length));
-  const head = ["matcher".padEnd(w), ...cols.map((c) => SHORT[c].padStart(11)), "score".padStart(7)].join(" ");
-  const lines = sb.matchers.map((m) => [m.matcher.padEnd(w), ...cols.map((c) => String(m.counts[c] || "·").padStart(11)), `${m.correct}/${m.total}`.padStart(7)].join(" "));
-  const notes = sb.rows.filter((r) => !CORRECT.has(r.category) || r.reasonMismatch).map((r) =>
-    `  ${r.matcher} ${r.case}: ${r.category}${r.reasonMismatch ? " (reason differs)" : ""} — expected ${r.expected}${r.expectedMember ? " " + r.expectedMember : ""}, got ${r.observed}`);
-  return [head, "-".repeat(head.length), ...lines, "", `ground truth ${sb.manifestDigest.slice(0, 12)} (digest-locked)`, ...(notes.length ? ["", "Not plainly correct:", ...notes] : [])].join("\n");
 }

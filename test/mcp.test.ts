@@ -18,7 +18,10 @@ test("mcp: lists exactly one tool, score_member_match, read-only", async () => {
   assert.equal(tools[0].annotations?.readOnlyHint, true);
   assert.equal(tools[0].annotations?.destructiveHint, false);
   assert.ok(tools[0].outputSchema);
-  assert.doesNotMatch(JSON.stringify(tools[0].inputSchema), /"llm/);
+  assert.doesNotMatch(JSON.stringify(tools[0].inputSchema), /ai-with-rules|ai-no-rules/);
+  assert.match(tools[0].description ?? "", /wrong person/);
+  assert.match(JSON.stringify(tools[0].inputSchema), /relaxed_confidence/);
+  assert.doesNotMatch(JSON.stringify(tools[0].inputSchema), /c057|AutoConfirm/);
 });
 
 test("mcp: a call returns structured scores", async () => {
@@ -27,21 +30,23 @@ test("mcp: a call returns structured scores", async () => {
   const sc = r.structuredContent;
   assert.match(sc.banner, /Synthetic/);
   assert.equal(sc.manifestDigest.length, 64);
-  const baseline = sc.matchers.find((m: any) => m.matcher === "baseline");
+  const baseline = sc.matchers.find((m: any) => m.matcher === "id-first");
+  assert.equal(baseline.label, "ID-first rules");
+  assert.match(sc.headline, /1 of 4 matchers sent someone's records to the wrong person/);
   assert.equal(baseline.counts["decoy-confusion"], 1);
-  assert.equal(sc.rows.find((x: any) => x.matcher === "baseline" && x.case === "D4-card-mixup").wrongPerson, "SYN-MEM-1002-01");
-  assert.match(r.content[0].text, /DECOY CONF\./);
+  assert.equal(sc.rows.find((x: any) => x.matcher === "id-first" && x.case === "D4-card-mixup").wrongPerson, "SYN-MEM-1002-01");
+  assert.match(r.content[0].text, /Sent Jon Roe's records in answer to a request for John Roe/);
 });
 
-test("mcp: matcher, case and threshold arguments narrow the run", async () => {
-  const r: any = await client.callTool({ name: "score_member_match", arguments: { matchers: ["c057-tuned"], cases: ["D1-senior-junior"], c057AutoConfirm: 0.9 } });
+test("mcp: matcher, decoy and confidence arguments narrow the run", async () => {
+  const r: any = await client.callTool({ name: "score_member_match", arguments: { matchers: ["identity-relaxed"], cases: ["D1-senior-junior"], relaxed_confidence: 90 } });
   assert.equal(r.structuredContent.rows.length, 1);
   assert.equal(r.structuredContent.rows[0].category, "missed-match"); // 0.87 < 0.90
 });
 
 test("mcp: unknown matchers and out-of-range thresholds are rejected", async () => {
-  const bad: any = await client.callTool({ name: "score_member_match", arguments: { matchers: ["llm"] } }).catch((e) => ({ isError: true, e }));
+  const bad: any = await client.callTool({ name: "score_member_match", arguments: { matchers: ["ai-with-rules"] } }).catch((e) => ({ isError: true, e }));
   assert.equal(bad.isError, true);
-  const low: any = await client.callTool({ name: "score_member_match", arguments: { c057AutoConfirm: 0.5 } }).catch((e) => ({ isError: true, e }));
+  const low: any = await client.callTool({ name: "score_member_match", arguments: { relaxed_confidence: 50 } }).catch((e) => ({ isError: true, e }));
   assert.equal(low.isError, true);
 });
