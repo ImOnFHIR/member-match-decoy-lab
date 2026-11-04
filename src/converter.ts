@@ -13,12 +13,8 @@ import type { Case, DecoySet } from "./decoys.js";
  */
 export const opaque = (caseId: string) => createHash("sha256").update(`mmdl:${caseId}`).digest("hex").slice(0, 10);
 
-export const HREX = "http://hl7.org/fhir/us/davinci-hrex/StructureDefinition";
-export const SYN = "https://imonfhir.com/ns/synthetic"; // a namespace URI, never fetched; neutral so requests carry no hint
-export const POLICY = {
-  sensitive: "http://hl7.org/fhir/us/davinci-hrex/StructureDefinition-hrex-consent.html#sensitive",
-  regular: "http://hl7.org/fhir/us/davinci-hrex/StructureDefinition-hrex-consent.html#regular",
-} as const;
+export { HREX, SYN, POLICY } from "./synthetic-ns.js";
+import { HREX, SYN, POLICY } from "./synthetic-ns.js";
 
 const OLD_PLAN = { identifier: { system: `${SYN}/payer-id`, value: "SYN-PAYER-OLD" }, display: "Synthetic Old Plan" };
 const NEW_PLAN = { identifier: { system: `${SYN}/payer-id`, value: "SYN-PAYER-NEW" }, display: "Synthetic New Plan" };

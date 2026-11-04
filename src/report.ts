@@ -5,7 +5,7 @@
  */
 import type { DecoySet } from "./decoys.js";
 import { CATEGORIES, CATEGORY_INFO, CORRECT, type Category, type Row, type Scoreboard } from "./scorer.js";
-import { labelFor, infoFor } from "./matchers/registry.js";
+import { labelFor, infoFor } from "./matchers/info.js";
 import { SYNTHETIC_BANNER } from "./index.js";
 
 const REASON_WORDS: Record<string, string> = {

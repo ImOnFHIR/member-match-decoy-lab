@@ -4,7 +4,7 @@
  * does not apply it: each matcher handles consent itself, and the LLM arm gets no helper.
  */
 import type { MatchRequest } from "./request.js";
-import { POLICY } from "./converter.js";
+import { POLICY } from "./synthetic-ns.js";
 
 export interface ConsentContext { asOf: string; canSegmentSensitive: boolean }
 export type ConsentVerdict = { ok: true } | { ok: false; reason: string };

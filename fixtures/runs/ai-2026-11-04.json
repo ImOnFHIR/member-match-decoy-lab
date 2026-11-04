@@ -1,0 +1,843 @@
+{
+  "recorded": "2026-11-04",
+  "models": [
+    "claude-sonnet-5-5"
+  ],
+  "servedBy": [
+    "claude-sonnet-5-5"
+  ],
+  "runsPerMatcher": 1,
+  "costUsd": {
+    "ai-with-rules": 0.0762,
+    "ai-no-rules": 0.0806,
+    "ai-with-definitions": 0.0712
+  },
+  "note": "One run per AI version. Synthetic data only; not a production matching recommendation.",
+  "scoreboard": {
+    "manifestDigest": "afd4a0787ca3976f425dba1e1fcd78cf1964d62249a0ddab09ffc14b5750dc62",
+    "matchers": [
+      {
+        "matcher": "ai-with-rules",
+        "counts": {
+          "true-match": 0,
+          "correct-no-match": 1,
+          "correct-multiple": 1,
+          "consent-constrained": 1,
+          "decoy-confusion": 0,
+          "consent-ignored": 1,
+          "missed-match": 2,
+          "error": 0
+        },
+        "correct": 3,
+        "total": 6,
+        "label": "AI adjudicator, with rules",
+        "summary": "Claude reads the request and the member list, given the HRex matching rules. No helper code."
+      },
+      {
+        "matcher": "ai-with-definitions",
+        "counts": {
+          "true-match": 1,
+          "correct-no-match": 1,
+          "correct-multiple": 1,
+          "consent-constrained": 2,
+          "decoy-confusion": 0,
+          "consent-ignored": 0,
+          "missed-match": 1,
+          "error": 0
+        },
+        "correct": 5,
+        "total": 6,
+        "label": "AI adjudicator, rules and consent codes",
+        "summary": "The same as with rules, plus HRex's own definitions of the two consent codes (#regular, #sensitive), which the model misread without them."
+      },
+      {
+        "matcher": "ai-no-rules",
+        "counts": {
+          "true-match": 2,
+          "correct-no-match": 1,
+          "correct-multiple": 1,
+          "consent-constrained": 1,
+          "decoy-confusion": 0,
+          "consent-ignored": 1,
+          "missed-match": 0,
+          "error": 0
+        },
+        "correct": 5,
+        "total": 6,
+        "label": "AI adjudicator, no rules",
+        "summary": "The same, but told nothing about the HRex rules: what does the model know on its own?"
+      }
+    ],
+    "rows": [
+      {
+        "matcher": "ai-with-rules",
+        "case": "D0-control",
+        "expected": "match",
+        "expectedMember": "SYN-MEM-1001-01",
+        "reasonMismatch": false,
+        "wrongPerson": null,
+        "subjectMemberId": "SYN-MEM-1001-01",
+        "observed": "422 consent",
+        "category": "missed-match",
+        "title": "Control: clean card, clean demographics",
+        "plain": "A clean request for John Roe: right card, right details. Everyone should find him.",
+        "result": "Missed the right person",
+        "explanation": "Refused (consent), but John Roe was the right answer.",
+        "rightAnswer": "Return John Roe (SYN-MEM-1001-01)."
+      },
+      {
+        "matcher": "ai-with-rules",
+        "case": "D1-senior-junior",
+        "expected": "match",
+        "expectedMember": "SYN-MEM-2001-02",
+        "reasonMismatch": false,
+        "wrongPerson": null,
+        "subjectMemberId": "SYN-MEM-2001-02",
+        "observed": "422 consent",
+        "category": "missed-match",
+        "title": "Senior and Junior on one card",
+        "plain": "Father and son, same name, same card. Only the birth date tells which Rowan is asking.",
+        "result": "Missed the right person",
+        "explanation": "Refused (consent), but Rowan Quill Jr was the right answer.",
+        "rightAnswer": "Return Rowan Quill Jr (SYN-MEM-2001-02)."
+      },
+      {
+        "matcher": "ai-with-rules",
+        "case": "D2-twins",
+        "expected": "multiple-422",
+        "expectedMember": null,
+        "reasonMismatch": false,
+        "wrongPerson": null,
+        "subjectMemberId": "SYN-MEM-2001-03",
+        "observed": "422 multiple-matches",
+        "category": "correct-multiple",
+        "title": "Twins on one policy, initial only",
+        "plain": "Twin sisters on one card, same birth date; the request gives only the initial A.",
+        "result": "Rightly refused: can't tell apart",
+        "explanation": "Refused (more than one match), as HRex requires.",
+        "rightAnswer": "Refuse (HRex 422): more than one member fits."
+      },
+      {
+        "matcher": "ai-with-rules",
+        "case": "D3-consent-expired",
+        "expected": "consent-422",
+        "expectedMember": null,
+        "reasonMismatch": false,
+        "wrongPerson": null,
+        "subjectMemberId": "SYN-MEM-1001-01",
+        "observed": "422 consent",
+        "category": "consent-constrained",
+        "title": "Right person, consent the server can't honour",
+        "plain": "The right person, but his permission to share ended last year.",
+        "result": "Rightly refused: consent",
+        "explanation": "Refused (consent), as HRex requires.",
+        "rightAnswer": "Refuse (HRex 422): the consent can't be honoured."
+      },
+      {
+        "matcher": "ai-with-rules",
+        "case": "D3b-consent-unsegmentable",
+        "expected": "consent-422",
+        "expectedMember": null,
+        "reasonMismatch": false,
+        "wrongPerson": null,
+        "subjectMemberId": "SYN-MEM-1001-01",
+        "observed": "match SYN-MEM-1001-01",
+        "category": "consent-ignored",
+        "title": "Right person, consent limited to non-sensitive data",
+        "plain": "The right person, but his permission excludes sensitive data, which this plan cannot separate out.",
+        "result": "Ignored consent",
+        "explanation": "Returned John Roe's records despite a consent the plan can't honour.",
+        "rightAnswer": "Refuse (HRex 422): the consent can't be honoured."
+      },
+      {
+        "matcher": "ai-with-rules",
+        "case": "D4-card-mixup",
+        "expected": "no-match-422",
+        "expectedMember": null,
+        "reasonMismatch": true,
+        "wrongPerson": null,
+        "subjectMemberId": "SYN-MEM-1001-01",
+        "observed": "422 review-required",
+        "category": "correct-no-match",
+        "title": "John's demographics, Jon's card",
+        "plain": "John Roe's details with the card of Jon Roe, a near-twin name born eight days later.",
+        "result": "Rightly refused: not this person",
+        "explanation": "Refused, giving the reason \"needs human review\" rather than \"no match\". Still the safe answer.",
+        "rightAnswer": "Refuse (HRex 422): the card and the person don't agree."
+      },
+      {
+        "matcher": "ai-with-definitions",
+        "case": "D0-control",
+        "expected": "match",
+        "expectedMember": "SYN-MEM-1001-01",
+        "reasonMismatch": false,
+        "wrongPerson": null,
+        "subjectMemberId": "SYN-MEM-1001-01",
+        "observed": "422 consent",
+        "category": "missed-match",
+        "title": "Control: clean card, clean demographics",
+        "plain": "A clean request for John Roe: right card, right details. Everyone should find him.",
+        "result": "Missed the right person",
+        "explanation": "Refused (consent), but John Roe was the right answer.",
+        "rightAnswer": "Return John Roe (SYN-MEM-1001-01)."
+      },
+      {
+        "matcher": "ai-with-definitions",
+        "case": "D1-senior-junior",
+        "expected": "match",
+        "expectedMember": "SYN-MEM-2001-02",
+        "reasonMismatch": false,
+        "wrongPerson": null,
+        "subjectMemberId": "SYN-MEM-2001-02",
+        "observed": "match SYN-MEM-2001-02",
+        "category": "true-match",
+        "title": "Senior and Junior on one card",
+        "plain": "Father and son, same name, same card. Only the birth date tells which Rowan is asking.",
+        "result": "Found the right person",
+        "explanation": "Found Rowan Quill Jr.",
+        "rightAnswer": "Return Rowan Quill Jr (SYN-MEM-2001-02)."
+      },
+      {
+        "matcher": "ai-with-definitions",
+        "case": "D2-twins",
+        "expected": "multiple-422",
+        "expectedMember": null,
+        "reasonMismatch": false,
+        "wrongPerson": null,
+        "subjectMemberId": "SYN-MEM-2001-03",
+        "observed": "422 multiple-matches",
+        "category": "correct-multiple",
+        "title": "Twins on one policy, initial only",
+        "plain": "Twin sisters on one card, same birth date; the request gives only the initial A.",
+        "result": "Rightly refused: can't tell apart",
+        "explanation": "Refused (more than one match), as HRex requires.",
+        "rightAnswer": "Refuse (HRex 422): more than one member fits."
+      },
+      {
+        "matcher": "ai-with-definitions",
+        "case": "D3-consent-expired",
+        "expected": "consent-422",
+        "expectedMember": null,
+        "reasonMismatch": false,
+        "wrongPerson": null,
+        "subjectMemberId": "SYN-MEM-1001-01",
+        "observed": "422 consent",
+        "category": "consent-constrained",
+        "title": "Right person, consent the server can't honour",
+        "plain": "The right person, but his permission to share ended last year.",
+        "result": "Rightly refused: consent",
+        "explanation": "Refused (consent), as HRex requires.",
+        "rightAnswer": "Refuse (HRex 422): the consent can't be honoured."
+      },
+      {
+        "matcher": "ai-with-definitions",
+        "case": "D3b-consent-unsegmentable",
+        "expected": "consent-422",
+        "expectedMember": null,
+        "reasonMismatch": false,
+        "wrongPerson": null,
+        "subjectMemberId": "SYN-MEM-1001-01",
+        "observed": "422 consent",
+        "category": "consent-constrained",
+        "title": "Right person, consent limited to non-sensitive data",
+        "plain": "The right person, but his permission excludes sensitive data, which this plan cannot separate out.",
+        "result": "Rightly refused: consent",
+        "explanation": "Refused (consent), as HRex requires.",
+        "rightAnswer": "Refuse (HRex 422): the consent can't be honoured."
+      },
+      {
+        "matcher": "ai-with-definitions",
+        "case": "D4-card-mixup",
+        "expected": "no-match-422",
+        "expectedMember": null,
+        "reasonMismatch": true,
+        "wrongPerson": null,
+        "subjectMemberId": "SYN-MEM-1001-01",
+        "observed": "422 review-required",
+        "category": "correct-no-match",
+        "title": "John's demographics, Jon's card",
+        "plain": "John Roe's details with the card of Jon Roe, a near-twin name born eight days later.",
+        "result": "Rightly refused: not this person",
+        "explanation": "Refused, giving the reason \"needs human review\" rather than \"no match\". Still the safe answer.",
+        "rightAnswer": "Refuse (HRex 422): the card and the person don't agree."
+      },
+      {
+        "matcher": "ai-no-rules",
+        "case": "D0-control",
+        "expected": "match",
+        "expectedMember": "SYN-MEM-1001-01",
+        "reasonMismatch": false,
+        "wrongPerson": null,
+        "subjectMemberId": "SYN-MEM-1001-01",
+        "observed": "match SYN-MEM-1001-01",
+        "category": "true-match",
+        "title": "Control: clean card, clean demographics",
+        "plain": "A clean request for John Roe: right card, right details. Everyone should find him.",
+        "result": "Found the right person",
+        "explanation": "Found John Roe.",
+        "rightAnswer": "Return John Roe (SYN-MEM-1001-01)."
+      },
+      {
+        "matcher": "ai-no-rules",
+        "case": "D1-senior-junior",
+        "expected": "match",
+        "expectedMember": "SYN-MEM-2001-02",
+        "reasonMismatch": false,
+        "wrongPerson": null,
+        "subjectMemberId": "SYN-MEM-2001-02",
+        "observed": "match SYN-MEM-2001-02",
+        "category": "true-match",
+        "title": "Senior and Junior on one card",
+        "plain": "Father and son, same name, same card. Only the birth date tells which Rowan is asking.",
+        "result": "Found the right person",
+        "explanation": "Found Rowan Quill Jr.",
+        "rightAnswer": "Return Rowan Quill Jr (SYN-MEM-2001-02)."
+      },
+      {
+        "matcher": "ai-no-rules",
+        "case": "D2-twins",
+        "expected": "multiple-422",
+        "expectedMember": null,
+        "reasonMismatch": false,
+        "wrongPerson": null,
+        "subjectMemberId": "SYN-MEM-2001-03",
+        "observed": "422 multiple-matches",
+        "category": "correct-multiple",
+        "title": "Twins on one policy, initial only",
+        "plain": "Twin sisters on one card, same birth date; the request gives only the initial A.",
+        "result": "Rightly refused: can't tell apart",
+        "explanation": "Refused (more than one match), as HRex requires.",
+        "rightAnswer": "Refuse (HRex 422): more than one member fits."
+      },
+      {
+        "matcher": "ai-no-rules",
+        "case": "D3-consent-expired",
+        "expected": "consent-422",
+        "expectedMember": null,
+        "reasonMismatch": false,
+        "wrongPerson": null,
+        "subjectMemberId": "SYN-MEM-1001-01",
+        "observed": "422 consent",
+        "category": "consent-constrained",
+        "title": "Right person, consent the server can't honour",
+        "plain": "The right person, but his permission to share ended last year.",
+        "result": "Rightly refused: consent",
+        "explanation": "Refused (consent), as HRex requires.",
+        "rightAnswer": "Refuse (HRex 422): the consent can't be honoured."
+      },
+      {
+        "matcher": "ai-no-rules",
+        "case": "D3b-consent-unsegmentable",
+        "expected": "consent-422",
+        "expectedMember": null,
+        "reasonMismatch": false,
+        "wrongPerson": null,
+        "subjectMemberId": "SYN-MEM-1001-01",
+        "observed": "match SYN-MEM-1001-01",
+        "category": "consent-ignored",
+        "title": "Right person, consent limited to non-sensitive data",
+        "plain": "The right person, but his permission excludes sensitive data, which this plan cannot separate out.",
+        "result": "Ignored consent",
+        "explanation": "Returned John Roe's records despite a consent the plan can't honour.",
+        "rightAnswer": "Refuse (HRex 422): the consent can't be honoured."
+      },
+      {
+        "matcher": "ai-no-rules",
+        "case": "D4-card-mixup",
+        "expected": "no-match-422",
+        "expectedMember": null,
+        "reasonMismatch": true,
+        "wrongPerson": null,
+        "subjectMemberId": "SYN-MEM-1001-01",
+        "observed": "422 review-required",
+        "category": "correct-no-match",
+        "title": "John's demographics, Jon's card",
+        "plain": "John Roe's details with the card of Jon Roe, a near-twin name born eight days later.",
+        "result": "Rightly refused: not this person",
+        "explanation": "Refused, giving the reason \"needs human review\" rather than \"no match\". Still the safe answer.",
+        "rightAnswer": "Refuse (HRex 422): the card and the person don't agree."
+      }
+    ],
+    "banner": "Synthetic data only; not a production matching recommendation.",
+    "headline": "None of the 3 matchers sent records to the wrong person."
+  },
+  "view": {
+    "v": 1,
+    "status": "warn",
+    "headline": "None of the 3 matchers sent records to the wrong person.",
+    "banner": "Synthetic data only; not a production matching recommendation.",
+    "stats": [
+      {
+        "label": "AI adjudicator, with rules",
+        "value": "3 of 6 right",
+        "status": "warn"
+      },
+      {
+        "label": "AI adjudicator, rules and consent codes",
+        "value": "5 of 6 right",
+        "status": "warn"
+      },
+      {
+        "label": "AI adjudicator, no rules",
+        "value": "5 of 6 right",
+        "status": "warn"
+      }
+    ],
+    "bullets": [
+      {
+        "text": "AI adjudicator, with rules: Refused (consent), but John Roe was the right answer.",
+        "status": "warn",
+        "detail": "Test: Control: clean card, clean demographics. A clean request for John Roe: right card, right details. Everyone should find him.\nRight answer: Return John Roe (SYN-MEM-1001-01)."
+      },
+      {
+        "text": "AI adjudicator, with rules: Refused (consent), but Rowan Quill Jr was the right answer.",
+        "status": "warn",
+        "detail": "Test: Senior and Junior on one card. Father and son, same name, same card. Only the birth date tells which Rowan is asking.\nRight answer: Return Rowan Quill Jr (SYN-MEM-2001-02)."
+      },
+      {
+        "text": "AI adjudicator, with rules: Returned John Roe's records despite a consent the plan can't honour.",
+        "status": "warn",
+        "detail": "Test: Right person, consent limited to non-sensitive data. The right person, but his permission excludes sensitive data, which this plan cannot separate out.\nRight answer: Refuse (HRex 422): the consent can't be honoured."
+      },
+      {
+        "text": "AI adjudicator, rules and consent codes: Refused (consent), but John Roe was the right answer.",
+        "status": "warn",
+        "detail": "Test: Control: clean card, clean demographics. A clean request for John Roe: right card, right details. Everyone should find him.\nRight answer: Return John Roe (SYN-MEM-1001-01)."
+      },
+      {
+        "text": "AI adjudicator, no rules: Returned John Roe's records despite a consent the plan can't honour.",
+        "status": "warn",
+        "detail": "Test: Right person, consent limited to non-sensitive data. The right person, but his permission excludes sensitive data, which this plan cannot separate out.\nRight answer: Refuse (HRex 422): the consent can't be honoured."
+      }
+    ],
+    "sections": [
+      {
+        "id": "answers",
+        "title": "Every answer",
+        "hint": "18 answers",
+        "blocks": [
+          {
+            "kind": "table",
+            "columns": [
+              {
+                "key": "test",
+                "label": "Test"
+              },
+              {
+                "key": "matcher",
+                "label": "Matcher"
+              },
+              {
+                "key": "result",
+                "label": "Result"
+              },
+              {
+                "key": "why",
+                "label": "What happened"
+              }
+            ],
+            "rows": [
+              {
+                "test": "Control: clean card, clean demographics",
+                "matcher": "AI adjudicator, with rules",
+                "result": {
+                  "text": "✗ Missed the right person",
+                  "status": "warn"
+                },
+                "why": "Refused (consent), but John Roe was the right answer."
+              },
+              {
+                "test": "Senior and Junior on one card",
+                "matcher": "AI adjudicator, with rules",
+                "result": {
+                  "text": "✗ Missed the right person",
+                  "status": "warn"
+                },
+                "why": "Refused (consent), but Rowan Quill Jr was the right answer."
+              },
+              {
+                "test": "Twins on one policy, initial only",
+                "matcher": "AI adjudicator, with rules",
+                "result": {
+                  "text": "✓ Rightly refused: can't tell apart",
+                  "status": "good"
+                },
+                "why": "Refused (more than one match), as HRex requires."
+              },
+              {
+                "test": "Right person, consent the server can't honour",
+                "matcher": "AI adjudicator, with rules",
+                "result": {
+                  "text": "✓ Rightly refused: consent",
+                  "status": "good"
+                },
+                "why": "Refused (consent), as HRex requires."
+              },
+              {
+                "test": "Right person, consent limited to non-sensitive data",
+                "matcher": "AI adjudicator, with rules",
+                "result": {
+                  "text": "✗ Ignored consent",
+                  "status": "warn"
+                },
+                "why": "Returned John Roe's records despite a consent the plan can't honour."
+              },
+              {
+                "test": "John's demographics, Jon's card",
+                "matcher": "AI adjudicator, with rules",
+                "result": {
+                  "text": "✓ Rightly refused: not this person",
+                  "status": "good"
+                },
+                "why": "Refused, giving the reason \"needs human review\" rather than \"no match\". Still the safe answer."
+              },
+              {
+                "test": "Control: clean card, clean demographics",
+                "matcher": "AI adjudicator, rules and consent codes",
+                "result": {
+                  "text": "✗ Missed the right person",
+                  "status": "warn"
+                },
+                "why": "Refused (consent), but John Roe was the right answer."
+              },
+              {
+                "test": "Senior and Junior on one card",
+                "matcher": "AI adjudicator, rules and consent codes",
+                "result": {
+                  "text": "✓ Found the right person",
+                  "status": "good"
+                },
+                "why": "Found Rowan Quill Jr."
+              },
+              {
+                "test": "Twins on one policy, initial only",
+                "matcher": "AI adjudicator, rules and consent codes",
+                "result": {
+                  "text": "✓ Rightly refused: can't tell apart",
+                  "status": "good"
+                },
+                "why": "Refused (more than one match), as HRex requires."
+              },
+              {
+                "test": "Right person, consent the server can't honour",
+                "matcher": "AI adjudicator, rules and consent codes",
+                "result": {
+                  "text": "✓ Rightly refused: consent",
+                  "status": "good"
+                },
+                "why": "Refused (consent), as HRex requires."
+              },
+              {
+                "test": "Right person, consent limited to non-sensitive data",
+                "matcher": "AI adjudicator, rules and consent codes",
+                "result": {
+                  "text": "✓ Rightly refused: consent",
+                  "status": "good"
+                },
+                "why": "Refused (consent), as HRex requires."
+              },
+              {
+                "test": "John's demographics, Jon's card",
+                "matcher": "AI adjudicator, rules and consent codes",
+                "result": {
+                  "text": "✓ Rightly refused: not this person",
+                  "status": "good"
+                },
+                "why": "Refused, giving the reason \"needs human review\" rather than \"no match\". Still the safe answer."
+              },
+              {
+                "test": "Control: clean card, clean demographics",
+                "matcher": "AI adjudicator, no rules",
+                "result": {
+                  "text": "✓ Found the right person",
+                  "status": "good"
+                },
+                "why": "Found John Roe."
+              },
+              {
+                "test": "Senior and Junior on one card",
+                "matcher": "AI adjudicator, no rules",
+                "result": {
+                  "text": "✓ Found the right person",
+                  "status": "good"
+                },
+                "why": "Found Rowan Quill Jr."
+              },
+              {
+                "test": "Twins on one policy, initial only",
+                "matcher": "AI adjudicator, no rules",
+                "result": {
+                  "text": "✓ Rightly refused: can't tell apart",
+                  "status": "good"
+                },
+                "why": "Refused (more than one match), as HRex requires."
+              },
+              {
+                "test": "Right person, consent the server can't honour",
+                "matcher": "AI adjudicator, no rules",
+                "result": {
+                  "text": "✓ Rightly refused: consent",
+                  "status": "good"
+                },
+                "why": "Refused (consent), as HRex requires."
+              },
+              {
+                "test": "Right person, consent limited to non-sensitive data",
+                "matcher": "AI adjudicator, no rules",
+                "result": {
+                  "text": "✗ Ignored consent",
+                  "status": "warn"
+                },
+                "why": "Returned John Roe's records despite a consent the plan can't honour."
+              },
+              {
+                "test": "John's demographics, Jon's card",
+                "matcher": "AI adjudicator, no rules",
+                "result": {
+                  "text": "✓ Rightly refused: not this person",
+                  "status": "good"
+                },
+                "why": "Refused, giving the reason \"needs human review\" rather than \"no match\". Still the safe answer."
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "tests",
+        "title": "The test requests",
+        "hint": "6 traps",
+        "blocks": [
+          {
+            "kind": "table",
+            "columns": [
+              {
+                "key": "test",
+                "label": "Test"
+              },
+              {
+                "key": "trap",
+                "label": "What's tricky"
+              },
+              {
+                "key": "right",
+                "label": "Right answer"
+              }
+            ],
+            "rows": [
+              {
+                "test": "Control: clean card, clean demographics",
+                "trap": "A clean request for John Roe: right card, right details. Everyone should find him.",
+                "right": "Return John Roe (SYN-MEM-1001-01)."
+              },
+              {
+                "test": "Senior and Junior on one card",
+                "trap": "Father and son, same name, same card. Only the birth date tells which Rowan is asking.",
+                "right": "Return Rowan Quill Jr (SYN-MEM-2001-02)."
+              },
+              {
+                "test": "Twins on one policy, initial only",
+                "trap": "Twin sisters on one card, same birth date; the request gives only the initial A.",
+                "right": "Refuse (HRex 422): more than one member fits."
+              },
+              {
+                "test": "Right person, consent the server can't honour",
+                "trap": "The right person, but his permission to share ended last year.",
+                "right": "Refuse (HRex 422): the consent can't be honoured."
+              },
+              {
+                "test": "Right person, consent limited to non-sensitive data",
+                "trap": "The right person, but his permission excludes sensitive data, which this plan cannot separate out.",
+                "right": "Refuse (HRex 422): the consent can't be honoured."
+              },
+              {
+                "test": "John's demographics, Jon's card",
+                "trap": "John Roe's details with the card of Jon Roe, a near-twin name born eight days later.",
+                "right": "Refuse (HRex 422): the card and the person don't agree."
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "matchers",
+        "title": "How each matcher works",
+        "hint": "3 matchers",
+        "blocks": [
+          {
+            "kind": "bullets",
+            "items": [
+              {
+                "text": "AI adjudicator, with rules: Claude decides, given the HRex rules.",
+                "detail": "Claude reads the request and the member list, given the HRex matching rules. No helper code."
+              },
+              {
+                "text": "AI adjudicator, rules and consent codes: Claude decides, given the rules and HRex's consent-code definitions.",
+                "detail": "The same as with rules, plus HRex's own definitions of the two consent codes (#regular, #sensitive), which the model misread without them."
+              },
+              {
+                "text": "AI adjudicator, no rules: Claude decides, given no rules.",
+                "detail": "The same, but told nothing about the HRex rules: what does the model know on its own?"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "legend",
+        "title": "What the results mean",
+        "hint": "8 results",
+        "blocks": [
+          {
+            "kind": "kv",
+            "items": [
+              {
+                "label": "✓ Found the right person",
+                "value": "One member was the person in the request, and the matcher returned that member."
+              },
+              {
+                "label": "✓ Rightly refused: not this person",
+                "value": "The card and the person don't agree, so nobody should be returned. The matcher refused (HRex 422)."
+              },
+              {
+                "label": "✓ Rightly refused: can't tell apart",
+                "value": "More than one member fits the request equally. HRex says refuse (422), and the matcher did."
+              },
+              {
+                "label": "✓ Rightly refused: consent",
+                "value": "The consent sent with the request can't be honoured, so HRex says refuse (422). The matcher did."
+              },
+              {
+                "label": "✗ Wrong person",
+                "value": "The matcher returned a member who is not the person asking, or returned someone when it should have refused. This is how one person's records reach another."
+              },
+              {
+                "label": "✗ Ignored consent",
+                "value": "The matcher returned the right person despite a consent the plan can't honour."
+              },
+              {
+                "label": "✗ Missed the right person",
+                "value": "One member was the right answer, but the matcher refused. Safe, but the member's records don't move."
+              },
+              {
+                "label": "✗ No usable answer",
+                "value": "The matcher crashed or answered in a form that isn't a valid $member-match response."
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "footnote": "Checked against the locked answer key afd4a0787ca3. Any HRex 422 refusal where one is due counts as right."
+  },
+  "rationales": [
+    {
+      "matcher": "ai-with-rules",
+      "case": "D0-control",
+      "decision": "consent",
+      "rationale": "The demographics, member ID (SYN-MEM-1001-01) and subscriber ID (SYN-SUB-1001) all agree on a single member, John Roe, born 1951-09-02. The Consent is active and covers today (2026-11-01), within 2026-10-01 to 2027-09-30. Its policy URI points to the HRex 'sensitive' policy, which requires the payer to segment sensitive data. The payer's canSegmentSensitiveData is false, so it cannot comply with the consent terms. The required answer is a 422 consent failure, and no member ID is returned."
+    },
+    {
+      "matcher": "ai-with-rules",
+      "case": "D1-senior-junior",
+      "decision": "consent",
+      "rationale": "Name, gender, birthDate (2008-07-01) and subscriberId SYN-SUB-2001 all point to a single roster member, SYN-MEM-2001-02 (Rowan Quill Jr). The request has no suffix, but the birthDate separates him from Rowan Sr. The Consent is active, in period on 2026-11-01, and names the patient as performer (he is 18). Its policy is the '#sensitive' one, which covers disclosure of sensitive data. The payer has canSegmentSensitiveData=false and cannot honor that consent, so under HRex it must return 422 for the consent rather than a match."
+    },
+    {
+      "matcher": "ai-with-rules",
+      "case": "D2-twins",
+      "decision": "multiple-matches",
+      "rationale": "The subscriber ID SYN-SUB-2001, family name Quill, gender female and birth date 2012-05-20 all agree with two dependents, Ada (SYN-MEM-2001-03) and Aya (SYN-MEM-2001-04). The request gives only the initial \"A\" as the given name, which fits both, and the coverage relationship is data-absent \"unknown\", so nothing separates them. The Consent is active and within its period (2026-10-01 to 2027-09-30). It permits disclosure including sensitive data, so the payer's inability to segment sensitive data does not stop it from complying. Because more than one member fits and they cannot be told apart, the answer is a 422 multiple-matches refusal."
+    },
+    {
+      "matcher": "ai-with-rules",
+      "case": "D3-consent-expired",
+      "decision": "consent",
+      "rationale": "Name, birth date, gender, member ID and subscriber ID all agree with SYN-MEM-1001-01 (John Roe, 1951-09-02). The near-duplicate Jon Roe (1951-09-10) has different IDs and birth date, so identity is not in doubt. However, the request includes a Consent that cannot be honored. Its policy is the HRex sensitive-data policy, and the payer cannot segment sensitive data. The permit period (2025-01-01 to 2025-12-31) also ended before today (2026-11-01). Because the payer cannot comply with the consent, it must return 422 and not a match."
+    },
+    {
+      "matcher": "ai-with-rules",
+      "case": "D3b-consent-unsegmentable",
+      "decision": "match",
+      "rationale": "The Coverage member id (SYN-MEM-1001-01) and subscriber id (SYN-SUB-1001) both point to the same roster member. The name John Roe, birth date 1951-09-02 and gender male also agree. The similar roster entry Jon Roe has a different member id, subscriber id and birth date, so it is not a candidate. The Consent is active and permits disclosure, with a period (2026-10-01 to 2027-09-30) that covers today (2026-11-01). It contains no sensitive-data restrictions, so the payer's inability to segment sensitive data does not stop it from complying."
+    },
+    {
+      "matcher": "ai-with-rules",
+      "case": "D4-card-mixup",
+      "decision": "review-required",
+      "rationale": "The demographics (John Roe, male, 1951-09-02) match SYN-MEM-1001-01 exactly. The Coverage member ID (SYN-MEM-1002-01) and subscriber ID (SYN-SUB-1002) point to a different member, Jon Roe, born 1951-09-10. Because the two sets of identifiers name two different people, I cannot safely return either one, and a human must resolve the conflict. The active Consent also carries a sensitive-data policy that this payer cannot honor because canSegmentSensitiveData is false, so no data could be released on this request in any case."
+    },
+    {
+      "matcher": "ai-no-rules",
+      "case": "D0-control",
+      "decision": "match",
+      "rationale": "Name (John Roe), birth date (1951-09-02), gender, member ID (SYN-MEM-1001-01) and subscriber ID (SYN-SUB-1001) all agree with one roster member. The similar roster entry, Jon Roe (born 1951-09-10), differs in given name, birth date and IDs. The Consent is active, covers 2026-11-01, and permits disclosure to the new payer under the #sensitive policy, which allows sharing all data including sensitive data. The payer cannot segment sensitive data, but that does not matter because nothing needs to be withheld, so the payer can comply."
+    },
+    {
+      "matcher": "ai-no-rules",
+      "case": "D1-senior-junior",
+      "decision": "match",
+      "rationale": "Subscriber ID SYN-SUB-2001, given name Rowan, family name Quill, gender male and birth date 2008-07-01 all agree with Rowan Quill Jr. The request omits the suffix, but the birth date separates him from Rowan Sr. (1979) and from the other dependents, so exactly one member fits. The Consent is active, covers today's date (2026-11-01), and permits disclosure to the new plan under the sensitive policy, which allows sharing all data. The payer can therefore comply without segmenting sensitive data."
+    },
+    {
+      "matcher": "ai-no-rules",
+      "case": "D2-twins",
+      "decision": "multiple-matches",
+      "rationale": "The request gives family Quill, given name only as the initial \"A\", female, birth date 2012-05-20, and subscriber SYN-SUB-2001. Two roster members fit equally: Ada Quill (SYN-MEM-2001-03) and Aya Quill (SYN-MEM-2001-04). Both are female with the same birth date and subscriber ID, and both given names start with A. Nothing in the request separates them, so returning either one risks sending the wrong child's records. The consent is a permit to disclose, effective for today's date, and its sensitive-data policy allows sharing everything, so the payer's inability to segment sensitive data is not the blocker. Ambiguous identity is the deciding issue."
+    },
+    {
+      "matcher": "ai-no-rules",
+      "case": "D3-consent-expired",
+      "decision": "consent",
+      "rationale": "Name, birth date, gender, member ID and subscriber ID all agree with exactly one roster member, SYN-MEM-1001-01 (John Roe), so identity is not the problem. The request includes a Consent that references the HRex sensitive-data policy, and the payer cannot segment sensitive data (canSegmentSensitiveData is false). The Consent's permit period also ended on 2025-12-31, before today (2026-11-01), so it cannot be honored as written. Because the payer cannot comply with the Consent, it should answer with a consent decision rather than release records."
+    },
+    {
+      "matcher": "ai-no-rules",
+      "case": "D3b-consent-unsegmentable",
+      "decision": "match",
+      "rationale": "Name (John Roe), birthDate 1951-09-02, gender male, member ID SYN-MEM-1001-01 and subscriber ID SYN-SUB-1001 all agree with exactly one roster member. The similar roster entry, Jon Roe (SYN-MEM-1002-01), differs in given name, birthDate, member ID and subscriber ID, so it is not a candidate. The Consent is active and permits disclosure for 2026-10-01 to 2027-09-30, which covers today (2026-11-01). It has no restrictions that would require segmenting sensitive data, so the payer can comply and the lack of segmentation capability does not matter."
+    },
+    {
+      "matcher": "ai-no-rules",
+      "case": "D4-card-mixup",
+      "decision": "review-required",
+      "rationale": "The demographics (John Roe, male, born 1951-09-02) match SYN-MEM-1001-01 exactly. The Coverage identifiers (member ID SYN-MEM-1002-01, subscriber ID SYN-SUB-1002) point to a different member, Jon Roe, born 1951-09-10. Both are real roster members with near-identical names and birth dates, so the request conflicts and could send one person's records to another. A human must resolve it. The consent is not a blocker: it permits disclosure under the 'sensitive' policy within the valid period, so no segmentation is needed."
+    },
+    {
+      "matcher": "ai-with-definitions",
+      "case": "D0-control",
+      "decision": "consent",
+      "rationale": "Demographics (John Roe, male, 1951-09-02), member id SYN-MEM-1001-01 and subscriber id SYN-SUB-1001 all agree with a single roster member, and the consent is active and within its 2026-10-01 to 2027-09-30 period (today is 2026-11-01). However, the Consent policy is the HRex #sensitive code, which grants access to sensitive data, and this payer cannot segment sensitive data (canSegmentSensitiveData is false). The payer cannot comply with the consent requirements, so per HRex it must return a 422 rather than release the match."
+    },
+    {
+      "matcher": "ai-with-definitions",
+      "case": "D1-senior-junior",
+      "decision": "match",
+      "rationale": "Subscriber ID SYN-SUB-2001, name Rowan Quill, gender male and birth date 2008-07-01 all agree with Rowan Quill Jr. Rowan Quill Sr shares the name and subscriber ID but has a different birth date, so only one member fits. The Consent is active and covers 2026-10-01 to 2027-09-30, which includes today (2026-11-01). The member turned 18 on 2026-07-01 and signed the Consent himself. Its policy is 'sensitive', which grants access to all data, so the payer can comply even though it cannot segment sensitive data."
+    },
+    {
+      "matcher": "ai-with-definitions",
+      "case": "D2-twins",
+      "decision": "multiple-matches",
+      "rationale": "The subscriberId SYN-SUB-2001, family name Quill, gender female and birthDate 2012-05-20 all agree with two roster members: Ada Quill (SYN-MEM-2001-03) and Aya Quill (SYN-MEM-2001-04). The request gives only the initial \"A\" as the given name, so it cannot separate them, and the coverage relationship is data-absent \"unknown\". The consent asks for the \"sensitive\" policy, which grants access to all information, so a payer that cannot segment data can honor it. The period 2026-10-01 to 2027-09-30 also covers today, 2026-11-01. Consent is therefore not the blocker. The identity is ambiguous between two members, and returning either could disclose the wrong person's records, so the answer is multiple matches (422)."
+    },
+    {
+      "matcher": "ai-with-definitions",
+      "case": "D3-consent-expired",
+      "decision": "consent",
+      "rationale": "The demographics (John Roe, male, 1951-09-02), member ID SYN-MEM-1001-01 and subscriber ID SYN-SUB-1001 all agree with exactly one roster member, SYN-MEM-1001-01. However, the request includes a Consent whose permit period ended on 2025-12-31, and today is 2026-11-01, so the consent has expired. The payer cannot comply with an expired consent, and HRex requires a 422 in that case. The 'sensitive' policy and the payer's inability to segment sensitive data are not the deciding factor, so no member is returned."
+    },
+    {
+      "matcher": "ai-with-definitions",
+      "case": "D3b-consent-unsegmentable",
+      "decision": "consent",
+      "rationale": "The demographics, member ID (SYN-MEM-1001-01) and subscriber ID (SYN-SUB-1001) all point to John Roe, born 1951-09-02, so the identity is not in doubt. The Consent is active and in period (2026-10-01 to 2027-09-30, today is 2026-11-01). Its policy is #regular, which grants access only to non-sensitive information. The payer cannot segment sensitive data (canSegmentSensitiveData is false), so it cannot honor that restriction. HRex requires a 422 when the payer cannot comply with a provided consent, so no member is returned."
+    },
+    {
+      "matcher": "ai-with-definitions",
+      "case": "D4-card-mixup",
+      "decision": "review-required",
+      "rationale": "The demographics (John Roe, male, born 1951-09-02) match roster member SYN-MEM-1001-01 exactly. The Coverage member ID SYN-MEM-1002-01 and subscriber ID SYN-SUB-1002 point to a different member, Jon Roe, born 1951-09-10. The identifiers and demographics conflict between two near-identical members, so returning either one risks sending records to the wrong person, and a human must resolve it. The Consent is not the problem: it is active, covers today's date, and carries the 'sensitive' policy, which grants access to all data and so needs no segmentation despite the payer being unable to segment sensitive data."
+    }
+  ]
+}

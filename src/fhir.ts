@@ -1,5 +1,5 @@
 /** HRex $member-match responses: 200 Parameters (hrex-parameters-member-match-out) or 422 OperationOutcome. */
-import { SYN } from "./converter.js";
+import { SYN } from "./synthetic-ns.js";
 
 /** Lab reason codes carried in OperationOutcome.issue.details so the scorer can tell refusals apart. */
 export const REASON_SYSTEM = `${SYN}/member-match-reason`;

@@ -5,7 +5,7 @@
  */
 import type { DecoySet } from "./decoys.js";
 import { CATEGORIES, CATEGORY_INFO, CORRECT, type Category } from "./scorer.js";
-import { labelFor } from "./matchers/registry.js";
+import { labelFor } from "./matchers/info.js";
 import type { FriendlyScoreboard } from "./report.js";
 
 const esc = (s: unknown) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]!);

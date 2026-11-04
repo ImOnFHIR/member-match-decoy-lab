@@ -1,7 +1,7 @@
 /** score_member_match's result as a ToolView: what every surface shows. */
 import type { FriendlyScoreboard } from "./report.js";
 import { CATEGORIES, CATEGORY_INFO, CORRECT } from "./scorer.js";
-import { labelFor, infoFor } from "./matchers/registry.js";
+import { labelFor, infoFor } from "./matchers/info.js";
 import { LIMITS, type Bullet, type Status, type ToolView } from "./ui/view.js";
 
 const clip = (s: string): { text: string; detail?: string } =>

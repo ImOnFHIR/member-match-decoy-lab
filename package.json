@@ -20,11 +20,13 @@
     "llm:try": "npm run -s build && node dist/src/llm-try.js",
     "score": "npm run -s build && node dist/src/score-cli.js",
     "golden:update": "npm run -s build && node scripts/golden-update.mjs",
-    "report": "npm run -s build && node dist/src/report-cli.js"
+    "report": "npm run -s build && node dist/src/report-cli.js",
+    "vendor:build": "npm run -s build && node scripts/vendor-build.mjs"
   },
   "license": "Apache-2.0",
   "devDependencies": {
     "@types/node": "26.6.6",
+    "esbuild": "0.28.2",
     "typescript": "7.0.2"
   },
   "private": true,
