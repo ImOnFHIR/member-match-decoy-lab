@@ -4,10 +4,17 @@
  * mm-6: Coverage and Consent references are local "Patient/<id>" resolving to MemberPatient.
  * Synthetic data only.
  */
+import { createHash } from "node:crypto";
 import type { Case, DecoySet } from "./decoys.js";
 
+/**
+ * Opaque, deterministic token for a case. Case names ("D4-card-mixup") must never appear in a
+ * request: they would tell any matcher, and especially the LLM, what the trap is.
+ */
+export const opaque = (caseId: string) => createHash("sha256").update(`mmdl:${caseId}`).digest("hex").slice(0, 10);
+
 export const HREX = "http://hl7.org/fhir/us/davinci-hrex/StructureDefinition";
-export const SYN = "https://github.com/ImOnFHIR/member-match-decoy-lab/synthetic";
+export const SYN = "https://imonfhir.com/ns/synthetic"; // a namespace URI, never fetched; neutral so requests carry no hint
 export const POLICY = {
   sensitive: "http://hl7.org/fhir/us/davinci-hrex/StructureDefinition-hrex-consent.html#sensitive",
   regular: "http://hl7.org/fhir/us/davinci-hrex/StructureDefinition-hrex-consent.html#regular",
@@ -34,7 +41,7 @@ export function toMemberMatchParameters(set: DecoySet, c: Case): Json {
     meta: { profile: [`${HREX}/hrex-patient-demographics`] },
     // US Core Patient (which Consent.patient must meet) requires an identifier. Use the
     // requesting (new) plan's own synthetic member number, never the target plan's.
-    identifier: [{ system: `${SYN}/new-plan-member-id`, value: `SYN-NEW-${c.id}` }],
+    identifier: [{ system: `${SYN}/new-plan-member-id`, value: `SYN-NEW-${opaque(c.id)}` }],
     name: [name],
     gender: person.gender,
     birthDate: person.birthDate,
@@ -79,7 +86,7 @@ export function toMemberMatchParameters(set: DecoySet, c: Case): Json {
         category: [{ coding: [{ system: "http://terminology.hl7.org/CodeSystem/v3-ActCode", code: "IDSCL" }] }],
         patient: { reference: `Patient/${patientId}` },
         performer: [{ reference: `Patient/${patientId}` }],
-        sourceReference: { reference: `${SYN}/DocumentReference/consent-${c.id.toLowerCase()}` },
+        sourceReference: { reference: `${SYN}/DocumentReference/consent-${opaque(c.id)}` },
         policy: [{ uri: c.request.consent === "regular" ? POLICY.regular : POLICY.sensitive }],
         provision: {
           type: "permit",
@@ -96,7 +103,7 @@ export function toMemberMatchParameters(set: DecoySet, c: Case): Json {
 
   return {
     resourceType: "Parameters",
-    id: `member-match-in-${c.id.toLowerCase()}`,
+    id: `req-${opaque(c.id)}`,
     meta: { profile: [`${HREX}/hrex-parameters-member-match-in`] },
     parameter,
   };

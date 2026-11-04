@@ -15,7 +15,9 @@
     "validate:fhir": "npm run -s convert && bash scripts/validate-fhir.sh",
     "manifest:build": "npm run -s build && node scripts/manifest.mjs build",
     "manifest:check": "npm run -s build && node scripts/manifest.mjs check",
-    "serve": "npm run -s build && node dist/src/serve.js"
+    "serve": "npm run -s build && node dist/src/serve.js",
+    "spend:check": "npm run -s build && node dist/src/spend-cli.js",
+    "llm:try": "npm run -s build && node dist/src/llm-try.js"
   },
   "license": "Apache-2.0",
   "devDependencies": {
@@ -30,5 +32,9 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/ImOnFHIR/member-match-decoy-lab.git"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "1.4.0",
+    "zod": "4.6.7"
   }
 }

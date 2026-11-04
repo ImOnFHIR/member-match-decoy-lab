@@ -8,6 +8,8 @@ export interface MatchRequest {
   memberId?: string;      // CoverageToMatch.identifier with type MB
   subscriberId?: string;  // CoverageToMatch.subscriberId
   consent?: { policy: string[]; period?: { start?: string; end?: string }; status?: string };
+  /** The Parameters resource as received (the LLM arm reads this, not the parsed fields). */
+  raw?: unknown;
 }
 
 export class BadRequest extends Error {}
@@ -34,5 +36,6 @@ export function parseRequest(p: Json): MatchRequest {
     ...(mb?.value ? { memberId: mb.value } : {}),
     ...(coverage.subscriberId ? { subscriberId: coverage.subscriberId } : {}),
     ...(consent ? { consent: { policy: (consent.policy ?? []).map((x: Json) => x.uri), period: consent.provision?.period, status: consent.status } } : {}),
+    raw: p,
   };
 }

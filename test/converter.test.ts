@@ -67,3 +67,12 @@ test("converter D4: John's demographics with Jon's member ID", () => {
   assert.equal(param(p, "MemberPatient").birthDate, "1951-09-02");
   assert.equal(param(p, "CoverageToMatch").identifier[0].value, "SYN-MEM-1002-01");
 });
+
+const FHIR_WORDS = new Set(["consent"]); // real FHIR vocabulary, not a hint
+test("converter: no request contains its case name or trap words", () => {
+  for (const c of set.cases) {
+    const s = JSON.stringify(toMemberMatchParameters(set, c)).toLowerCase();
+    for (const leak of [c.id.toLowerCase(), ...c.id.toLowerCase().split("-").filter((w) => w.length > 3 && !FHIR_WORDS.has(w)), "decoy", "trap", "twin", "mixup", "expired", "senior", "junior"])
+      assert.ok(!s.includes(leak), `${c.id} request contains "${leak}"`);
+  }
+});

@@ -18,7 +18,7 @@ Status: v0 under construction (target 2026-12-02). Progress is in [REMAINING_WOR
 | `c057-tuned` | The same matcher with a user-set auto-confirm line: `C057_AUTO_CONFIRM=0.85` (the default). |
 | `baseline` | Tiered rules: identifier first, then name, DOB and gender, applied only while there's still a tie. |
 | `baseline-strict` | The same candidates, but every field must agree even after the identifier has picked one member. |
-| `llm` | (task 7) An LLM adjudicator. |
+| `llm` | An LLM adjudicator (Claude Sonnet 5.5 by default; `LLM_MODEL=claude-opus-5-5` reruns it on Opus). It gets the HRex rules but no consent helper. |
 
 Every matcher checks consent itself (HRex mm-11); the endpoint doesn't.
 
@@ -33,6 +33,8 @@ npm run validator:get  # one-time: fetch the HL7 validator (Java 17+)
 npm run validate:fhir  # validate the requests against HRex 1.2.0
 npm run serve          # local $member-match endpoint on 127.0.0.1:8650
 npm run manifest:check # ground truth is digest-locked and stable
+npm run spend:check    # LLM spend vs the $50/month ceiling; SMS alert configured?
+npm run llm:try        # live LLM run (needs ANTHROPIC_API_KEY and the SMS alert)
 npm run leak:check     # leak guard; needs a banlist outside this repo (LEAK_GUARD_CONFIG)
 ```
 

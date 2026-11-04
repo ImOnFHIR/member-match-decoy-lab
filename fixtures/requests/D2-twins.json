@@ -1,6 +1,6 @@
 {
   "resourceType": "Parameters",
-  "id": "member-match-in-d2-twins",
+  "id": "req-d9c3324ef3",
   "meta": {
     "profile": [
       "http://hl7.org/fhir/us/davinci-hrex/StructureDefinition/hrex-parameters-member-match-in"
@@ -19,8 +19,8 @@
         },
         "identifier": [
           {
-            "system": "https://github.com/ImOnFHIR/member-match-decoy-lab/synthetic/new-plan-member-id",
-            "value": "SYN-NEW-D2-twins"
+            "system": "https://imonfhir.com/ns/synthetic/new-plan-member-id",
+            "value": "SYN-NEW-d9c3324ef3"
           }
         ],
         "name": [
@@ -62,7 +62,7 @@
         "payor": [
           {
             "identifier": {
-              "system": "https://github.com/ImOnFHIR/member-match-decoy-lab/synthetic/payer-id",
+              "system": "https://imonfhir.com/ns/synthetic/payer-id",
               "value": "SYN-PAYER-OLD"
             },
             "display": "Synthetic Old Plan"
@@ -108,7 +108,7 @@
           }
         ],
         "sourceReference": {
-          "reference": "https://github.com/ImOnFHIR/member-match-decoy-lab/synthetic/DocumentReference/consent-d2-twins"
+          "reference": "https://imonfhir.com/ns/synthetic/DocumentReference/consent-d9c3324ef3"
         },
         "policy": [
           {
@@ -133,7 +133,7 @@
               },
               "reference": {
                 "identifier": {
-                  "system": "https://github.com/ImOnFHIR/member-match-decoy-lab/synthetic/payer-id",
+                  "system": "https://imonfhir.com/ns/synthetic/payer-id",
                   "value": "SYN-PAYER-OLD"
                 },
                 "display": "Synthetic Old Plan"
@@ -150,7 +150,7 @@
               },
               "reference": {
                 "identifier": {
-                  "system": "https://github.com/ImOnFHIR/member-match-decoy-lab/synthetic/payer-id",
+                  "system": "https://imonfhir.com/ns/synthetic/payer-id",
                   "value": "SYN-PAYER-NEW"
                 },
                 "display": "Synthetic New Plan"

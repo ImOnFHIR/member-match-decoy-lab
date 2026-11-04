@@ -1,6 +1,6 @@
 {
   "resourceType": "Parameters",
-  "id": "member-match-in-d4-card-mixup",
+  "id": "req-ca943ceb39",
   "meta": {
     "profile": [
       "http://hl7.org/fhir/us/davinci-hrex/StructureDefinition/hrex-parameters-member-match-in"
@@ -19,8 +19,8 @@
         },
         "identifier": [
           {
-            "system": "https://github.com/ImOnFHIR/member-match-decoy-lab/synthetic/new-plan-member-id",
-            "value": "SYN-NEW-D4-card-mixup"
+            "system": "https://imonfhir.com/ns/synthetic/new-plan-member-id",
+            "value": "SYN-NEW-ca943ceb39"
           }
         ],
         "name": [
@@ -56,7 +56,7 @@
                 }
               ]
             },
-            "system": "https://github.com/ImOnFHIR/member-match-decoy-lab/synthetic/member-id",
+            "system": "https://imonfhir.com/ns/synthetic/member-id",
             "value": "SYN-MEM-1002-01"
           }
         ],
@@ -76,7 +76,7 @@
         "payor": [
           {
             "identifier": {
-              "system": "https://github.com/ImOnFHIR/member-match-decoy-lab/synthetic/payer-id",
+              "system": "https://imonfhir.com/ns/synthetic/payer-id",
               "value": "SYN-PAYER-OLD"
             },
             "display": "Synthetic Old Plan"
@@ -122,7 +122,7 @@
           }
         ],
         "sourceReference": {
-          "reference": "https://github.com/ImOnFHIR/member-match-decoy-lab/synthetic/DocumentReference/consent-d4-card-mixup"
+          "reference": "https://imonfhir.com/ns/synthetic/DocumentReference/consent-ca943ceb39"
         },
         "policy": [
           {
@@ -147,7 +147,7 @@
               },
               "reference": {
                 "identifier": {
-                  "system": "https://github.com/ImOnFHIR/member-match-decoy-lab/synthetic/payer-id",
+                  "system": "https://imonfhir.com/ns/synthetic/payer-id",
                   "value": "SYN-PAYER-OLD"
                 },
                 "display": "Synthetic Old Plan"
@@ -164,7 +164,7 @@
               },
               "reference": {
                 "identifier": {
-                  "system": "https://github.com/ImOnFHIR/member-match-decoy-lab/synthetic/payer-id",
+                  "system": "https://imonfhir.com/ns/synthetic/payer-id",
                   "value": "SYN-PAYER-NEW"
                 },
                 "display": "Synthetic New Plan"
