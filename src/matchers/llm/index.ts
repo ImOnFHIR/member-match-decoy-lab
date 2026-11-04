@@ -62,6 +62,25 @@ export const SYSTEM_PROMPT_NO_RULES = (() => {
   return SYSTEM_PROMPT.slice(0, start) + SYSTEM_PROMPT.slice(end);
 })();
 
+/**
+ * HRex's own definitions of its two consent policy codes, quoted from the HRex Consent profile
+ * notes (HL7/davinci-ehrx, StructureDefinition-hrex-consent-notes.md). Added after the first live
+ * run showed the model reading both codes backwards (Nick, 2026-11-04: test whether this fixes it).
+ */
+export const CONSENT_DEFINITIONS = `HRex consent policy codes (from the HRex Consent profile):
+- "http://hl7.org/fhir/us/davinci-hrex/StructureDefinition-hrex-consent.html#regular" - "Access is granted to all patient information that is not considered to be 'sensitive' according to U.S. state or federal regulation."
+- "http://hl7.org/fhir/us/davinci-hrex/StructureDefinition-hrex-consent.html#sensitive" - "Access is granted to all patient information, including that considered to be 'sensitive' according to U.S. state or federal regulation."`;
+
+export const SYSTEM_PROMPT_WITH_DEFINITIONS = SYSTEM_PROMPT.replace("Returning the wrong member", `${CONSENT_DEFINITIONS}\n\nReturning the wrong member`);
+
+/** Which prompt an AI matcher gets. */
+export type PromptMode = "rules" | "no-rules" | "rules-and-definitions";
+const PROMPTS: Record<PromptMode, { system: string; name: string }> = {
+  rules: { system: SYSTEM_PROMPT, name: "ai-with-rules" },
+  "no-rules": { system: SYSTEM_PROMPT_NO_RULES, name: "ai-no-rules" },
+  "rules-and-definitions": { system: SYSTEM_PROMPT_WITH_DEFINITIONS, name: "ai-with-definitions" },
+};
+
 export interface LlmCallResult { parsed: LlmDecision | null; usage: Usage; model: string; stopReason: string | null }
 export interface LlmClient { call(model: string, system: string, user: string, maxTokens: number): Promise<LlmCallResult> }
 
@@ -96,8 +115,8 @@ export interface LlmMatcherOptions {
   spend: SpendGuard;
   decisionLogPath?: string;
   name?: string;
-  /** false: the prompt has no HRex rule text (the "ai-no-rules" matcher). Default true. */
-  rules?: boolean;
+  /** Which prompt: "rules" (default), "no-rules", or "rules-and-definitions". */
+  prompt?: PromptMode;
 }
 
 export class LlmError extends Error {}
@@ -107,8 +126,8 @@ export function llmMatcher(o: LlmMatcherOptions): Matcher {
   if (!PRICES[model]) throw new Error(`LLM_MODEL ${model} has no price in src/spend.ts; refusing to run an unpriced model`);
   let client = o.client;
   const logPath = o.decisionLogPath ?? ".runs/llm-decisions.jsonl";
-  const system = o.rules === false ? SYSTEM_PROMPT_NO_RULES : SYSTEM_PROMPT;
-  const name = o.name ?? (o.rules === false ? "ai-no-rules" : "ai-with-rules");
+  const { system, name: defaultName } = PROMPTS[o.prompt ?? "rules"];
+  const name = o.name ?? defaultName;
   return {
     name,
     async decide(req, roster, payer): Promise<Decision> {

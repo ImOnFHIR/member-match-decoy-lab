@@ -161,8 +161,18 @@ test("matcher-llm: the no-rules variant drops only the HRex rule text", async ()
   const f = fake({ decision: "no-match", memberId: null, rationale: "x" });
   const seen: string[] = [];
   const client: LlmClient = { call: async (m, sys, u, mt) => { seen.push(sys); return f.client.call(m, sys, u, mt); } };
-  const m = llmMatcher({ client, spend: guard(dir), rules: false, decisionLogPath: join(dir, "d.jsonl") });
+  const m = llmMatcher({ client, spend: guard(dir), prompt: "no-rules", decisionLogPath: join(dir, "d.jsonl") });
   assert.equal(m.name, "ai-no-rules");
   await handle({ matchers: [m], roster: roster(set), consent: payer }, "ai-no-rules", fixture("D0-control"));
   assert.equal(seen[0], SYSTEM_PROMPT_NO_RULES);
+});
+
+test("matcher-llm: the definitions variant adds HRex's consent-code definitions to the rules prompt", async () => {
+  const { SYSTEM_PROMPT, SYSTEM_PROMPT_WITH_DEFINITIONS, CONSENT_DEFINITIONS } = await import("../src/matchers/llm/index.js");
+  assert.ok(SYSTEM_PROMPT_WITH_DEFINITIONS.includes(CONSENT_DEFINITIONS));
+  assert.ok(SYSTEM_PROMPT_WITH_DEFINITIONS.includes("SHALL"));
+  assert.match(CONSENT_DEFINITIONS, /#regular" - "Access is granted to all patient information that is not considered to be 'sensitive'/);
+  assert.equal(SYSTEM_PROMPT_WITH_DEFINITIONS.replace(CONSENT_DEFINITIONS + "\n\n", ""), SYSTEM_PROMPT);
+  const m = llmMatcher({ client: fake(null).client, spend: guard(tmp()), prompt: "rules-and-definitions" });
+  assert.equal(m.name, "ai-with-definitions");
 });

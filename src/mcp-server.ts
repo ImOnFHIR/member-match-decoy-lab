@@ -12,7 +12,7 @@ import { buildMatchers, MATCHER_INFO, DEFAULT_RELAXED_CONFIDENCE } from "./match
 import { runScoreboard } from "./run.js";
 import { CATEGORIES } from "./scorer.js";
 import { loadDecoys } from "./decoys.js";
-import { befriend, renderText } from "./report.js";
+import { befriend, renderText, renderSummary } from "./report.js";
 
 /** Repo root, so the server works whatever directory the MCP client starts it from. */
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..", "..");
@@ -22,19 +22,32 @@ const MATCHER_IDS = FREE.map((m) => m.id) as [string, ...string[]];
 const CASE_IDS = set.cases.map((c) => c.id) as [string, ...string[]];
 
 const DESCRIPTION = [
-  "Tests how safely different member-matching approaches answer Da Vinci HRex $member-match requests.",
+  "WHAT IT IS",
+  "• A test bench for HRex $member-match: does a matcher send someone's records to the wrong person?",
   "",
-  "Each test request hides a trap: a look-alike member (a near-twin name, a father and son on one card, twins, a borrowed card) or a consent the plan can't honour. Every matcher answers every request, and each answer is checked against a locked answer key.",
+  "WHAT IT DOES",
+  `• Sends ${set.cases.length} synthetic test requests, each with a hidden trap, to up to ${FREE.length} matchers.`,
+  "• Checks every answer against a locked answer key.",
+  "• Tells you who got it right, who refused safely, and who sent records to the wrong person.",
   "",
-  "You get back a plain-English report: which matchers found the right person, which rightly refused, and which sent someone's records to the wrong person, with names.",
+  "SETTINGS (all optional)",
+  `• matchers: which matchers to test. Default: all ${FREE.length}.`,
+  `• cases: which test requests to run. Default: all ${set.cases.length}.`,
+  `• relaxed_confidence: 75 to 100. Default ${DEFAULT_RELAXED_CONFIDENCE}.`,
+  '• detail: "summary" (default) or "full".',
   "",
-  "Matchers:",
-  ...FREE.map((m) => `- ${m.id}: ${m.label}. ${m.summary}`),
+  "HOW TO USE",
+  "• Run it with no settings to see the result.",
+  '• Set detail to "full" to see every answer explained.',
   "",
-  "Decoys:",
-  ...set.cases.map((c) => `- ${c.id}: ${c.title}. ${c.plain}`),
+  "MATCHERS",
+  ...FREE.map((m) => `• ${m.id}: ${m.short}`),
   "",
-  "All data is synthetic. Read-only, free (no AI calls), and nothing leaves this machine.",
+  "TEST REQUESTS",
+  ...set.cases.map((c) => `• ${c.id}: ${c.title}`),
+  "",
+  "SAFE TO RUN",
+  "• Synthetic data. Read-only. Free. Nothing leaves this machine.",
 ].join("\n");
 
 const Category = z.enum(CATEGORIES);
@@ -59,25 +72,28 @@ export function createMcpServer(): McpServer {
   server.registerTool(
     "score_member_match",
     {
-      title: "Test member-match matchers against look-alike decoys",
+      title: "Member-match decoy test",
       description: DESCRIPTION,
       inputSchema: {
         matchers: z.array(z.enum(MATCHER_IDS)).optional()
-          .describe(`Which matchers to test. Leave empty to test all four: ${FREE.map((m) => `${m.id} (${m.label})`).join(", ")}.`),
+          .describe(`Which matchers to test. Leave empty for all ${FREE.length}.`),
         cases: z.array(z.enum(CASE_IDS)).optional()
-          .describe(`Which decoys to run. Leave empty to run all six: ${set.cases.map((c) => `${c.id} (${c.title})`).join(", ")}.`),
+          .describe(`Which test requests to run. Leave empty for all ${set.cases.length}.`),
         relaxed_confidence: z.number().int().min(75).max(100).optional()
-          .describe(`How sure, from 75 to 100 percent, the relaxed identity matcher must be before it accepts a single look-alike. Default ${DEFAULT_RELAXED_CONFIDENCE}. The strict matcher always uses 90.`),
+          .describe(`How sure (75 to 100%) the relaxed matcher must be to accept a look-alike. Default ${DEFAULT_RELAXED_CONFIDENCE}.`),
+        detail: z.enum(["summary", "full"]).optional()
+          .describe('"summary" (default): the result and the problems. "full": every answer, explained.'),
       },
       outputSchema,
       annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false },
     },
-    async ({ matchers, cases, relaxed_confidence }) => {
+    async ({ matchers, cases, relaxed_confidence, detail }) => {
       const env = relaxed_confidence === undefined ? {} : { RELAXED_CONFIDENCE: String(relaxed_confidence) };
       const all = buildMatchers(env);
       const chosen = matchers?.length ? all.filter((m) => matchers.includes(m.name)) : all;
       const sb = befriend(await runScoreboard({ matchers: chosen, cases, dir: ROOT }), set);
-      return { content: [{ type: "text", text: renderText(sb) }], structuredContent: { ...sb } };
+      const text = detail === "full" ? renderText(sb) : renderSummary(sb);
+      return { content: [{ type: "text", text }], structuredContent: { ...sb } };
     },
   );
   return server;

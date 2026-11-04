@@ -28,7 +28,18 @@ See every answer on the [scoreboard page](report/scoreboard.html) (open it in a 
 | ID-first rules | `id-first` | Trusts the member or subscriber ID on the card; uses name, birth date and gender only to break ties. A common way to build member match. |
 | Check-every-field rules | `check-every-field` | Finds the card's ID, then insists that name, birth date and gender all agree. |
 | AI adjudicator, with rules | `ai-with-rules` | Claude reads the request and the member list, given the HRex matching rules. Costs a few cents per run. |
+| AI adjudicator, rules and consent codes | `ai-with-definitions` | The same, plus HRex's own definitions of the two consent codes. |
 | AI adjudicator, no rules | `ai-no-rules` | The same, told nothing about the HRex rules. |
+
+### First AI run (2026-11-04, Claude Sonnet 5.5, one run each)
+
+| AI version | Right | What went wrong |
+|---|---|---|
+| With rules | 3 of 6 | Read the consent code `#sensitive` as a restriction. Refused John Roe and Rowan Quill Jr although both consents were valid, and released John Roe's records under a `#regular` consent this plan can't honour. |
+| Rules and consent codes | 5 of 6 | Still refused the clean control, reading "can't separate out sensitive data" as a reason it couldn't honour a share-everything consent. |
+| No rules | 5 of 6 | Released John Roe's records under the `#regular` consent. |
+
+No AI version sent records to the wrong person. The weak point is consent: the model doesn't know what HRex's two consent codes mean, and the rules alone made it more cautious in the wrong place. One run each is a small sample.
 
 Each matcher checks consent itself; the endpoint doesn't help. The AI matchers default to Claude Sonnet 5.5; `LLM_MODEL=claude-opus-5-5` reruns them on Opus.
 
@@ -47,10 +58,12 @@ Six synthetic requests, each with a trap. Details and the spec text behind each 
 
 ```sh
 npm ci
-npm run score                    # the plain-English report (free, offline)
+npm run score                    # the short result (free, offline)
+npm run score -- --full          # every answer, explained
 npm run report                   # rebuild report/scoreboard.html
 npm run score -- --ai            # add the AI adjudicator (needs ANTHROPIC_API_KEY and the SMS spend alert)
 npm run score -- --ai-no-rules   # add the AI adjudicator without the HRex rules
+npm run score -- --ai-definitions  # add the AI adjudicator with the rules and HRex's consent-code definitions
 RELAXED_CONFIDENCE=90 npm run score
 ```
 
@@ -79,8 +92,9 @@ npm run leak:check     # leak guard; needs a banlist outside this repo (LEAK_GUA
 - `matchers`: which matchers to test. Default: all four rule-based ones.
 - `cases`: which decoys to run. Default: all six.
 - `relaxed_confidence`: 75–100, how sure the relaxed identity matcher must be.
+- `detail`: `summary` (the default: the result, scores and problems) or `full` (every answer, explained).
 
-It returns the plain-English report, plus the same results as structured data. It never runs the AI matchers, so a call is free, and nothing leaves the machine.
+It returns the report, plus the same results as structured data. It never runs the AI matchers, so a call is free, and nothing leaves the machine.
 
 ```sh
 npx @modelcontextprotocol/inspector node dist/mcp.js

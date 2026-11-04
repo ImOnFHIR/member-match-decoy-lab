@@ -78,6 +78,18 @@ tbody tr:last-child th, tbody tr:last-child td { border-bottom: 0; }
 /* legend */
 dl.legend { display: grid; grid-template-columns: auto 1fr; gap: 0.4rem 0.9rem; margin: 0; font-size: 0.88rem; }
 dl.legend dt { font-weight: 600; white-space: nowrap; } dl.legend dd { margin: 0; color: var(--muted); }
+ul.bul { margin: 0; padding-left: 1.1rem; display: grid; gap: 0.35rem; max-width: 70ch; }
+ul.bul li::marker { color: var(--muted); }
+.scorelist li { font-variant-numeric: tabular-nums; }
+.scorelist .bad, .problems .bad { color: var(--bad); font-weight: 600; }
+details { background: var(--panel); border: 1px solid var(--rule); border-radius: 6px; }
+details > summary { cursor: pointer; padding: 0.8rem 1rem; font: 600 1rem/1.3 var(--display); list-style: none; display: flex; justify-content: space-between; gap: 1rem; }
+details > summary::-webkit-details-marker { display: none; }
+details > summary::after { content: "+"; color: var(--muted); font-weight: 400; }
+details[open] > summary::after { content: "–"; }
+details > summary .hint { font: 400 0.85rem/1.3 var(--body); color: var(--muted); margin-left: auto; }
+details > .inner { padding: 0 1rem 1rem; display: grid; gap: 1rem; }
+.more { display: grid; gap: 0.6rem; }
 footer { font-size: 0.8rem; color: var(--muted); display: grid; gap: 0.3rem; }
 a { color: var(--accent); }
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
@@ -98,14 +110,6 @@ export function htmlReport(f: FriendlyScoreboard, set: DecoySet, o: { fragment?:
   const sharedCards = [...new Set(set.coverages.map((c) => c.subscriberId))]
     .map((s) => ({ s, n: set.coverages.filter((c) => c.subscriberId === s).length })).filter((x) => x.n > 1);
 
-  const matchers = f.matchers.map((m) => {
-    const wrong = m.counts["decoy-confusion"] > 0;
-    return `<div class="m"><span class="eyebrow">${esc(m.matcher)}</span><strong>${esc(m.label)}</strong>
-      <span class="score${m.correct < m.total ? " bad" : ""}">${m.correct} of ${m.total} right</span>
-      ${wrong ? `<span class="cross">Sent records to the wrong person</span>` : ""}
-      <p>${esc(m.summary)}</p></div>`;
-  }).join("\n");
-
   const decoys = caseIds.map((c) => {
     const rs = f.rows.filter((r) => r.case === c);
     const items = rs.map((r) => `<li class="${ok(r.category) ? "" : "miss"}"><span class="${ok(r.category) ? "tick" : "cross"}" aria-label="${ok(r.category) ? "right" : "wrong"}">${ok(r.category) ? "✓" : "✗"}</span><span class="who">${esc(labelFor(r.matcher))}</span><span class="what">${esc(r.explanation)}</span></li>`).join("");
@@ -113,8 +117,18 @@ export function htmlReport(f: FriendlyScoreboard, set: DecoySet, o: { fragment?:
       <p>${esc(rs[0].plain)}</p><p class="answer"><b>Right answer:</b> ${esc(rs[0].rightAnswer)}</p><ul class="results">${items}</ul></article>`;
   }).join("\n");
 
+  const scoreItems = f.matchers.map((m) => {
+    const wrong = m.counts["decoy-confusion"] > 0;
+    return `<li><strong>${esc(m.label)}</strong>: ${m.correct} of ${m.total} right${wrong ? ` <span class="bad">✗ sent records to the wrong person</span>` : ""}</li>`;
+  }).join("");
+  const problemRows = f.rows.filter((r) => !ok(r.category));
+  const problemItems = problemRows.length
+    ? problemRows.map((r) => `<li><strong>${esc(labelFor(r.matcher))}</strong>, “${esc(r.title)}”: <span class="${r.category === "decoy-confusion" ? "bad" : ""}">${esc(r.explanation)}</span></li>`).join("")
+    : "<li>None.</li>";
+  const howItWorks = f.matchers.map((m) => `<li><strong>${esc(m.label)}</strong>: ${esc(m.summary)}</li>`).join("");
+
   const head = `<tr><th scope="col">Decoy</th>${f.matchers.map((m) => `<th scope="col">${esc(m.label)}</th>`).join("")}</tr>`;
-  const body = caseIds.map((c) => `<tr><th scope="row"><a href="#${esc(c)}">${esc(row(f.matchers[0].matcher, c).title)}</a></th>${f.matchers.map((m) => {
+  const body = caseIds.map((c) => `<tr><th scope="row">${esc(row(f.matchers[0].matcher, c).title)}</th>${f.matchers.map((m) => {
     const r = row(m.matcher, c);
     return `<td class="cell ${ok(r.category) ? "good" : "bad"}" title="${esc(r.explanation)}">${ok(r.category) ? "✓" : "✗"}<br><span style="font-weight:400">${esc(CATEGORY_INFO[r.category].label)}</span></td>`;
   }).join("")}</tr>`).join("\n");
@@ -127,27 +141,34 @@ export function htmlReport(f: FriendlyScoreboard, set: DecoySet, o: { fragment?:
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Condensed:wght@600&family=IBM+Plex+Sans:wght@400;600&display=swap">
 <style>${CSS}</style>
 <main class="wrap">
-  <header style="display:grid;gap:0.75rem">
-    <span class="eyebrow">Member Match Decoy Lab · Da Vinci HRex $member-match</span>
+  <header style="display:grid;gap:0.6rem">
+    <span class="eyebrow">Member Match Decoy Lab · HRex $member-match</span>
     <h1 class="headline ${anyWrong ? "bad" : "good"}">${esc(f.headline)}</h1>
-    <p class="lede">When one health plan asks another “who is this member?”, a wrong answer sends one person’s records to someone else. Each test request below hides a look-alike or a consent problem. Four ways of matching answered every request.</p>
-    <p class="banner">${esc(f.banner)} No real people, plans or identifiers.</p>
+    <ul class="bul">
+      <li><strong>What it is:</strong> a test of whether member-matching sends someone’s records to the wrong person.</li>
+      <li><strong>What it does:</strong> ${caseIds.length} synthetic requests, each with a hidden trap, sent to ${f.matchers.length} matchers and checked against a locked answer key.</li>
+      <li><strong>How to use it:</strong> read the scores, then open any section below for details.</li>
+    </ul>
+    <p class="banner">${esc(f.banner)}</p>
   </header>
 
-  <section aria-labelledby="h-matchers"><h2 id="h-matchers">How each matcher did</h2><div class="matchers">${matchers}</div></section>
+  <section aria-labelledby="h-scores"><h2 id="h-scores">Scores</h2><ul class="bul scorelist">${scoreItems}</ul></section>
 
-  <section aria-labelledby="h-family"><h2 id="h-family">The synthetic members</h2>
-    <p>The plan’s member list. Look-alikes are planted on purpose: John Roe and Jon Roe, born eight days apart; two Rowan Quills on one card; twins Ada and Aya.</p>
-    <div class="cards">${people}</div>
-    ${sharedCards.length ? `<p class="shared">${sharedCards.map((x) => `${x.n} members share subscriber ID <span class="mono">${esc(x.s)}</span>.`).join(" ")}</p>` : ""}
-  </section>
+  <section aria-labelledby="h-problems"><h2 id="h-problems">Problems</h2><ul class="bul problems">${problemItems}</ul></section>
 
-  <section aria-labelledby="h-grid"><h2 id="h-grid">Every answer at a glance</h2><div class="scroll"><table><thead>${head}</thead><tbody>${body}</tbody></table></div></section>
+  <section aria-labelledby="h-grid"><h2 id="h-grid">Every answer</h2><div class="scroll"><table><thead>${head}</thead><tbody>${body}</tbody></table></div></section>
 
-  <section aria-labelledby="h-decoys"><h2 id="h-decoys">The decoys</h2><div class="decoys">${decoys}</div></section>
-
-  <section aria-labelledby="h-legend"><h2 id="h-legend">What the results mean</h2><dl class="legend">${legend}</dl>
-    <p style="font-size:0.88rem;color:var(--muted)">HRex says a plan must return at most one member, and must refuse (HTTP 422) when there is no match, more than one match, or a consent it can’t honour. Any refusal where a refusal is due counts as right.</p></section>
+  <div class="more">
+    <details id="more-matchers"><summary>How each matcher works <span class="hint">${f.matchers.length} matchers</span></summary><div class="inner"><ul class="bul">${howItWorks}</ul></div></details>
+    <details id="more-members"><summary>The synthetic members <span class="hint">${set.coverages.length} people</span></summary><div class="inner">
+      <p>Look-alikes planted on purpose: John Roe and Jon Roe, born eight days apart; two Rowan Quills on one card; twins Ada and Aya.</p>
+      <div class="cards">${people}</div>
+      ${sharedCards.length ? `<p class="shared">${sharedCards.map((x) => `${x.n} members share subscriber ID <span class="mono">${esc(x.s)}</span>.`).join(" ")}</p>` : ""}
+    </div></details>
+    <details id="more-decoys"><summary>Each test request <span class="hint">${caseIds.length} traps</span></summary><div class="inner"><div class="decoys">${decoys}</div></div></details>
+    <details id="more-legend"><summary>What the results mean <span class="hint">${CATEGORIES.length} results</span></summary><div class="inner"><dl class="legend">${legend}</dl>
+      <p style="font-size:0.88rem;color:var(--muted)">HRex says a plan returns at most one member, and refuses (HTTP 422) when there is no match, more than one match, or a consent it can’t honour. Any refusal where a refusal is due counts as right.</p></div></details>
+  </div>
 
   <footer><span>Checked against the locked answer key <span class="mono">${esc(f.manifestDigest.slice(0, 12))}</span>. Generated by <span class="mono">npm run report</span>.</span>
     <span>Source: <a href="https://github.com/ImOnFHIR/member-match-decoy-lab">github.com/ImOnFHIR/member-match-decoy-lab</a> · Apache-2.0</span></footer>

@@ -1,6 +1,7 @@
 /**
  * npm run llm:try [-- D4-card-mixup ...]   — run the AI adjudicator live on some or all decoys.
  * npm run llm:try -- --no-rules             — the same, with no HRex rules in its prompt.
+ * npm run llm:try -- --definitions          — rules plus HRex's consent-code definitions.
  * LLM_MODEL=claude-opus-5-5 npm run llm:try — the same on a stronger model.
  * Refuses to start unless the SMS spend alert is configured. Prints each decision and its cost.
  * The full scoreboard is task 8 (npm run score).
@@ -21,10 +22,10 @@ if (missing.length) {
 }
 const set = loadDecoys();
 const wanted = process.argv.slice(2).filter((a) => !a.startsWith("--"));
-const noRules = process.argv.includes("--no-rules");
+const prompt = process.argv.includes("--no-rules") ? "no-rules" : process.argv.includes("--definitions") ? "rules-and-definitions" : "rules";
 const cases = set.cases.filter((c) => wanted.length === 0 || wanted.includes(c.id));
 const spend = new SpendGuard({ alert: twilioSender() });
-const m = llmMatcher({ spend, rules: !noRules });
+const m = llmMatcher({ spend, prompt });
 const opts = { matchers: [m], roster: roster(set), consent: { asOf: set.asOf, canSegmentSensitive: set.targetPayer.canSegmentSensitive } };
 
 console.log(`${SYNTHETIC_BANNER}\n${m.name}, model: ${process.env.LLM_MODEL ?? DEFAULT_LLM_MODEL}`);

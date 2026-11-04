@@ -64,3 +64,18 @@ test("report page: self-contained, banner present, no scripts", async () => {
   assert.match(html, /prefers-color-scheme: dark/);
   assert.match(html, /Sent Jon Roe&#39;s records in answer to a request for John Roe/);
 });
+
+test("report: the summary lists only problems, in bullets", async () => {
+  const { renderSummary } = await import("../src/report.js");
+  const s = renderSummary(await friendly());
+  assert.match(s, /^RESULT: 1 of 4 matchers/m);
+  assert.equal((s.match(/^• /gm) ?? []).length, 4 + 2 + 1); // 4 scores, 2 problems, 1 "more"
+  assert.match(s, /• ID-first rules, "John's demographics, Jon's card": Sent Jon Roe's records/);
+});
+
+test("report page: details are collapsed sections; summary first", async () => {
+  const html = htmlReport(await friendly(), set);
+  assert.ok(html.indexOf('id="h-scores"') < html.indexOf("<details"));
+  assert.equal((html.match(/<details /g) ?? []).length, 4);
+  assert.doesNotMatch(html, /<details[^>]* open/);
+});

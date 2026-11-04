@@ -111,3 +111,21 @@ export function renderText(f: FriendlyScoreboard): string {
   out.push("", `Scored against the locked answer key ${f.manifestDigest.slice(0, 12)}. Any HRex 422 refusal where a refusal is due counts as right.`);
   return out.join("\n");
 }
+
+/**
+ * The short version (the default): the result, one line per matcher, the problems, and how to
+ * get more. Bullets only; no narrative. renderText() is the full version.
+ */
+export function renderSummary(f: FriendlyScoreboard, moreHint = 'For every answer explained, run again with detail set to "full".'): string {
+  const out: string[] = [f.banner, "", `RESULT: ${f.headline}`, "", "SCORES"];
+  for (const m of f.matchers) {
+    const wrong = m.counts["decoy-confusion"] > 0 ? "  ✗ sent records to the wrong person" : "";
+    out.push(`• ${m.label}: ${m.correct} of ${m.total} right${wrong}`);
+  }
+  const problems = f.rows.filter((r) => !CORRECT.has(r.category));
+  out.push("", "PROBLEMS");
+  if (!problems.length) out.push("• None.");
+  for (const r of problems) out.push(`• ${labelFor(r.matcher)}, "${r.title}": ${r.explanation}`);
+  out.push("", "MORE", `• ${moreHint}`);
+  return out.join("\n");
+}
