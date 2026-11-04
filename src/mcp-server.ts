@@ -13,42 +13,50 @@ import { runScoreboard } from "./run.js";
 import { CATEGORIES } from "./scorer.js";
 import { loadDecoys } from "./decoys.js";
 import { befriend, renderText, renderSummary } from "./report.js";
+import { toView } from "./report-view.js";
+import { describe, toolMeta, resultMeta, type About, type Preset } from "./tool-meta.js";
 
 /** Repo root, so the server works whatever directory the MCP client starts it from. */
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..", "..");
 const set = loadDecoys(`${ROOT}/decoys/decoys.json`);
 const FREE = MATCHER_INFO.filter((m) => !m.costsMoney);
-const MATCHER_IDS = FREE.map((m) => m.id) as [string, ...string[]];
-const CASE_IDS = set.cases.map((c) => c.id) as [string, ...string[]];
 
-const DESCRIPTION = [
-  "WHAT IT IS",
-  "• A test bench for HRex $member-match: does a matcher send someone's records to the wrong person?",
-  "",
-  "WHAT IT DOES",
-  `• Sends ${set.cases.length} synthetic test requests, each with a hidden trap, to up to ${FREE.length} matchers.`,
-  "• Checks every answer against a locked answer key.",
-  "• Tells you who got it right, who refused safely, and who sent records to the wrong person.",
-  "",
-  "SETTINGS (all optional)",
-  `• matchers: which matchers to test. Default: all ${FREE.length}.`,
-  `• cases: which test requests to run. Default: all ${set.cases.length}.`,
-  `• relaxed_confidence: 75 to 100. Default ${DEFAULT_RELAXED_CONFIDENCE}.`,
-  '• detail: "summary" (default) or "full".',
-  "",
-  "HOW TO USE",
-  "• Run it with no settings to see the result.",
-  '• Set detail to "full" to see every answer explained.',
-  "",
-  "MATCHERS",
-  ...FREE.map((m) => `• ${m.id}: ${m.short}`),
-  "",
-  "TEST REQUESTS",
-  ...set.cases.map((c) => `• ${c.id}: ${c.title}`),
-  "",
-  "SAFE TO RUN",
-  "• Synthetic data. Read-only. Free. Nothing leaves this machine.",
-].join("\n");
+export const ABOUT: About = {
+  whatItIs: ["A test bench for HRex $member-match: does a matcher send someone's records to the wrong person?"],
+  whatItDoes: [
+    `Sends ${set.cases.length} synthetic test requests, each with a hidden trap, to up to ${FREE.length} matchers.`,
+    "Checks every answer against a locked answer key.",
+    "Tells you who got it right, who refused safely, and who sent records to the wrong person.",
+  ],
+  howToUse: ["Run it with no settings to see the result.", 'Set detail to "full" to see every answer explained.'],
+  safeToRun: ["Synthetic data. Read-only. Free. Nothing leaves this machine."],
+};
+
+export const PRESETS: Preset[] = [
+  { id: "everything", label: "Run everything", args: {} },
+  { id: "borrowed-card", label: "Try: the borrowed card", args: { cases: ["D4-card-mixup"] } },
+  { id: "twins", label: "Try: the twins", args: { cases: ["D2-twins"] } },
+  { id: "father-son", label: "Try: father and son", args: { cases: ["D1-senior-junior"] } },
+  { id: "consent", label: "Try: the consent problems", args: { cases: ["D3-consent-expired", "D3b-consent-unsegmentable"] } },
+  { id: "stricter", label: "Try: a stricter relaxed matcher (90%)", args: { relaxed_confidence: 90 } },
+];
+
+const DESCRIPTION = describe(ABOUT, {
+  settings: [
+    `matchers: which matchers to test. Default: all ${FREE.length}.`,
+    `cases: which test requests to run. Default: all ${set.cases.length}.`,
+    `relaxed_confidence: 75 to 100. Default ${DEFAULT_RELAXED_CONFIDENCE}.`,
+    'detail: "summary" (default) or "full".',
+  ],
+  lists: [
+    { title: "MATCHERS", items: FREE.map((m) => `${m.id}: ${m.short}`) },
+    { title: "TEST REQUESTS", items: set.cases.map((c) => `${c.id}: ${c.title}`) },
+  ],
+});
+
+/** A choice list whose JSON Schema carries a plain title per value: anyOf [{ const, title }]. */
+const labelled = (items: { id: string; title: string }[]) =>
+  z.union(items.map((i) => z.literal(i.id).meta({ title: i.title })) as unknown as [z.ZodLiteral<string>, z.ZodLiteral<string>, ...z.ZodLiteral<string>[]]);
 
 const Category = z.enum(CATEGORIES);
 const outputSchema = {
@@ -75,17 +83,22 @@ export function createMcpServer(): McpServer {
       title: "Member-match decoy test",
       description: DESCRIPTION,
       inputSchema: {
-        matchers: z.array(z.enum(MATCHER_IDS)).optional()
+        matchers: z.array(labelled(FREE.map((m) => ({ id: m.id, title: m.label })))).optional()
+          .meta({ title: "Matchers to test", examples: [["id-first", "check-every-field"]] })
           .describe(`Which matchers to test. Leave empty for all ${FREE.length}.`),
-        cases: z.array(z.enum(CASE_IDS)).optional()
+        cases: z.array(labelled(set.cases.map((c) => ({ id: c.id, title: c.title })))).optional()
+          .meta({ title: "Test requests to run", examples: [["D4-card-mixup"]] })
           .describe(`Which test requests to run. Leave empty for all ${set.cases.length}.`),
         relaxed_confidence: z.number().int().min(75).max(100).optional()
+          .meta({ title: "Relaxed matcher confidence (%)", examples: [90] })
           .describe(`How sure (75 to 100%) the relaxed matcher must be to accept a look-alike. Default ${DEFAULT_RELAXED_CONFIDENCE}.`),
-        detail: z.enum(["summary", "full"]).optional()
+        detail: labelled([{ id: "summary", title: "Summary: the result and the problems" }, { id: "full", title: "Full: every answer, explained" }]).optional()
+          .meta({ title: "How much to show" })
           .describe('"summary" (default): the result and the problems. "full": every answer, explained.'),
       },
       outputSchema,
       annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false },
+      _meta: toolMeta({ about: ABOUT, presets: PRESETS, cost: { free: true }, form: { advanced: ["relaxed_confidence", "detail"] } }),
     },
     async ({ matchers, cases, relaxed_confidence, detail }) => {
       const env = relaxed_confidence === undefined ? {} : { RELAXED_CONFIDENCE: String(relaxed_confidence) };
@@ -93,7 +106,7 @@ export function createMcpServer(): McpServer {
       const chosen = matchers?.length ? all.filter((m) => matchers.includes(m.name)) : all;
       const sb = befriend(await runScoreboard({ matchers: chosen, cases, dir: ROOT }), set);
       const text = detail === "full" ? renderText(sb) : renderSummary(sb);
-      return { content: [{ type: "text", text }], structuredContent: { ...sb } };
+      return { content: [{ type: "text", text }], structuredContent: { ...sb }, _meta: resultMeta(toView(sb)) };
     },
   );
   return server;

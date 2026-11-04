@@ -67,3 +67,29 @@ test("mcp: summary by default, every answer with detail=full", async () => {
   assert.match(full.content[0].text, /THE DECOYS/);
   assert.ok(short.content[0].text.split("\n").length < 25);
 });
+
+test("mcp: every input has a plain title; choices carry titles", async () => {
+  const { tools } = await client.listTools();
+  const props = (tools[0].inputSchema as any).properties;
+  for (const [k, v] of Object.entries<any>(props)) {
+    assert.ok(v.title, `${k} has no title`);
+    const choices = v.items?.anyOf ?? v.anyOf;
+    if (choices) for (const c of choices) assert.ok(c.const && c.title, `${k}: choice without a title`);
+  }
+});
+
+test("mcp: tool _meta declares about, free cost, form hints and presets that run", async () => {
+  const { tools } = await client.listTools();
+  const meta: any = tools[0]._meta;
+  assert.ok(meta["com.imonfhir/about"].whatItIs.length);
+  assert.deepEqual(meta["com.imonfhir/cost"], { free: true });
+  assert.deepEqual(meta["com.imonfhir/form"].advanced, ["relaxed_confidence", "detail"]);
+  const presets = meta["com.imonfhir/presets"];
+  assert.ok(presets.some((p: any) => p.label === "Try: the borrowed card"));
+  const { checkView } = await import("../src/ui/view.js");
+  for (const p of presets) {
+    const r: any = await client.callTool({ name: "score_member_match", arguments: p.args });
+    assert.notEqual(r.isError, true, `${p.id}: ${JSON.stringify(r.content)}`);
+    assert.deepEqual(checkView(r._meta?.["com.imonfhir/view"]), [], p.id);
+  }
+});

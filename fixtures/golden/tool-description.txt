@@ -1,0 +1,34 @@
+WHAT IT IS
+• A test bench for HRex $member-match: does a matcher send someone's records to the wrong person?
+
+WHAT IT DOES
+• Sends 6 synthetic test requests, each with a hidden trap, to up to 4 matchers.
+• Checks every answer against a locked answer key.
+• Tells you who got it right, who refused safely, and who sent records to the wrong person.
+
+SETTINGS (all optional)
+• matchers: which matchers to test. Default: all 4.
+• cases: which test requests to run. Default: all 6.
+• relaxed_confidence: 75 to 100. Default 85.
+• detail: "summary" (default) or "full".
+
+HOW TO USE
+• Run it with no settings to see the result.
+• Set detail to "full" to see every answer explained.
+
+MATCHERS
+• identity-strict: Nick's matcher (C-057); accepts look-alikes only at 90%+.
+• identity-relaxed: Same matcher; accepts look-alikes at a level you set.
+• id-first: Trusts the ID on the card first.
+• check-every-field: ID, name, birth date and gender must all agree.
+
+TEST REQUESTS
+• D0-control: Control: clean card, clean demographics
+• D1-senior-junior: Senior and Junior on one card
+• D2-twins: Twins on one policy, initial only
+• D3-consent-expired: Right person, consent the server can't honour
+• D3b-consent-unsegmentable: Right person, consent limited to non-sensitive data
+• D4-card-mixup: John's demographics, Jon's card
+
+SAFE TO RUN
+• Synthetic data. Read-only. Free. Nothing leaves this machine.
