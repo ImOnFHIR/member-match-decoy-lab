@@ -15,3 +15,18 @@ Renames (2026-11-04, Nick): c057 → identity-strict, c057-tuned → identity-re
 Completed: 7 live (three AI versions; README "First AI run"); readability pass 2 (Nick: "too much narrative"): MCP description in labelled bullet sections, `detail` setting (summary default / full), `npm run score` short by default (`--full`), page summary-first with collapsible sections, published privately at https://claude.ai/artifact/DRHFnABDm7uP7Mk5EQiUVF.
 AI finding: Sonnet 5.5 misreads the HRex consent codes (#regular / #sensitive). With rules 3/6, with rules + definitions 5/6, no rules 5/6. No AI version sent records to the wrong person. Verified #regular/#sensitive meanings in the HRex source (StructureDefinition-hrex-consent-notes.md).
 Deviation: added a third AI version (ai-with-definitions), at Nick's request.
+
+## 2026-11-04 session (UI plan, phase 1)
+Completed (plan: ~/.claude/plans/all-right-so-yes-delightful-reef.md):
+- tool contract + ToolView v1 (87ee8d5)
+- Node-free browser core, vendor bundle, recorded AI run (ff2c4d9)
+- shared renderer/form + dev console with security tests (cccda93)
+Checked in Chrome: home page, tool page, "Try: the borrowed card" result, technical drawer.
+NOT checked: phone width. The window wouldn't resize below desktop; only the CSS is tested.
+Planning-agent findings for the imonfhir page:
+- MASTER_PLAN_V2 §6 bans new tools, so it needs Nick's amendment.
+- imonfhir publicly doesn't ship name scorers, so the page presents matchers as test subjects.
+- Use the vendored browser bundle (no API route).
+- Sibling tools get no workbench pages (Validator and Compare already exist).
+Remaining: phase 0 Claude Desktop spike; phase 2 imonfhir handoff (blocked on Nick's 4 answers); phase 3 MCP App; phase 4 sibling contract + split; tasks 10–11.
+Tests: 186/186. Spend: $0.23 of $50.

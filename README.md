@@ -85,6 +85,20 @@ npm run leak:check     # leak guard; needs a banlist outside this repo (LEAK_GUA
 - [src/matchers/c057/PROVENANCE.md](src/matchers/c057/PROVENANCE.md): where the identity matcher comes from and what changed
 - [docs/SPEC_NOTES.md](docs/SPEC_NOTES.md): what building against HRex turned up
 
+## Dev console (replaces the MCP Inspector for building tools)
+
+```sh
+npm run console    # prints a local link: http://127.0.0.1:4317/#token=…
+```
+
+- **One full-width page per tool:** what it is, what it does and how to use it; example buttons ("Try: the borrowed card"); a plain form; Run. After a run, the result comes first and the settings fold into one line.
+- **Technical details** (bottom right): the raw request and response, the tool definition, the server log, and the matching Inspector command.
+- **Safe by default:**
+  - local only, with a per-launch link
+  - runs only read-only tools; asks before any tool that may cost money
+  - never passes API keys to the servers it starts
+- **More servers:** add them in `console.local.json` (gitignored), same shape as `console.config.json`.
+
 ## Use it from an MCP client
 
 `node dist/mcp.js` (after `npm run build`) is an MCP server with one read-only tool, **`score_member_match`** ("Test member-match matchers against look-alike decoys"). It takes three optional settings:
