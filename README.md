@@ -46,6 +46,7 @@ npm run validate:fhir  # validate the requests against HRex 1.2.0
 npm run serve          # local $member-match endpoint on 127.0.0.1:8650
 npm run manifest:check # ground truth is digest-locked and stable
 npm run score          # scoreboard: every matcher x every decoy (add --llm / --llm-norules)
+npm run build && npx @modelcontextprotocol/inspector node dist/mcp.js   # MCP: one read-only tool, score_member_match
 npm run spend:check    # LLM spend vs the $50/month ceiling; SMS alert configured?
 npm run llm:try        # live LLM run (needs ANTHROPIC_API_KEY and the SMS alert)
 npm run leak:check     # leak guard; needs a banlist outside this repo (LEAK_GUARD_CONFIG)
@@ -54,6 +55,16 @@ npm run leak:check     # leak guard; needs a banlist outside this repo (LEAK_GUA
 - [DECOYS.md](DECOYS.md): the traps and their correct answers
 - [src/matchers/c057/PROVENANCE.md](src/matchers/c057/PROVENANCE.md): where matcher A comes from and what changed
 - [docs/SPEC_NOTES.md](docs/SPEC_NOTES.md): what building against HRex turned up
+
+## MCP tool
+
+`node dist/mcp.js` is a stdio MCP server with one read-only tool, `score_member_match`. It takes optional `matchers`, `cases` and `c057AutoConfirm` and returns the scoreboard as structured content plus a text table. It runs only the rule-based matchers: the LLM isn't exposed, so a tool call can never spend money. It makes no network calls beyond 127.0.0.1.
+
+Claude Code config example:
+
+```json
+{ "mcpServers": { "member-match-decoy-lab": { "command": "node", "args": ["/path/to/member-match-decoy-lab/dist/mcp.js"] } } }
+```
 
 ## Licence
 
