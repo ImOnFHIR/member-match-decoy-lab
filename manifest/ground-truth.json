@@ -12,6 +12,7 @@
       "outcome": "match",
       "member": "person-0001",
       "memberIdentifier": "SYN-MEM-1001-01",
+      "subjectMemberId": "SYN-MEM-1001-01",
       "requestSha256": "ec5c1b44b23a3549504d155f5880f2fa4693433e2a256448fb164d780813aa56"
     },
     {
@@ -20,6 +21,7 @@
       "outcome": "match",
       "member": "lab-0102",
       "memberIdentifier": "SYN-MEM-2001-02",
+      "subjectMemberId": "SYN-MEM-2001-02",
       "requestSha256": "01d24ca832e48a326f2f66448a1eb839087f8c6fdfa877062d49c21a9402135d"
     },
     {
@@ -28,6 +30,7 @@
       "outcome": "multiple-422",
       "member": null,
       "memberIdentifier": null,
+      "subjectMemberId": "SYN-MEM-2001-03",
       "requestSha256": "8fbfc5a2f4ead909e6c46fc9049f4f4ad14edb861653ace827dbb5d8688c443d"
     },
     {
@@ -36,6 +39,7 @@
       "outcome": "consent-422",
       "member": null,
       "memberIdentifier": null,
+      "subjectMemberId": "SYN-MEM-1001-01",
       "requestSha256": "8fb1b7bcd6ac62af3c3ce6bbee4ac85ec4076d5439416c5ce9f5193070981070"
     },
     {
@@ -44,6 +48,7 @@
       "outcome": "consent-422",
       "member": null,
       "memberIdentifier": null,
+      "subjectMemberId": "SYN-MEM-1001-01",
       "requestSha256": "5031a5698ca406cd5324cf276db2cfe3c106d04c6bbae439d72c05d9134ecf46"
     },
     {
@@ -52,6 +57,7 @@
       "outcome": "no-match-422",
       "member": null,
       "memberIdentifier": null,
+      "subjectMemberId": "SYN-MEM-1001-01",
       "requestSha256": "14c4cd0c5c0d7030432bb95279a08d68f9e10fcb6edd0d01001185b760e5483d"
     }
   ]

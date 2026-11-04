@@ -151,3 +151,18 @@ test("alert: Twilio request shape, and missing config is refused", async () => {
   const fail = (async () => new Response(JSON.stringify({ code: 21211, message: "bad To" }), { status: 400 })) as typeof fetch;
   await assert.rejects(twilioSender(env, fail).send("hi"), /HTTP 400 21211 bad To/);
 });
+
+test("matcher-llm: the no-rules variant drops only the HRex rule text", async () => {
+  const { SYSTEM_PROMPT_NO_RULES } = await import("../src/matchers/llm/index.js");
+  assert.doesNotMatch(SYSTEM_PROMPT_NO_RULES, /SHALL|HRex 1\.2\.0|422/);
+  assert.match(SYSTEM_PROMPT_NO_RULES, /\$member-match/);
+  assert.match(SYSTEM_PROMPT_NO_RULES, /"consent" if a Consent is provided/);
+  const dir = tmp();
+  const f = fake({ decision: "no-match", memberId: null, rationale: "x" });
+  const seen: string[] = [];
+  const client: LlmClient = { call: async (m, sys, u, mt) => { seen.push(sys); return f.client.call(m, sys, u, mt); } };
+  const m = llmMatcher({ client, spend: guard(dir), rules: false, decisionLogPath: join(dir, "d.jsonl") });
+  assert.equal(m.name, "llm-norules");
+  await handle({ matchers: [m], roster: roster(set), consent: payer }, "llm-norules", fixture("D0-control"));
+  assert.equal(seen[0], SYSTEM_PROMPT_NO_RULES);
+});

@@ -13,7 +13,7 @@ import { twilioSender } from "../alert.js";
 
 export const DEFAULT_TUNED_AUTO_CONFIRM = 0.85;
 
-export interface BuildOptions { llm?: boolean; llmClient?: LlmClient; spend?: SpendGuard }
+export interface BuildOptions { llm?: boolean; llmNoRules?: boolean; llmClient?: LlmClient; spend?: SpendGuard }
 
 export function buildMatchers(env: Record<string, string | undefined> = process.env, o: BuildOptions = {}): Matcher[] {
   const raw = env.C057_AUTO_CONFIRM;
@@ -25,6 +25,8 @@ export function buildMatchers(env: Record<string, string | undefined> = process.
     baselineMatcher("tiered"),
     baselineMatcher("strict"),
   ];
-  if (o.llm) ms.push(llmMatcher({ model: env.LLM_MODEL, client: o.llmClient, spend: o.spend ?? new SpendGuard({ alert: twilioSender(env) }) }));
+  const spend = o.llm || o.llmNoRules ? o.spend ?? new SpendGuard({ alert: twilioSender(env) }) : undefined;
+  if (o.llm) ms.push(llmMatcher({ model: env.LLM_MODEL, client: o.llmClient, spend: spend! }));
+  if (o.llmNoRules) ms.push(llmMatcher({ model: env.LLM_MODEL, client: o.llmClient, spend: spend!, rules: false }));
   return ms;
 }

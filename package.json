@@ -17,7 +17,9 @@
     "manifest:check": "npm run -s build && node scripts/manifest.mjs check",
     "serve": "npm run -s build && node dist/src/serve.js",
     "spend:check": "npm run -s build && node dist/src/spend-cli.js",
-    "llm:try": "npm run -s build && node dist/src/llm-try.js"
+    "llm:try": "npm run -s build && node dist/src/llm-try.js",
+    "score": "npm run -s build && node dist/src/score-cli.js",
+    "golden:update": "npm run -s build && node scripts/golden-update.mjs"
   },
   "license": "Apache-2.0",
   "devDependencies": {

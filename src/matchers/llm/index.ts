@@ -30,6 +30,7 @@ export const LlmDecision = z.object({
 });
 export type LlmDecision = z.infer<typeof LlmDecision>;
 
+const RULES_START = "The HRex rules you must apply";
 export const SYSTEM_PROMPT = `You adjudicate Da Vinci HRex $member-match requests for a health plan (the "target payer"). All data is synthetic.
 
 You receive the request (a FHIR Parameters resource), the target payer's member roster, and facts about the target payer. Decide what the payer should answer.
@@ -49,6 +50,17 @@ Answer with:
 - "multiple-matches" if more than one member fits and you cannot tell them apart;
 - "consent" if a Consent is provided and the payer cannot comply with it;
 - "review-required" if the data conflicts in a way a human must resolve.`;
+
+/**
+ * The same prompt with the HRex rule text removed (Nick, 2026-11-03: "run once to see"). The
+ * job description and the answer options stay, so only the spec knowledge is taken away.
+ */
+export const SYSTEM_PROMPT_NO_RULES = (() => {
+  const start = SYSTEM_PROMPT.indexOf(RULES_START);
+  const end = SYSTEM_PROMPT.indexOf("Returning the wrong member");
+  if (start < 0 || end < 0) throw new Error("prompt markers moved");
+  return SYSTEM_PROMPT.slice(0, start) + SYSTEM_PROMPT.slice(end);
+})();
 
 export interface LlmCallResult { parsed: LlmDecision | null; usage: Usage; model: string; stopReason: string | null }
 export interface LlmClient { call(model: string, system: string, user: string, maxTokens: number): Promise<LlmCallResult> }
@@ -84,6 +96,8 @@ export interface LlmMatcherOptions {
   spend: SpendGuard;
   decisionLogPath?: string;
   name?: string;
+  /** false: the prompt has no HRex rule text (the "llm-norules" variant). Default true. */
+  rules?: boolean;
 }
 
 export class LlmError extends Error {}
@@ -93,16 +107,18 @@ export function llmMatcher(o: LlmMatcherOptions): Matcher {
   if (!PRICES[model]) throw new Error(`LLM_MODEL ${model} has no price in src/spend.ts; refusing to run an unpriced model`);
   let client = o.client;
   const logPath = o.decisionLogPath ?? ".runs/llm-decisions.jsonl";
+  const system = o.rules === false ? SYSTEM_PROMPT_NO_RULES : SYSTEM_PROMPT;
+  const name = o.name ?? (o.rules === false ? "llm-norules" : "llm");
   return {
-    name: o.name ?? "llm",
+    name,
     async decide(req, roster, payer): Promise<Decision> {
       if (!req.raw) throw new LlmError("request has no raw Parameters");
       const user = userPrompt(req, roster, payer);
-      await o.spend.beforeCall(worstCaseUsd(model, SYSTEM_PROMPT.length + user.length, MAX_TOKENS));
+      await o.spend.beforeCall(worstCaseUsd(model, system.length + user.length, MAX_TOKENS));
       client ??= anthropicClient();
-      const r = await client.call(model, SYSTEM_PROMPT, user, MAX_TOKENS);
-      const usd = await o.spend.afterCall(model, r.usage, `llm:${(req.raw as any)?.id ?? "request"}`, r.model);
-      const record = { at: new Date().toISOString(), request: (req.raw as any)?.id, model, servedBy: r.model, stopReason: r.stopReason, usd, decision: r.parsed };
+      const r = await client.call(model, system, user, MAX_TOKENS);
+      const usd = await o.spend.afterCall(model, r.usage, `${name}:${(req.raw as any)?.id ?? "request"}`, r.model);
+      const record = { at: new Date().toISOString(), matcher: name, request: (req.raw as any)?.id, model, servedBy: r.model, stopReason: r.stopReason, usd, decision: r.parsed };
       mkdirSync(logPath.replace(/\/[^/]+$/, ""), { recursive: true });
       appendFileSync(logPath, JSON.stringify(record) + "\n");
 

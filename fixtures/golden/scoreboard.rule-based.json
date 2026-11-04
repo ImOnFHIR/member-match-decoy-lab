@@ -1,0 +1,307 @@
+{
+  "manifestDigest": "afd4a0787ca3976f425dba1e1fcd78cf1964d62249a0ddab09ffc14b5750dc62",
+  "matchers": [
+    {
+      "matcher": "c057",
+      "counts": {
+        "true-match": 1,
+        "correct-no-match": 1,
+        "correct-multiple": 1,
+        "consent-constrained": 2,
+        "decoy-confusion": 0,
+        "consent-ignored": 0,
+        "missed-match": 1,
+        "error": 0
+      },
+      "correct": 5,
+      "total": 6
+    },
+    {
+      "matcher": "c057-tuned",
+      "counts": {
+        "true-match": 2,
+        "correct-no-match": 1,
+        "correct-multiple": 1,
+        "consent-constrained": 2,
+        "decoy-confusion": 0,
+        "consent-ignored": 0,
+        "missed-match": 0,
+        "error": 0
+      },
+      "correct": 6,
+      "total": 6
+    },
+    {
+      "matcher": "baseline",
+      "counts": {
+        "true-match": 2,
+        "correct-no-match": 0,
+        "correct-multiple": 1,
+        "consent-constrained": 2,
+        "decoy-confusion": 1,
+        "consent-ignored": 0,
+        "missed-match": 0,
+        "error": 0
+      },
+      "correct": 5,
+      "total": 6
+    },
+    {
+      "matcher": "baseline-strict",
+      "counts": {
+        "true-match": 2,
+        "correct-no-match": 1,
+        "correct-multiple": 1,
+        "consent-constrained": 2,
+        "decoy-confusion": 0,
+        "consent-ignored": 0,
+        "missed-match": 0,
+        "error": 0
+      },
+      "correct": 6,
+      "total": 6
+    }
+  ],
+  "rows": [
+    {
+      "matcher": "c057",
+      "case": "D0-control",
+      "expected": "match",
+      "expectedMember": "SYN-MEM-1001-01",
+      "reasonMismatch": false,
+      "wrongPerson": null,
+      "observed": "match SYN-MEM-1001-01",
+      "category": "true-match"
+    },
+    {
+      "matcher": "c057",
+      "case": "D1-senior-junior",
+      "expected": "match",
+      "expectedMember": "SYN-MEM-2001-02",
+      "reasonMismatch": false,
+      "wrongPerson": null,
+      "observed": "422 review-required",
+      "category": "missed-match"
+    },
+    {
+      "matcher": "c057",
+      "case": "D2-twins",
+      "expected": "multiple-422",
+      "expectedMember": null,
+      "reasonMismatch": false,
+      "wrongPerson": null,
+      "observed": "422 multiple-matches",
+      "category": "correct-multiple"
+    },
+    {
+      "matcher": "c057",
+      "case": "D3-consent-expired",
+      "expected": "consent-422",
+      "expectedMember": null,
+      "reasonMismatch": false,
+      "wrongPerson": null,
+      "observed": "422 consent",
+      "category": "consent-constrained"
+    },
+    {
+      "matcher": "c057",
+      "case": "D3b-consent-unsegmentable",
+      "expected": "consent-422",
+      "expectedMember": null,
+      "reasonMismatch": false,
+      "wrongPerson": null,
+      "observed": "422 consent",
+      "category": "consent-constrained"
+    },
+    {
+      "matcher": "c057",
+      "case": "D4-card-mixup",
+      "expected": "no-match-422",
+      "expectedMember": null,
+      "reasonMismatch": true,
+      "wrongPerson": null,
+      "observed": "422 review-required",
+      "category": "correct-no-match"
+    },
+    {
+      "matcher": "c057-tuned",
+      "case": "D0-control",
+      "expected": "match",
+      "expectedMember": "SYN-MEM-1001-01",
+      "reasonMismatch": false,
+      "wrongPerson": null,
+      "observed": "match SYN-MEM-1001-01",
+      "category": "true-match"
+    },
+    {
+      "matcher": "c057-tuned",
+      "case": "D1-senior-junior",
+      "expected": "match",
+      "expectedMember": "SYN-MEM-2001-02",
+      "reasonMismatch": false,
+      "wrongPerson": null,
+      "observed": "match SYN-MEM-2001-02",
+      "category": "true-match"
+    },
+    {
+      "matcher": "c057-tuned",
+      "case": "D2-twins",
+      "expected": "multiple-422",
+      "expectedMember": null,
+      "reasonMismatch": false,
+      "wrongPerson": null,
+      "observed": "422 multiple-matches",
+      "category": "correct-multiple"
+    },
+    {
+      "matcher": "c057-tuned",
+      "case": "D3-consent-expired",
+      "expected": "consent-422",
+      "expectedMember": null,
+      "reasonMismatch": false,
+      "wrongPerson": null,
+      "observed": "422 consent",
+      "category": "consent-constrained"
+    },
+    {
+      "matcher": "c057-tuned",
+      "case": "D3b-consent-unsegmentable",
+      "expected": "consent-422",
+      "expectedMember": null,
+      "reasonMismatch": false,
+      "wrongPerson": null,
+      "observed": "422 consent",
+      "category": "consent-constrained"
+    },
+    {
+      "matcher": "c057-tuned",
+      "case": "D4-card-mixup",
+      "expected": "no-match-422",
+      "expectedMember": null,
+      "reasonMismatch": true,
+      "wrongPerson": null,
+      "observed": "422 review-required",
+      "category": "correct-no-match"
+    },
+    {
+      "matcher": "baseline",
+      "case": "D0-control",
+      "expected": "match",
+      "expectedMember": "SYN-MEM-1001-01",
+      "reasonMismatch": false,
+      "wrongPerson": null,
+      "observed": "match SYN-MEM-1001-01",
+      "category": "true-match"
+    },
+    {
+      "matcher": "baseline",
+      "case": "D1-senior-junior",
+      "expected": "match",
+      "expectedMember": "SYN-MEM-2001-02",
+      "reasonMismatch": false,
+      "wrongPerson": null,
+      "observed": "match SYN-MEM-2001-02",
+      "category": "true-match"
+    },
+    {
+      "matcher": "baseline",
+      "case": "D2-twins",
+      "expected": "multiple-422",
+      "expectedMember": null,
+      "reasonMismatch": true,
+      "wrongPerson": null,
+      "observed": "422 no-match",
+      "category": "correct-multiple"
+    },
+    {
+      "matcher": "baseline",
+      "case": "D3-consent-expired",
+      "expected": "consent-422",
+      "expectedMember": null,
+      "reasonMismatch": false,
+      "wrongPerson": null,
+      "observed": "422 consent",
+      "category": "consent-constrained"
+    },
+    {
+      "matcher": "baseline",
+      "case": "D3b-consent-unsegmentable",
+      "expected": "consent-422",
+      "expectedMember": null,
+      "reasonMismatch": false,
+      "wrongPerson": null,
+      "observed": "422 consent",
+      "category": "consent-constrained"
+    },
+    {
+      "matcher": "baseline",
+      "case": "D4-card-mixup",
+      "expected": "no-match-422",
+      "expectedMember": null,
+      "reasonMismatch": false,
+      "wrongPerson": "SYN-MEM-1002-01",
+      "observed": "match SYN-MEM-1002-01",
+      "category": "decoy-confusion"
+    },
+    {
+      "matcher": "baseline-strict",
+      "case": "D0-control",
+      "expected": "match",
+      "expectedMember": "SYN-MEM-1001-01",
+      "reasonMismatch": false,
+      "wrongPerson": null,
+      "observed": "match SYN-MEM-1001-01",
+      "category": "true-match"
+    },
+    {
+      "matcher": "baseline-strict",
+      "case": "D1-senior-junior",
+      "expected": "match",
+      "expectedMember": "SYN-MEM-2001-02",
+      "reasonMismatch": false,
+      "wrongPerson": null,
+      "observed": "match SYN-MEM-2001-02",
+      "category": "true-match"
+    },
+    {
+      "matcher": "baseline-strict",
+      "case": "D2-twins",
+      "expected": "multiple-422",
+      "expectedMember": null,
+      "reasonMismatch": true,
+      "wrongPerson": null,
+      "observed": "422 no-match",
+      "category": "correct-multiple"
+    },
+    {
+      "matcher": "baseline-strict",
+      "case": "D3-consent-expired",
+      "expected": "consent-422",
+      "expectedMember": null,
+      "reasonMismatch": false,
+      "wrongPerson": null,
+      "observed": "422 consent",
+      "category": "consent-constrained"
+    },
+    {
+      "matcher": "baseline-strict",
+      "case": "D3b-consent-unsegmentable",
+      "expected": "consent-422",
+      "expectedMember": null,
+      "reasonMismatch": false,
+      "wrongPerson": null,
+      "observed": "422 consent",
+      "category": "consent-constrained"
+    },
+    {
+      "matcher": "baseline-strict",
+      "case": "D4-card-mixup",
+      "expected": "no-match-422",
+      "expectedMember": null,
+      "reasonMismatch": false,
+      "wrongPerson": null,
+      "observed": "422 no-match",
+      "category": "correct-no-match"
+    }
+  ]
+}

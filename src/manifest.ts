@@ -25,6 +25,8 @@ export interface ManifestEntry {
   outcome: string;
   member: string | null;
   memberIdentifier: string | null;
+  /** God view: the member the request is really about, even when the right answer is a 422. */
+  subjectMemberId: string;
   requestSha256: string;
 }
 export interface Manifest {
@@ -48,10 +50,17 @@ export function buildManifest(set: DecoySet): Manifest {
         outcome: c.expected.outcome,
         member: c.expected.member ?? null,
         memberIdentifier: c.expected.memberIdentifier ?? null,
+        subjectMemberId: subjectOf(set, c.request.patient),
         requestSha256: sha256(canonical(toMemberMatchParameters(set, c))),
       }))
       .sort((a, b) => a.case.localeCompare(b.case)),
   };
+}
+
+function subjectOf(set: DecoySet, personId: string): string {
+  const covs = set.coverages.filter((c) => c.beneficiary === personId);
+  if (covs.length !== 1) throw new Error(`${personId}: expected exactly one coverage, found ${covs.length}`);
+  return covs[0].memberId;
 }
 
 export const manifestDigest = (m: Manifest) => sha256(canonical(m));

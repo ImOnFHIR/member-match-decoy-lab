@@ -10,6 +10,18 @@ A lab for Da Vinci HRex `$member-match`. Each synthetic request carries a plante
 
 Status: v0 under construction (target 2026-12-02). Progress is in [REMAINING_WORK.md](REMAINING_WORK.md).
 
+## Scoreboard (rule-based matchers, `npm run score`)
+
+```
+matcher          true match  no-match ✓  multiple ✓   consent ✓ DECOY CONF.   consent ✗      missed   score
+c057                      1           1           1           2           ·           ·           1     5/6
+c057-tuned                2           1           1           2           ·           ·           ·     6/6
+baseline                  2           ·           1           2           1           ·           ·     5/6
+baseline-strict           2           1           1           2           ·           ·           ·     6/6
+```
+
+`baseline` trusts the member ID and returns Jon's records for John's request (D4): that's the decoy confusion. Any 422 where a 422 is due counts as correct; the run lists refusals whose reason differs.
+
 ## Matchers
 
 | Name | What it is |
@@ -33,6 +45,7 @@ npm run validator:get  # one-time: fetch the HL7 validator (Java 17+)
 npm run validate:fhir  # validate the requests against HRex 1.2.0
 npm run serve          # local $member-match endpoint on 127.0.0.1:8650
 npm run manifest:check # ground truth is digest-locked and stable
+npm run score          # scoreboard: every matcher x every decoy (add --llm / --llm-norules)
 npm run spend:check    # LLM spend vs the $50/month ceiling; SMS alert configured?
 npm run llm:try        # live LLM run (needs ANTHROPIC_API_KEY and the SMS alert)
 npm run leak:check     # leak guard; needs a banlist outside this repo (LEAK_GUARD_CONFIG)
