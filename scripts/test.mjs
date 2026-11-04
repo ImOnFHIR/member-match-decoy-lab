@@ -5,6 +5,9 @@ import { readdirSync } from "node:fs";
 import { join } from "node:path";
 
 execFileSync("npx", ["tsc", "-p", "."], { stdio: "inherit" });
+// The console page and its browser code: typecheck with DOM types, then build the one-file page.
+execFileSync("npx", ["tsc", "-p", "tsconfig.ui.json"], { stdio: "inherit" });
+execFileSync(process.execPath, ["scripts/ui-build.mjs"], { stdio: "pipe" });
 
 const filters = process.argv.slice(2);
 const dir = "dist/test";

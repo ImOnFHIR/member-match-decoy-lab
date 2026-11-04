@@ -21,7 +21,9 @@
     "score": "npm run -s build && node dist/src/score-cli.js",
     "golden:update": "npm run -s build && node scripts/golden-update.mjs",
     "report": "npm run -s build && node dist/src/report-cli.js",
-    "vendor:build": "npm run -s build && node scripts/vendor-build.mjs"
+    "vendor:build": "npm run -s build && node scripts/vendor-build.mjs",
+    "ui:build": "npm run -s build && tsc -p tsconfig.ui.json && node scripts/ui-build.mjs",
+    "console": "npm run -s ui:build && node dist/src/console/cli.js"
   },
   "license": "Apache-2.0",
   "devDependencies": {

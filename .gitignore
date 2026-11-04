@@ -7,3 +7,4 @@ dist/
 .tools/
 .spend/
 .runs/
+console.local.json

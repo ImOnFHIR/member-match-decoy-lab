@@ -1,0 +1,6 @@
+{
+  "$comment": "Servers the dev console starts. Relative paths only; put machine paths (e.g. ~/agent-vs-validator) in console.local.json, which is gitignored.",
+  "servers": [
+    { "id": "decoy-lab", "label": "Member-match decoy lab", "command": "node", "args": ["dist/mcp.js"], "cwd": "." }
+  ]
+}
