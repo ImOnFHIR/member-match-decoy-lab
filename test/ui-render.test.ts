@@ -98,7 +98,7 @@ test("form: picks the right widget for each input and labels every one", () => {
   assert.match(html, /<details class="f-advanced"><summary>More settings<\/summary>/);
   // every input has a label pointing at it
   for (const m of html.matchAll(/<(input|select|textarea)[^>]*id="([^"]+)"/g)) {
-    if (/-slider$/.test(m[2])) continue; // the slider is labelled by aria-label
+    if (m[2].endsWith("-slider")) continue; // the slider is labelled by aria-label
     assert.ok(html.includes(`for="${m[2]}"`), `no label for ${m[2]}`);
   }
 });

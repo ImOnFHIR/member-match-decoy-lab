@@ -144,7 +144,7 @@ export function renderText(f: FriendlyScoreboard): string {
       out.push(`  ${mark(r.category)} ${r.title}: ${r.explanation}`);
   }
   out.push("", "", "THE DECOYS");
-  for (const id of [...new Set(f.rows.map((r) => r.case))]) {
+  for (const id of new Set(f.rows.map((r) => r.case))) {
     const rows = f.rows.filter((r) => r.case === id);
     out.push(
       "",
