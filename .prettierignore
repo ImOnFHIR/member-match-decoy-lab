@@ -1,0 +1,14 @@
+# Prettier formats code only. Data, docs and anything hash-locked are left alone.
+node_modules/
+dist/
+.tools/
+.spend/
+.runs/
+manifest/
+fixtures/
+decoys/
+report/
+docs/
+*.md
+*.json
+*.html
