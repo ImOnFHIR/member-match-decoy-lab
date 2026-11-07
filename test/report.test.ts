@@ -13,13 +13,38 @@ const friendly = async () => befriend(await runScoreboard({ matchers: buildMatch
 
 test("report: headline names the matcher that sent records to the wrong person", async () => {
   const f = await friendly();
-  assert.equal(f.headline, "1 of 4 matchers sent someone's records to the wrong person: ID-first rules.");
+  assert.equal(
+    f.headline,
+    "1 of 4 matchers sent someone's records to the wrong person: ID-first rules.",
+  );
 });
 
 test("report: headline when nobody was fooled", () => {
-  const e = { case: "X", survivesIdMatch: false, outcome: "match", member: "p", memberIdentifier: "A", subjectMemberId: "A", requestSha256: "h" };
-  const row = scoreOne("check-every-field", e, { status: 200, body: { resourceType: "Parameters", parameter: [{ name: "MemberIdentifier", valueIdentifier: { type: { coding: [{ code: "UMB" }] }, value: "A" } }] } });
-  assert.equal(headline(tally([row], "d")), "None of the 1 matchers sent records to the wrong person.");
+  const e = {
+    case: "X",
+    survivesIdMatch: false,
+    outcome: "match",
+    member: "p",
+    memberIdentifier: "A",
+    subjectMemberId: "A",
+    requestSha256: "h",
+  };
+  const row = scoreOne("check-every-field", e, {
+    status: 200,
+    body: {
+      resourceType: "Parameters",
+      parameter: [
+        {
+          name: "MemberIdentifier",
+          valueIdentifier: { type: { coding: [{ code: "UMB" }] }, value: "A" },
+        },
+      ],
+    },
+  });
+  assert.equal(
+    headline(tally([row], "d")),
+    "None of the 1 matchers sent records to the wrong person.",
+  );
 });
 
 test("report: the wrong-person sentence uses the synthetic names", async () => {
@@ -40,20 +65,39 @@ test("report: every category has a plain label and meaning, and an explanation",
   const name = nameIndex(set);
   for (const c of CATEGORIES) {
     assert.ok(CATEGORY_INFO[c].label && CATEGORY_INFO[c].meaning, c);
-    const s = explain({ matcher: "m", case: "X", expected: "match", expectedMember: "SYN-MEM-1001-01", observed: c === "error" ? "error: HTTP 500" : "422 no-match", category: c, reasonMismatch: false, wrongPerson: "SYN-MEM-1002-01", subjectMemberId: "SYN-MEM-1001-01" }, name);
+    const s = explain(
+      {
+        matcher: "m",
+        case: "X",
+        expected: "match",
+        expectedMember: "SYN-MEM-1001-01",
+        observed: c === "error" ? "error: HTTP 500" : "422 no-match",
+        category: c,
+        reasonMismatch: false,
+        wrongPerson: "SYN-MEM-1002-01",
+        subjectMemberId: "SYN-MEM-1001-01",
+      },
+      name,
+    );
     assert.ok(s.length > 5 && !/undefined/.test(s), `${c}: ${s}`);
   }
 });
 
 test("report: text has no internal ids where a person reads it", async () => {
   const t = renderText(await friendly());
-  for (const internal of ["c057", "baseline", "decoy-confusion", "multiple-422", "review-required"]) assert.ok(!t.includes(internal), `text contains ${internal}`);
-  for (const m of MATCHER_INFO.filter((x) => !x.costsMoney)) assert.ok(t.includes(m.label), m.label);
+  for (const internal of ["c057", "baseline", "decoy-confusion", "multiple-422", "review-required"])
+    assert.ok(!t.includes(internal), `text contains ${internal}`);
+  for (const m of MATCHER_INFO.filter((x) => !x.costsMoney))
+    assert.ok(t.includes(m.label), m.label);
 });
 
 test("report page: committed report/scoreboard.html matches a fresh build", async () => {
   const fresh = htmlReport(await friendly(), set);
-  assert.equal(readFileSync("report/scoreboard.html", "utf8"), fresh, "run `npm run report` and commit");
+  assert.equal(
+    readFileSync("report/scoreboard.html", "utf8"),
+    fresh,
+    "run `npm run report` and commit",
+  );
 });
 
 test("report page: self-contained, banner present, no scripts", async () => {

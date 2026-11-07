@@ -92,7 +92,16 @@ main#main { padding-block: 1.5rem 4rem; padding-left: max(16px, env(safe-area-in
 }
 `;
 
-const out = await build({ entryPoints: ["src/ui/browser/console-main.ts"], bundle: true, format: "iife", platform: "browser", target: "es2022", write: false, minify: true, logLevel: "error" });
+const out = await build({
+  entryPoints: ["src/ui/browser/console-main.ts"],
+  bundle: true,
+  format: "iife",
+  platform: "browser",
+  target: "es2022",
+  write: false,
+  minify: true,
+  logLevel: "error",
+});
 const js = out.outputFiles[0].text.replace(/<\/script/gi, "<\\/script");
 const html = `<!doctype html>
 <html lang="en">
@@ -117,7 +126,16 @@ console.log(`dist/ui/console.html (${Math.round(html.length / 1024)} KB)`);
 
 // The in-Claude view (MCP Apps). One inlined file: the host's default CSP allows only inline
 // script and style, no network and no web fonts.
-const v = await build({ entryPoints: ["src/ui/browser/view-main.ts"], bundle: true, format: "esm", platform: "browser", target: "es2022", write: false, minify: true, logLevel: "error" });
+const v = await build({
+  entryPoints: ["src/ui/browser/view-main.ts"],
+  bundle: true,
+  format: "esm",
+  platform: "browser",
+  target: "es2022",
+  write: false,
+  minify: true,
+  logLevel: "error",
+});
 const vjs = v.outputFiles[0].text.replace(/<\/script/gi, "<\\/script");
 const viewHtml = `<!doctype html>
 <html lang="en">

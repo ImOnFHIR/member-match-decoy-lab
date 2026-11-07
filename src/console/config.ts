@@ -27,16 +27,35 @@ function parse(file: string, local: boolean): ServerConfig[] {
   if (!Array.isArray(raw.servers)) throw new ConfigError(`${file}: "servers" must be a list`);
   return raw.servers.map((s: any, i: number) => {
     const where = `${file} servers[${i}]`;
-    if (!/^[a-z0-9-]{1,40}$/.test(s?.id ?? "")) throw new ConfigError(`${where}: id must be lowercase letters, digits or dashes`);
-    if (typeof s.label !== "string" || !s.label) throw new ConfigError(`${where}: label is required`);
-    if (typeof s.command !== "string" || !s.command) throw new ConfigError(`${where}: command is required`);
+    if (!/^[a-z0-9-]{1,40}$/.test(s?.id ?? ""))
+      throw new ConfigError(`${where}: id must be lowercase letters, digits or dashes`);
+    if (typeof s.label !== "string" || !s.label)
+      throw new ConfigError(`${where}: label is required`);
+    if (typeof s.command !== "string" || !s.command)
+      throw new ConfigError(`${where}: command is required`);
     const args = s.args ?? [];
-    if (!Array.isArray(args) || args.some((a: unknown) => typeof a !== "string")) throw new ConfigError(`${where}: args must be a list of strings`);
+    if (!Array.isArray(args) || args.some((a: unknown) => typeof a !== "string"))
+      throw new ConfigError(`${where}: args must be a list of strings`);
     const cwdRaw = s.cwd ?? ".";
-    if (!local && isAbsolute(cwdRaw)) throw new ConfigError(`${where}: the committed config may use relative paths only (put machine paths in console.local.json)`);
+    if (!local && isAbsolute(cwdRaw))
+      throw new ConfigError(
+        `${where}: the committed config may use relative paths only (put machine paths in console.local.json)`,
+      );
     const env = s.env ?? [];
-    if (!Array.isArray(env) || env.some((e: unknown) => typeof e !== "string" || !/^[A-Z_][A-Z0-9_]*$/.test(e as string))) throw new ConfigError(`${where}: env must be a list of variable names`);
-    return { id: s.id, label: s.label, command: s.command === "node" ? process.execPath : s.command, args, cwd: resolve(dirname(file), cwdRaw), env, timeoutSeconds: Number(s.timeoutSeconds ?? 60) };
+    if (
+      !Array.isArray(env) ||
+      env.some((e: unknown) => typeof e !== "string" || !/^[A-Z_][A-Z0-9_]*$/.test(e as string))
+    )
+      throw new ConfigError(`${where}: env must be a list of variable names`);
+    return {
+      id: s.id,
+      label: s.label,
+      command: s.command === "node" ? process.execPath : s.command,
+      args,
+      cwd: resolve(dirname(file), cwdRaw),
+      env,
+      timeoutSeconds: Number(s.timeoutSeconds ?? 60),
+    };
   });
 }
 
@@ -46,6 +65,9 @@ export function loadConsoleConfig(dir = "."): ServerConfig[] {
   if (!existsSync(committed)) throw new ConfigError(`missing ${committed}`);
   const all = [...parse(committed, false), ...(existsSync(local) ? parse(local, true) : [])];
   const ids = new Set<string>();
-  for (const s of all) { if (ids.has(s.id)) throw new ConfigError(`server id "${s.id}" is used twice`); ids.add(s.id); }
+  for (const s of all) {
+    if (ids.has(s.id)) throw new ConfigError(`server id "${s.id}" is used twice`);
+    ids.add(s.id);
+  }
   return all;
 }

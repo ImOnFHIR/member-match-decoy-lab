@@ -6,7 +6,7 @@
 import type { DecoySet } from "./decoys.js";
 
 export interface Member {
-  memberId: string;          // the payer's unique member identifier (returned as UMB)
+  memberId: string; // the payer's unique member identifier (returned as UMB)
   subscriberId: string;
   relationship: string;
   given: string;
@@ -22,9 +22,14 @@ export function roster(set: Pick<DecoySet, "people" | "coverages">): Member[] {
     if (!p) throw new Error(`coverage ${c.id}: unknown beneficiary`);
     const [given, ...rest] = p.name.split(" ");
     return {
-      memberId: c.memberId, subscriberId: c.subscriberId, relationship: c.relationship,
-      given, family: rest.join(" "), ...(p.suffix ? { suffix: p.suffix } : {}),
-      birthDate: p.birthDate, gender: p.gender,
+      memberId: c.memberId,
+      subscriberId: c.subscriberId,
+      relationship: c.relationship,
+      given,
+      family: rest.join(" "),
+      ...(p.suffix ? { suffix: p.suffix } : {}),
+      birthDate: p.birthDate,
+      gender: p.gender,
     };
   });
 }

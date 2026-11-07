@@ -14,13 +14,36 @@ export * from "./info.js";
 import { relaxedConfidence } from "./info.js";
 import { buildFreeMatchers } from "./free.js";
 
-export interface BuildOptions { ai?: boolean; aiNoRules?: boolean; aiDefinitions?: boolean; llmClient?: LlmClient; spend?: SpendGuard }
+export interface BuildOptions {
+  ai?: boolean;
+  aiNoRules?: boolean;
+  aiDefinitions?: boolean;
+  llmClient?: LlmClient;
+  spend?: SpendGuard;
+}
 
-export function buildMatchers(env: Record<string, string | undefined> = process.env, o: BuildOptions = {}): Matcher[] {
+export function buildMatchers(
+  env: Record<string, string | undefined> = process.env,
+  o: BuildOptions = {},
+): Matcher[] {
   const ms: Matcher[] = buildFreeMatchers(relaxedConfidence(env));
-  const spend = o.ai || o.aiNoRules || o.aiDefinitions ? o.spend ?? new SpendGuard({ alert: twilioSender(env) }) : undefined;
+  const spend =
+    o.ai || o.aiNoRules || o.aiDefinitions
+      ? (o.spend ?? new SpendGuard({ alert: twilioSender(env) }))
+      : undefined;
   if (o.ai) ms.push(llmMatcher({ model: env.LLM_MODEL, client: o.llmClient, spend: spend! }));
-  if (o.aiDefinitions) ms.push(llmMatcher({ model: env.LLM_MODEL, client: o.llmClient, spend: spend!, prompt: "rules-and-definitions" }));
-  if (o.aiNoRules) ms.push(llmMatcher({ model: env.LLM_MODEL, client: o.llmClient, spend: spend!, prompt: "no-rules" }));
+  if (o.aiDefinitions)
+    ms.push(
+      llmMatcher({
+        model: env.LLM_MODEL,
+        client: o.llmClient,
+        spend: spend!,
+        prompt: "rules-and-definitions",
+      }),
+    );
+  if (o.aiNoRules)
+    ms.push(
+      llmMatcher({ model: env.LLM_MODEL, client: o.llmClient, spend: spend!, prompt: "no-rules" }),
+    );
   return ms;
 }

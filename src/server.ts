@@ -21,24 +21,38 @@ export function createEndpoint(opts: EndpointOptions): Server {
       res.end(JSON.stringify(body));
     };
     const route = ROUTE.exec(req.url ?? "");
-    if (req.method !== "POST" || !route) return send(404, refusal("bad-request", "POST /<matcher>/Patient/$member-match"));
+    if (req.method !== "POST" || !route)
+      return send(404, refusal("bad-request", "POST /<matcher>/Patient/$member-match"));
     const chunks: Buffer[] = [];
     let size = 0;
     req.on("data", (c: Buffer) => {
       size += c.length;
-      if (size > max) { send(413, refusal("bad-request", "body too large")); req.destroy(); return; }
+      if (size > max) {
+        send(413, refusal("bad-request", "body too large"));
+        req.destroy();
+        return;
+      }
       chunks.push(c);
     });
     req.on("end", async () => {
       if (res.headersSent) return;
       let body: unknown;
-      try { body = JSON.parse(Buffer.concat(chunks).toString("utf8")); } catch { return send(400, refusal("bad-request", "body is not JSON")); }
+      try {
+        body = JSON.parse(Buffer.concat(chunks).toString("utf8"));
+      } catch {
+        return send(400, refusal("bad-request", "body is not JSON"));
+      }
       try {
         const out = await handle(opts, route[1], body);
         opts.log?.(out.log);
         send(out.status, out.body);
       } catch (e) {
-        send(500, { resourceType: "OperationOutcome", issue: [{ severity: "fatal", code: "exception", diagnostics: String((e as Error).message) }] });
+        send(500, {
+          resourceType: "OperationOutcome",
+          issue: [
+            { severity: "fatal", code: "exception", diagnostics: String((e as Error).message) },
+          ],
+        });
       }
     });
   });

@@ -13,16 +13,26 @@ const known = (i) => KNOWN.find((k) => k.re.test(i.details?.text ?? i.diagnostic
 let bad = 0;
 let knownCount = 0;
 for (const oo of oos) {
-  const file = oo.extension?.find((x) => x.url.endsWith("operationoutcome-file"))?.valueString ?? "?";
+  const file =
+    oo.extension?.find((x) => x.url.endsWith("operationoutcome-file"))?.valueString ?? "?";
   const issues = oo.issue ?? [];
   const all = issues.filter((i) => i.severity === "error" || i.severity === "fatal");
   const errs = all.filter((i) => !known(i));
   knownCount += all.length - errs.length;
   const warns = issues.filter((i) => i.severity === "warning");
   bad += errs.length;
-  console.log(`${errs.length ? "✗" : "✓"} ${file.split("/").pop()}: ${errs.length} errors, ${all.length - errs.length} known, ${warns.length} warnings`);
-  if (process.env.VERBOSE) for (const i of warns) console.log(`    warning: ${i.details?.text ?? i.diagnostics}`);
-  for (const i of errs) console.log(`    ${i.severity}: ${i.details?.text ?? i.diagnostics} @ ${(i.expression ?? i.location ?? []).join(",")}`);
+  console.log(
+    `${errs.length ? "✗" : "✓"} ${file.split("/").pop()}: ${errs.length} errors, ${all.length - errs.length} known, ${warns.length} warnings`,
+  );
+  if (process.env.VERBOSE)
+    for (const i of warns) console.log(`    warning: ${i.details?.text ?? i.diagnostics}`);
+  for (const i of errs)
+    console.log(
+      `    ${i.severity}: ${i.details?.text ?? i.diagnostics} @ ${(i.expression ?? i.location ?? []).join(",")}`,
+    );
 }
-if (knownCount) console.log(`${knownCount} known false positive(s) allowed:\n${KNOWN.map((k) => "  - " + k.why).join("\n")}`);
+if (knownCount)
+  console.log(
+    `${knownCount} known false positive(s) allowed:\n${KNOWN.map((k) => "  - " + k.why).join("\n")}`,
+  );
 process.exit(bad ? 1 : 0);

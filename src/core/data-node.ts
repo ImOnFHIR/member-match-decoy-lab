@@ -11,7 +11,8 @@ export function loadCoreData(dir = "."): CoreData {
   const requests: Record<string, unknown> = {};
   for (const e of manifest.entries) {
     const r = JSON.parse(readFileSync(`${dir}/fixtures/requests/${e.case}.json`, "utf8"));
-    if (sha256(canonical(r)) !== e.requestSha256) throw new Error(`fixtures/requests/${e.case}.json differs from the locked request`);
+    if (sha256(canonical(r)) !== e.requestSha256)
+      throw new Error(`fixtures/requests/${e.case}.json differs from the locked request`);
     requests[e.case] = r;
   }
   return { decoys, manifest, requests, lockDigest: sha256(canonical(manifest)) };

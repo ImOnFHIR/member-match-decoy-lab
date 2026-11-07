@@ -25,8 +25,13 @@ const FALLBACK_MODELS = new Set(["claude-sonnet-5-5", "claude-opus-5-5", "claude
 
 export const LlmDecision = z.object({
   decision: z.enum(["match", "no-match", "multiple-matches", "consent", "review-required"]),
-  memberId: z.string().nullable().describe("The roster memberId when decision is match; otherwise null."),
-  rationale: z.string().describe("Two to five sentences: which fields agreed or conflicted, and why this decision."),
+  memberId: z
+    .string()
+    .nullable()
+    .describe("The roster memberId when decision is match; otherwise null."),
+  rationale: z
+    .string()
+    .describe("Two to five sentences: which fields agreed or conflicted, and why this decision."),
 });
 export type LlmDecision = z.infer<typeof LlmDecision>;
 
@@ -71,7 +76,10 @@ export const CONSENT_DEFINITIONS = `HRex consent policy codes (from the HRex Con
 - "http://hl7.org/fhir/us/davinci-hrex/StructureDefinition-hrex-consent.html#regular" - "Access is granted to all patient information that is not considered to be 'sensitive' according to U.S. state or federal regulation."
 - "http://hl7.org/fhir/us/davinci-hrex/StructureDefinition-hrex-consent.html#sensitive" - "Access is granted to all patient information, including that considered to be 'sensitive' according to U.S. state or federal regulation."`;
 
-export const SYSTEM_PROMPT_WITH_DEFINITIONS = SYSTEM_PROMPT.replace("Returning the wrong member", `${CONSENT_DEFINITIONS}\n\nReturning the wrong member`);
+export const SYSTEM_PROMPT_WITH_DEFINITIONS = SYSTEM_PROMPT.replace(
+  "Returning the wrong member",
+  `${CONSENT_DEFINITIONS}\n\nReturning the wrong member`,
+);
 
 /** Which prompt an AI matcher gets. */
 export type PromptMode = "rules" | "no-rules" | "rules-and-definitions";
@@ -81,8 +89,15 @@ const PROMPTS: Record<PromptMode, { system: string; name: string }> = {
   "rules-and-definitions": { system: SYSTEM_PROMPT_WITH_DEFINITIONS, name: "ai-with-definitions" },
 };
 
-export interface LlmCallResult { parsed: LlmDecision | null; usage: Usage; model: string; stopReason: string | null }
-export interface LlmClient { call(model: string, system: string, user: string, maxTokens: number): Promise<LlmCallResult> }
+export interface LlmCallResult {
+  parsed: LlmDecision | null;
+  usage: Usage;
+  model: string;
+  stopReason: string | null;
+}
+export interface LlmClient {
+  call(model: string, system: string, user: string, maxTokens: number): Promise<LlmCallResult>;
+}
 
 export function anthropicClient(client = new Anthropic()): LlmClient {
   return {
@@ -93,15 +108,29 @@ export function anthropicClient(client = new Anthropic()): LlmClient {
         max_tokens: maxTokens,
         system,
         messages: [{ role: "user", content: user }],
-        output_config: { format: betaZodOutputFormat(LlmDecision), ...(process.env.LLM_EFFORT ? { effort: process.env.LLM_EFFORT as any } : {}) },
-        ...(fallback ? { betas: ["server-side-fallback-2026-07-01"], fallbacks: "default" as const } : {}),
+        output_config: {
+          format: betaZodOutputFormat(LlmDecision),
+          ...(process.env.LLM_EFFORT ? { effort: process.env.LLM_EFFORT as any } : {}),
+        },
+        ...(fallback
+          ? { betas: ["server-side-fallback-2026-07-01"], fallbacks: "default" as const }
+          : {}),
       });
-      return { parsed: res.parsed_output ?? null, usage: res.usage, model: res.model, stopReason: res.stop_reason };
+      return {
+        parsed: res.parsed_output ?? null,
+        usage: res.usage,
+        model: res.model,
+        stopReason: res.stop_reason,
+      };
     },
   };
 }
 
-export function userPrompt(req: MatchRequest, roster: Member[], payer: { asOf: string; canSegmentSensitive: boolean }): string {
+export function userPrompt(
+  req: MatchRequest,
+  roster: Member[],
+  payer: { asOf: string; canSegmentSensitive: boolean },
+): string {
   return [
     `Target payer facts:\n${JSON.stringify({ today: payer.asOf, canSegmentSensitiveData: payer.canSegmentSensitive }, null, 2)}`,
     `Target payer roster (${roster.length} members):\n${JSON.stringify(roster, null, 2)}`,
@@ -123,7 +152,10 @@ export class LlmError extends Error {}
 
 export function llmMatcher(o: LlmMatcherOptions): Matcher {
   const model = o.model ?? process.env.LLM_MODEL ?? DEFAULT_LLM_MODEL;
-  if (!PRICES[model]) throw new Error(`LLM_MODEL ${model} has no price in src/spend.ts; refusing to run an unpriced model`);
+  if (!PRICES[model])
+    throw new Error(
+      `LLM_MODEL ${model} has no price in src/spend.ts; refusing to run an unpriced model`,
+    );
   let client = o.client;
   const logPath = o.decisionLogPath ?? ".runs/llm-decisions.jsonl";
   const { system, name: defaultName } = PROMPTS[o.prompt ?? "rules"];
@@ -136,8 +168,22 @@ export function llmMatcher(o: LlmMatcherOptions): Matcher {
       await o.spend.beforeCall(worstCaseUsd(model, system.length + user.length, MAX_TOKENS));
       client ??= anthropicClient();
       const r = await client.call(model, system, user, MAX_TOKENS);
-      const usd = await o.spend.afterCall(model, r.usage, `${name}:${(req.raw as any)?.id ?? "request"}`, r.model);
-      const record = { at: new Date().toISOString(), matcher: name, request: (req.raw as any)?.id, model, servedBy: r.model, stopReason: r.stopReason, usd, decision: r.parsed };
+      const usd = await o.spend.afterCall(
+        model,
+        r.usage,
+        `${name}:${(req.raw as any)?.id ?? "request"}`,
+        r.model,
+      );
+      const record = {
+        at: new Date().toISOString(),
+        matcher: name,
+        request: (req.raw as any)?.id,
+        model,
+        servedBy: r.model,
+        stopReason: r.stopReason,
+        usd,
+        decision: r.parsed,
+      };
       mkdirSync(logPath.replace(/\/[^/]+$/, ""), { recursive: true });
       appendFileSync(logPath, JSON.stringify(record) + "\n");
 
@@ -147,7 +193,9 @@ export function llmMatcher(o: LlmMatcherOptions): Matcher {
       const why = `${model}${served}: ${r.parsed.rationale}`;
       if (r.parsed.decision === "match") {
         if (!r.parsed.memberId || !roster.some((m) => m.memberId === r.parsed!.memberId))
-          throw new LlmError(`model returned match with a memberId not on the roster: ${r.parsed.memberId}`);
+          throw new LlmError(
+            `model returned match with a memberId not on the roster: ${r.parsed.memberId}`,
+          );
         return { kind: "match", memberId: r.parsed.memberId, rationale: why, evidence: { usd } };
       }
       return { kind: "refuse", reason: r.parsed.decision, rationale: why, evidence: { usd } };

@@ -5,7 +5,12 @@ import type { ConsentContext } from "../consent.js";
 
 export type Decision =
   | { kind: "match"; memberId: string; rationale: string; evidence?: unknown }
-  | { kind: "refuse"; reason: Exclude<Reason, "bad-request">; rationale: string; evidence?: unknown };
+  | {
+      kind: "refuse";
+      reason: Exclude<Reason, "bad-request">;
+      rationale: string;
+      evidence?: unknown;
+    };
 
 /** What the target payer knows about itself: today's date and whether it can segment sensitive data. */
 export type PayerContext = ConsentContext;

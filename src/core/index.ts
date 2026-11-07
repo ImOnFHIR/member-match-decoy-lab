@@ -38,7 +38,11 @@ export interface ScoreOptions {
   relaxedConfidence?: number;
 }
 
-export interface CoreResult { scoreboard: FriendlyScoreboard; view: ToolView; summary: string }
+export interface CoreResult {
+  scoreboard: FriendlyScoreboard;
+  view: ToolView;
+  summary: string;
+}
 
 export async function scoreDecoys(data: CoreData, o: ScoreOptions = {}): Promise<CoreResult> {
   const pct = o.relaxedConfidence ?? DEFAULT_RELAXED_CONFIDENCE;
@@ -47,12 +51,18 @@ export async function scoreDecoys(data: CoreData, o: ScoreOptions = {}): Promise
   if (unknown.length) throw new Error(`unknown matcher(s): ${unknown.join(", ")}`);
   const matchers = o.matchers?.length ? all.filter((m) => o.matchers!.includes(m.name)) : all;
   const entries = data.manifest.entries.filter((e) => !o.cases?.length || o.cases.includes(e.case));
-  if (o.cases?.length && entries.length !== o.cases.length) throw new Error(`unknown case(s): ${o.cases.filter((c) => !entries.some((e) => e.case === c)).join(", ")}`);
+  if (o.cases?.length && entries.length !== o.cases.length)
+    throw new Error(
+      `unknown case(s): ${o.cases.filter((c) => !entries.some((e) => e.case === c)).join(", ")}`,
+    );
 
   const endpoint = {
     matchers,
     roster: roster(data.decoys),
-    consent: { asOf: data.decoys.asOf, canSegmentSensitive: data.decoys.targetPayer.canSegmentSensitive },
+    consent: {
+      asOf: data.decoys.asOf,
+      canSegmentSensitive: data.decoys.targetPayer.canSegmentSensitive,
+    },
   };
   const rows = [];
   for (const m of matchers) {
