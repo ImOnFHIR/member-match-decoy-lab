@@ -28,16 +28,47 @@ test("checkView: every rule names its problem", () => {
     "headline is required": { ...ok, headline: "" },
     "one line": { ...ok, headline: "a\nb" },
     "keep bullets to 110": { ...ok, bullets: [{ text: "x".repeat(111) }] },
-    "duplicate id": { ...ok, sections: [{ id: "a", title: "A", blocks: [] }, { id: "a", title: "B", blocks: [] }] },
-    "cut to 200": { ...ok, sections: [{ id: "a", title: "A", blocks: [{ kind: "table", columns: [{ key: "k", label: "K" }], rows: Array(201).fill({ k: "x" }) }] }] },
+    "duplicate id": {
+      ...ok,
+      sections: [
+        { id: "a", title: "A", blocks: [] },
+        { id: "a", title: "B", blocks: [] },
+      ],
+    },
+    "cut to 200": {
+      ...ok,
+      sections: [
+        {
+          id: "a",
+          title: "A",
+          blocks: [
+            {
+              kind: "table",
+              columns: [{ key: "k", label: "K" }],
+              rows: Array(201).fill({ k: "x" }),
+            },
+          ],
+        },
+      ],
+    },
     "needs label and patch": { ...ok, next: [{ label: "x" }] },
     "under 50000": { ...ok, footnote: "x".repeat(50_001) },
   };
-  for (const [want, v] of Object.entries(bad)) assert.ok(checkView(v).some((p) => p.includes(want)), `${want}: ${checkView(v).join("; ")}`);
+  for (const [want, v] of Object.entries(bad))
+    assert.ok(
+      checkView(v).some((p) => p.includes(want)),
+      `${want}: ${checkView(v).join("; ")}`,
+    );
 });
 
 test("checkView: unknown block kinds are allowed (forward compatible)", () => {
-  assert.deepEqual(checkView({ ...ok, sections: [{ id: "a", title: "A", blocks: [{ kind: "chart", data: [] }] }] }), []);
+  assert.deepEqual(
+    checkView({
+      ...ok,
+      sections: [{ id: "a", title: "A", blocks: [{ kind: "chart", data: [] }] }],
+    }),
+    [],
+  );
 });
 
 test("report-view: the default run's view is valid, bad, and names the wrong-person release", async () => {
@@ -47,14 +78,33 @@ test("report-view: the default run's view is valid, bad, and names the wrong-per
   assert.equal(v.status, "bad");
   assert.match(v.headline, /1 of 4 matchers/);
   assert.equal(v.stats?.find((s) => s.label === "ID-first rules")?.status, "bad");
-  assert.ok(v.bullets?.some((b) => b.status === "bad" && /Sent Jon Roe's records in answer to a request for John Roe/.test(b.text)));
-  assert.deepEqual(v.sections?.map((s) => s.id), ["answers", "tests", "matchers", "legend"]);
-  assert.ok(v.sections?.every((s) => !s.open), "sections start collapsed");
+  assert.ok(
+    v.bullets?.some(
+      (b) =>
+        b.status === "bad" &&
+        /Sent Jon Roe's records in answer to a request for John Roe/.test(b.text),
+    ),
+  );
+  assert.deepEqual(
+    v.sections?.map((s) => s.id),
+    ["answers", "tests", "matchers", "legend"],
+  );
+  assert.ok(
+    v.sections?.every((s) => !s.open),
+    "sections start collapsed",
+  );
 });
 
 test("report-view: a clean run is good with a 'no problems' bullet", async () => {
   const set = loadDecoys();
-  const v = toView(befriend(await runScoreboard({ matchers: buildMatchers({}).filter((m) => m.name === "check-every-field") }), set));
+  const v = toView(
+    befriend(
+      await runScoreboard({
+        matchers: buildMatchers({}).filter((m) => m.name === "check-every-field"),
+      }),
+      set,
+    ),
+  );
   assert.equal(v.status, "good");
   assert.match(v.bullets![0].text, /No problems/);
 });

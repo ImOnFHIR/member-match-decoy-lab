@@ -23,15 +23,27 @@ export interface About {
 }
 
 /** A one-click example run: "Try: the borrowed card". `args` must validate against the tool's inputSchema. */
-export interface Preset { id: string; label: string; args: Record<string, unknown>; argsFrom?: Record<string, { resource: string }> }
+export interface Preset {
+  id: string;
+  label: string;
+  args: Record<string, unknown>;
+  argsFrom?: Record<string, { resource: string }>;
+}
 
 /** A tool with no cost entry is treated as not free. */
 export type Cost = { free: true } | { free: false; note: string };
 
 /** Which inputs sit behind "More settings". */
-export interface FormHints { advanced?: string[] }
+export interface FormHints {
+  advanced?: string[];
+}
 
-export interface ToolMeta { about: About; presets?: Preset[]; cost: Cost; form?: FormHints }
+export interface ToolMeta {
+  about: About;
+  presets?: Preset[];
+  cost: Cost;
+  form?: FormHints;
+}
 
 /** The `_meta` object for registerTool. */
 export function toolMeta(m: ToolMeta): Record<string, unknown> {
@@ -52,7 +64,10 @@ export function resultMeta(view: ToolView): Record<string, unknown> {
  * The tool description as plain text, built from `about` so there is one source. Clients that
  * know nothing of `_meta` (Claude, the Inspector) still get the same sections.
  */
-export function describe(about: About, extra: { settings?: string[]; lists?: { title: string; items: string[] }[] } = {}): string {
+export function describe(
+  about: About,
+  extra: { settings?: string[]; lists?: { title: string; items: string[] }[] } = {},
+): string {
   const block = (title: string, items: string[]) => [title, ...items.map((i) => `• ${i}`)];
   const parts: string[][] = [
     block("WHAT IT IS", about.whatItIs),

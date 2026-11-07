@@ -13,5 +13,9 @@ createEndpoint({
   consent: { asOf: set.asOf, canSegmentSensitive: set.targetPayer.canSegmentSensitive },
   log: (e) => console.log(JSON.stringify(e)),
 }).listen(port, "127.0.0.1", () => {
-  console.log(`${SYNTHETIC_BANNER}\n$member-match on http://127.0.0.1:${port}/<matcher>/Patient/$member-match — loopback only, no auth\nmatchers: ${buildMatchers().map((m) => m.name).join(", ")}`);
+  console.log(
+    `${SYNTHETIC_BANNER}\n$member-match on http://127.0.0.1:${port}/<matcher>/Patient/$member-match — loopback only, no auth\nmatchers: ${buildMatchers()
+      .map((m) => m.name)
+      .join(", ")}`,
+  );
 });

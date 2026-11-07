@@ -26,8 +26,16 @@ before(async () => {
 after(() => new Promise<void>((r) => server.close(() => r())));
 
 const post = async (path: string, body: unknown) => {
-  const res = await fetch(base + path, { method: "POST", headers: { "content-type": "application/fhir+json" }, body: typeof body === "string" ? body : JSON.stringify(body) });
-  return { status: res.status, type: res.headers.get("content-type"), body: (await res.json()) as any };
+  const res = await fetch(base + path, {
+    method: "POST",
+    headers: { "content-type": "application/fhir+json" },
+    body: typeof body === "string" ? body : JSON.stringify(body),
+  });
+  return {
+    status: res.status,
+    type: res.headers.get("content-type"),
+    body: (await res.json()) as any,
+  };
 };
 const fixture = (id: string) => JSON.parse(readFileSync(`fixtures/requests/${id}.json`, "utf8"));
 
@@ -74,17 +82,40 @@ for (const c of set.cases) {
 }
 
 test("identity-relaxed: a user-set confidence of 85% confirms D1 (Jr. scores 0.87)", async () => {
-  const tuned = { matchers: [c057Matcher({ name: "identity-relaxed", autoConfirm: 0.85 })], roster: roster(set), consent: { asOf: set.asOf, canSegmentSensitive: false } };
+  const tuned = {
+    matchers: [c057Matcher({ name: "identity-relaxed", autoConfirm: 0.85 })],
+    roster: roster(set),
+    consent: { asOf: set.asOf, canSegmentSensitive: false },
+  };
   const r: any = await handle(tuned, "identity-relaxed", fixture("D1-senior-junior"));
   assert.equal(r.status, 200);
   assert.equal(r.body.parameter[0].valueIdentifier.value, "SYN-MEM-2001-02");
-  const strict: any = await handle({ ...tuned, matchers: [c057Matcher({ name: "x", autoConfirm: 0.9 })] }, "x", fixture("D1-senior-junior"));
+  const strict: any = await handle(
+    { ...tuned, matchers: [c057Matcher({ name: "x", autoConfirm: 0.9 })] },
+    "x",
+    fixture("D1-senior-junior"),
+  );
   assert.equal(strict.status, 422);
 });
 
 test("matcher-c057: consent is checked by the wrapper, not the endpoint", async () => {
-  const noConsentCheck = { name: "naive", decide: () => ({ kind: "match" as const, memberId: "SYN-MEM-1001-01", rationale: "ignores consent" }) };
-  const r: any = await handle({ matchers: [noConsentCheck], roster: roster(set), consent: { asOf: set.asOf, canSegmentSensitive: false } }, "naive", fixture("D3-consent-expired"));
+  const noConsentCheck = {
+    name: "naive",
+    decide: () => ({
+      kind: "match" as const,
+      memberId: "SYN-MEM-1001-01",
+      rationale: "ignores consent",
+    }),
+  };
+  const r: any = await handle(
+    {
+      matchers: [noConsentCheck],
+      roster: roster(set),
+      consent: { asOf: set.asOf, canSegmentSensitive: false },
+    },
+    "naive",
+    fixture("D3-consent-expired"),
+  );
   assert.equal(r.status, 200, "the endpoint must not rescue a matcher that ignores consent");
 });
 
@@ -96,7 +127,10 @@ test("matcher-c057: every decision is logged with a rationale", () => {
 test("matcher-c057: short route, bad JSON, wrong resource, unknown matcher", async () => {
   assert.equal((await post("/identity-strict/$member-match", fixture("D0-control"))).status, 200);
   assert.equal((await post("/identity-strict/$member-match", "{not json")).status, 400);
-  assert.equal((await post("/identity-strict/$member-match", { resourceType: "Patient" })).status, 400);
+  assert.equal(
+    (await post("/identity-strict/$member-match", { resourceType: "Patient" })).status,
+    400,
+  );
   assert.equal((await post("/nope/$member-match", fixture("D0-control"))).status, 404);
 });
 
@@ -113,14 +147,33 @@ test("matcher-c057 port: decision branches", () => {
     { id: "a", attributes: [{ name: "Ann Lee", birthDate: "1990-01-01", memberId: "M1" }] },
     { id: "b", attributes: [{ name: "Ann Lea", birthDate: "1990-01-01", memberId: "M2" }] },
   ];
-  assert.equal(decide({ name: "Ann Lee", birthDate: "1990-01-01", memberId: "M1" }, ids, "standard").status, "confirmed");
-  const conflict = decide({ name: "Zed Q", birthDate: "1950-06-06", memberId: "M1" }, ids, "standard");
+  assert.equal(
+    decide({ name: "Ann Lee", birthDate: "1990-01-01", memberId: "M1" }, ids, "standard").status,
+    "confirmed",
+  );
+  const conflict = decide(
+    { name: "Zed Q", birthDate: "1950-06-06", memberId: "M1" },
+    ids,
+    "standard",
+  );
   assert.equal(conflict.status, "under-review");
   assert.equal((conflict as any).why, "det-conflict");
   assert.deepEqual((conflict as any).candidates, ["a"]);
-  assert.equal((decide({ name: "Ann Le", birthDate: "1990-01-01" }, ids, "standard") as any).why, "ambiguous");
-  assert.equal(decide({ name: "Nobody", birthDate: "1900-01-01" }, ids, "standard").status, "minted");
+  assert.equal(
+    (decide({ name: "Ann Le", birthDate: "1990-01-01" }, ids, "standard") as any).why,
+    "ambiguous",
+  );
+  assert.equal(
+    decide({ name: "Nobody", birthDate: "1900-01-01" }, ids, "standard").status,
+    "minted",
+  );
   const one = [ids[0]];
-  assert.equal(decide({ name: "Ann Lee", birthDate: "1990-01-01" }, one, "standard").status, "confirmed");
-  assert.equal((decide({ name: "Ann Lee", birthDate: "1990-01-01" }, one, "conservative") as any).why, "probable");
+  assert.equal(
+    decide({ name: "Ann Lee", birthDate: "1990-01-01" }, one, "standard").status,
+    "confirmed",
+  );
+  assert.equal(
+    (decide({ name: "Ann Lee", birthDate: "1990-01-01" }, one, "conservative") as any).why,
+    "probable",
+  );
 });

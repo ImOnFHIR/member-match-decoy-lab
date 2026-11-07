@@ -14,11 +14,21 @@ import { buildMatchers } from "../src/matchers/registry.js";
 import { checkView } from "../src/ui/view.js";
 
 const data = loadCoreData(".");
-const strip = (rows: any[]) => rows.map(({ matcher, case: c, category, observed, reasonMismatch, wrongPerson }) => ({ matcher, c, category, observed, reasonMismatch, wrongPerson }));
+const strip = (rows: any[]) =>
+  rows.map(({ matcher, case: c, category, observed, reasonMismatch, wrongPerson }) => ({
+    matcher,
+    c,
+    category,
+    observed,
+    reasonMismatch,
+    wrongPerson,
+  }));
 
 test("core parity: in-memory scoring equals the MCP/HTTP path at every confidence 75–100", async () => {
   for (let pct = 75; pct <= 100; pct++) {
-    const viaHttp = await runScoreboard({ matchers: buildMatchers({ RELAXED_CONFIDENCE: String(pct) }) });
+    const viaHttp = await runScoreboard({
+      matchers: buildMatchers({ RELAXED_CONFIDENCE: String(pct) }),
+    });
     const inMem = await scoreDecoys(data, { relaxedConfidence: pct });
     assert.deepEqual(strip(inMem.scoreboard.rows), strip(viaHttp.rows), `confidence ${pct}`);
     assert.equal(inMem.scoreboard.manifestDigest, viaHttp.manifestDigest);
@@ -35,9 +45,29 @@ test("core: options narrow the run; unknown ids are refused", async () => {
 });
 
 test("core purity: the bundle runs in a bare JS sandbox (no Node, no network)", async () => {
-  const out = await build({ entryPoints: ["src/core/index.ts"], bundle: true, format: "iife", globalName: "Core", platform: "neutral", target: "es2022", write: false, logLevel: "silent" });
+  const out = await build({
+    entryPoints: ["src/core/index.ts"],
+    bundle: true,
+    format: "iife",
+    globalName: "Core",
+    platform: "neutral",
+    target: "es2022",
+    write: false,
+    logLevel: "silent",
+  });
   const code = out.outputFiles[0].text;
-  for (const banned of [/\bnode:/, /\brequire\(/, /process\.env/, /\bfetch\(/, /XMLHttpRequest/, /WebSocket/, /sendBeacon/, /new Function/, /\beval\(/, /\bimport\(/])
+  for (const banned of [
+    /\bnode:/,
+    /\brequire\(/,
+    /process\.env/,
+    /\bfetch\(/,
+    /XMLHttpRequest/,
+    /WebSocket/,
+    /sendBeacon/,
+    /new Function/,
+    /\beval\(/,
+    /\bimport\(/,
+  ])
     assert.doesNotMatch(code, banned, `bundle contains ${banned}`);
   // Only what every browser provides; no require, process, fetch or fs.
   const sandbox: Record<string, unknown> = { structuredClone, TextEncoder };
@@ -56,7 +86,11 @@ test("conformance views: test/views/*.json match a fresh run and are valid", asy
     const path = `test/views/${run.id}.json`;
     const fresh = JSON.stringify(view, null, 2) + "\n";
     if (process.env.UPDATE_VIEWS) writeFileSync(path, fresh);
-    assert.equal(readFileSync(path, "utf8"), fresh, `${path} is stale: UPDATE_VIEWS=1 npm test -- core`);
+    assert.equal(
+      readFileSync(path, "utf8"),
+      fresh,
+      `${path} is stale: UPDATE_VIEWS=1 npm test -- core`,
+    );
   }
 });
 
@@ -65,11 +99,28 @@ test("vendor bundle: every file matches PROVENANCE and the lock", () => {
   const dir = "dist/vendor/member-match-decoy-lab";
   const prov = JSON.parse(readFileSync(join(dir, "PROVENANCE.json"), "utf8"));
   const seen: string[] = [];
-  const walk = (d: string, pre = "") => { for (const e of readdirSync(d, { withFileTypes: true })) { const p = join(d, e.name), rel = pre + e.name; if (e.isDirectory()) walk(p, rel + "/"); else if (rel !== "PROVENANCE.json") seen.push(rel); } };
+  const walk = (d: string, pre = "") => {
+    for (const e of readdirSync(d, { withFileTypes: true })) {
+      const p = join(d, e.name),
+        rel = pre + e.name;
+      if (e.isDirectory()) walk(p, rel + "/");
+      else if (rel !== "PROVENANCE.json") seen.push(rel);
+    }
+  };
   walk(dir);
   assert.deepEqual(seen.sort(), Object.keys(prov.files).sort());
-  for (const f of seen) assert.equal(createHash("sha256").update(readFileSync(join(dir, f))).digest("hex"), prov.files[f], f);
-  assert.equal(prov.lockDigest, readFileSync("manifest/ground-truth.sha256", "utf8").split(/\s+/)[0]);
+  for (const f of seen)
+    assert.equal(
+      createHash("sha256")
+        .update(readFileSync(join(dir, f)))
+        .digest("hex"),
+      prov.files[f],
+      f,
+    );
+  assert.equal(
+    prov.lockDigest,
+    readFileSync("manifest/ground-truth.sha256", "utf8").split(/\s+/)[0],
+  );
   const tool = JSON.parse(readFileSync(join(dir, "tool.json"), "utf8"));
   assert.equal(tool.name, "score_member_match");
   assert.ok(tool.presets.length && tool.about.whatItIs.length && tool.inputSchema.properties.cases);

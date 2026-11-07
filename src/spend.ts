@@ -19,7 +19,12 @@ export const PRICES: Record<string, { input: number; output: number; cacheRead: 
 };
 const CACHE_WRITE_MULTIPLIER = 1.25;
 
-export interface Usage { input_tokens: number; output_tokens: number; cache_read_input_tokens?: number | null; cache_creation_input_tokens?: number | null }
+export interface Usage {
+  input_tokens: number;
+  output_tokens: number;
+  cache_read_input_tokens?: number | null;
+  cache_creation_input_tokens?: number | null;
+}
 
 export function priceOf(model: string) {
   const p = PRICES[model];
@@ -29,8 +34,13 @@ export function priceOf(model: string) {
 
 export function costUsd(model: string, u: Usage): number {
   const p = priceOf(model);
-  return (u.input_tokens * p.input + u.output_tokens * p.output + (u.cache_read_input_tokens ?? 0) * p.cacheRead
-    + (u.cache_creation_input_tokens ?? 0) * p.input * CACHE_WRITE_MULTIPLIER) / 1e6;
+  return (
+    (u.input_tokens * p.input +
+      u.output_tokens * p.output +
+      (u.cache_read_input_tokens ?? 0) * p.cacheRead +
+      (u.cache_creation_input_tokens ?? 0) * p.input * CACHE_WRITE_MULTIPLIER) /
+    1e6
+  );
 }
 
 /** Worst case for one call: estimated input at ~3 chars/token (generous), plus the full max_tokens of output. */
@@ -39,7 +49,16 @@ export function worstCaseUsd(model: string, promptChars: number, maxTokens: numb
 }
 
 type Entry =
-  | { type: "call"; at: string; month: string; model: string; servedBy?: string; usd: number; usage: Usage; label: string }
+  | {
+      type: "call";
+      at: string;
+      month: string;
+      model: string;
+      servedBy?: string;
+      usd: number;
+      usage: Usage;
+      label: string;
+    }
   | { type: "alert"; at: string; month: string; usd: number };
 
 export class SpendCeilingError extends Error {}
@@ -67,11 +86,16 @@ export class SpendGuard {
     this.now = o.now ?? (() => new Date());
   }
 
-  private month() { return this.now().toISOString().slice(0, 7); }
+  private month() {
+    return this.now().toISOString().slice(0, 7);
+  }
 
   private entries(): Entry[] {
     if (!existsSync(this.ledgerPath)) return [];
-    return readFileSync(this.ledgerPath, "utf8").split("\n").filter(Boolean).map((l) => JSON.parse(l));
+    return readFileSync(this.ledgerPath, "utf8")
+      .split("\n")
+      .filter(Boolean)
+      .map((l) => JSON.parse(l));
   }
 
   private append(e: Entry) {
@@ -84,7 +108,14 @@ export class SpendGuard {
     const es = this.entries().filter((e) => e.month === m);
     const calls = es.filter((e): e is Extract<Entry, { type: "call" }> => e.type === "call");
     const spent = calls.reduce((s, e) => s + e.usd, 0);
-    return { month: m, spentUsd: spent, ceilingUsd: this.ceilingUsd, alertUsd: this.alertUsd, alerted: es.some((e) => e.type === "alert"), calls: calls.length };
+    return {
+      month: m,
+      spentUsd: spent,
+      ceilingUsd: this.ceilingUsd,
+      alertUsd: this.alertUsd,
+      alerted: es.some((e) => e.type === "alert"),
+      calls: calls.length,
+    };
   }
 
   /** Call before every API request. Throws SpendCeilingError if the call must not be sent. */
@@ -92,13 +123,24 @@ export class SpendGuard {
     const s = this.status();
     if (s.spentUsd >= this.alertUsd && !s.alerted) await this.sendAlert(s.spentUsd); // throws if undeliverable: fail closed
     if (s.spentUsd + worstCase > this.ceilingUsd)
-      throw new SpendCeilingError(`blocked: $${s.spentUsd.toFixed(4)} spent in ${s.month} + worst case $${worstCase.toFixed(4)} would exceed the $${this.ceilingUsd} ceiling`);
+      throw new SpendCeilingError(
+        `blocked: $${s.spentUsd.toFixed(4)} spent in ${s.month} + worst case $${worstCase.toFixed(4)} would exceed the $${this.ceilingUsd} ceiling`,
+      );
   }
 
   /** Call after every API response with the real usage. Sends the 80% alert when the line is crossed. */
   async afterCall(model: string, usage: Usage, label: string, servedBy?: string): Promise<number> {
     const usd = costUsd(servedBy && PRICES[servedBy] ? servedBy : model, usage);
-    this.append({ type: "call", at: this.now().toISOString(), month: this.month(), model, ...(servedBy && servedBy !== model ? { servedBy } : {}), usd, usage, label });
+    this.append({
+      type: "call",
+      at: this.now().toISOString(),
+      month: this.month(),
+      model,
+      ...(servedBy && servedBy !== model ? { servedBy } : {}),
+      usd,
+      usage,
+      label,
+    });
     const s = this.status();
     if (s.spentUsd >= this.alertUsd && !s.alerted) await this.sendAlert(s.spentUsd);
     return usd;
@@ -107,11 +149,15 @@ export class SpendGuard {
   /** Sends the alert text now (used by spend:check --test-alert). Does not mark the month as alerted. */
   async testAlert(): Promise<void> {
     const s = this.status();
-    await this.alert.send(`member-match-decoy-lab TEST alert: LLM spend $${s.spentUsd.toFixed(2)} of $${this.ceilingUsd} this month. The real alert fires at $${this.alertUsd}.`);
+    await this.alert.send(
+      `member-match-decoy-lab TEST alert: LLM spend $${s.spentUsd.toFixed(2)} of $${this.ceilingUsd} this month. The real alert fires at $${this.alertUsd}.`,
+    );
   }
 
   private async sendAlert(spent: number) {
-    await this.alert.send(`member-match-decoy-lab: LLM spend $${spent.toFixed(2)} of $${this.ceilingUsd} this month (alert at $${this.alertUsd}). Runs stop at the ceiling.`);
+    await this.alert.send(
+      `member-match-decoy-lab: LLM spend $${spent.toFixed(2)} of $${this.ceilingUsd} this month (alert at $${this.alertUsd}). Runs stop at the ceiling.`,
+    );
     this.append({ type: "alert", at: this.now().toISOString(), month: this.month(), usd: spent });
   }
 }

@@ -13,7 +13,9 @@ for (const c of set.cases) {
 
   test(`converter ${c.id}: HRex parameter names and profiles`, () => {
     assert.equal(p.resourceType, "Parameters");
-    assert.deepEqual(p.meta.profile, ["http://hl7.org/fhir/us/davinci-hrex/StructureDefinition/hrex-parameters-member-match-in"]);
+    assert.deepEqual(p.meta.profile, [
+      "http://hl7.org/fhir/us/davinci-hrex/StructureDefinition/hrex-parameters-member-match-in",
+    ]);
     const names = p.parameter.map((x: any) => x.name);
     assert.deepEqual(names.slice(0, 2), ["MemberPatient", "CoverageToMatch"]);
     assert.equal(names.includes("Consent"), c.request.consent !== "none");
@@ -58,8 +60,14 @@ test("converter D3: consent period ended before asOf", () => {
 });
 
 test("converter D3b: #regular policy; D0: #sensitive policy", () => {
-  assert.equal(param(toMemberMatchParameters(set, byId("D3b-consent-unsegmentable")), "Consent").policy[0].uri, POLICY.regular);
-  assert.equal(param(toMemberMatchParameters(set, byId("D0-control")), "Consent").policy[0].uri, POLICY.sensitive);
+  assert.equal(
+    param(toMemberMatchParameters(set, byId("D3b-consent-unsegmentable")), "Consent").policy[0].uri,
+    POLICY.regular,
+  );
+  assert.equal(
+    param(toMemberMatchParameters(set, byId("D0-control")), "Consent").policy[0].uri,
+    POLICY.sensitive,
+  );
 });
 
 test("converter D4: John's demographics with Jon's member ID", () => {
@@ -72,7 +80,20 @@ const FHIR_WORDS = new Set(["consent"]); // real FHIR vocabulary, not a hint
 test("converter: no request contains its case name or trap words", () => {
   for (const c of set.cases) {
     const s = JSON.stringify(toMemberMatchParameters(set, c)).toLowerCase();
-    for (const leak of [c.id.toLowerCase(), ...c.id.toLowerCase().split("-").filter((w) => w.length > 3 && !FHIR_WORDS.has(w)), "decoy", "trap", "twin", "mixup", "expired", "senior", "junior"])
+    for (const leak of [
+      c.id.toLowerCase(),
+      ...c.id
+        .toLowerCase()
+        .split("-")
+        .filter((w) => w.length > 3 && !FHIR_WORDS.has(w)),
+      "decoy",
+      "trap",
+      "twin",
+      "mixup",
+      "expired",
+      "senior",
+      "junior",
+    ])
       assert.ok(!s.includes(leak), `${c.id} request contains "${leak}"`);
   }
 });

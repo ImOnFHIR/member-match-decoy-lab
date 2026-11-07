@@ -8,7 +8,15 @@ import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js"
 import { VIEW_URI, VIEW_MIME } from "../src/mcp-server.js";
 
 const client = new Client({ name: "test", version: "0" });
-before(async () => { await client.connect(new StdioClientTransport({ command: process.execPath, args: [resolve("dist/mcp.js")], cwd: tmpdir() })); });
+before(async () => {
+  await client.connect(
+    new StdioClientTransport({
+      command: process.execPath,
+      args: [resolve("dist/mcp.js")],
+      cwd: tmpdir(),
+    }),
+  );
+});
 after(() => client.close());
 
 test("mcp app: the tool points at its view with both key forms", async () => {
@@ -36,7 +44,10 @@ test("mcp app: the view is one self-contained file that loads nothing", () => {
 });
 
 test("mcp app: the text answer is unchanged for hosts without MCP Apps", async () => {
-  const r: any = await client.callTool({ name: "score_member_match", arguments: { cases: ["D4-card-mixup"] } });
+  const r: any = await client.callTool({
+    name: "score_member_match",
+    arguments: { cases: ["D4-card-mixup"] },
+  });
   assert.match(r.content[0].text, /^Synthetic data only/);
   assert.match(r.content[0].text, /RESULT: /);
 });

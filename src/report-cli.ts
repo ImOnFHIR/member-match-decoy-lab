@@ -16,7 +16,10 @@ const set = loadDecoys();
 const sb = befriend(await runScoreboard({ matchers: buildMatchers({}) }), set);
 const i = process.argv.indexOf("--fragment");
 const out = i > 0 ? process.argv[i + 1] : REPORT_PATH;
-if (!out) { console.error("--fragment needs an output path"); process.exit(2); }
+if (!out) {
+  console.error("--fragment needs an output path");
+  process.exit(2);
+}
 mkdirSync(dirname(out), { recursive: true });
 writeFileSync(out, htmlReport(sb, set, { fragment: i > 0 }));
 console.log(`wrote ${out}`);

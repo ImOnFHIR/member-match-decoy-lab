@@ -19,18 +19,34 @@ import { missingAlertEnv } from "./alert.js";
 const args = process.argv.slice(2);
 const flags = new Set(args.filter((a) => a.startsWith("--")));
 const cases = args.filter((a) => !a.startsWith("--"));
-const ai = flags.has("--ai"), aiNoRules = flags.has("--ai-no-rules"), aiDefinitions = flags.has("--ai-definitions");
+const ai = flags.has("--ai"),
+  aiNoRules = flags.has("--ai-no-rules"),
+  aiDefinitions = flags.has("--ai-definitions");
 
 if ((ai || aiNoRules || aiDefinitions) && missingAlertEnv().length) {
-  console.error(`Refusing to spend: the SMS spend alert is not configured (set ${missingAlertEnv().join(", ")}).`);
+  console.error(
+    `Refusing to spend: the SMS spend alert is not configured (set ${missingAlertEnv().join(", ")}).`,
+  );
   process.exit(2);
 }
 
 try {
-  const sb = befriend(await runScoreboard({ matchers: buildMatchers(process.env, { ai, aiNoRules, aiDefinitions }), cases }), loadDecoys());
+  const sb = befriend(
+    await runScoreboard({
+      matchers: buildMatchers(process.env, { ai, aiNoRules, aiDefinitions }),
+      cases,
+    }),
+    loadDecoys(),
+  );
   mkdirSync(".runs", { recursive: true });
   writeFileSync(".runs/scoreboard.json", JSON.stringify(sb, null, 2) + "\n");
-  console.log(flags.has("--json") ? JSON.stringify(sb, null, 2) : flags.has("--full") ? renderText(sb) : renderSummary(sb, "For every answer explained: npm run score -- --full"));
+  console.log(
+    flags.has("--json")
+      ? JSON.stringify(sb, null, 2)
+      : flags.has("--full")
+        ? renderText(sb)
+        : renderSummary(sb, "For every answer explained: npm run score -- --full"),
+  );
 } catch (e) {
   console.error(`✗ ${(e as Error).message}`);
   process.exit(2);

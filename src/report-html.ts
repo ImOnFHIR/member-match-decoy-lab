@@ -8,7 +8,11 @@ import { CATEGORIES, CATEGORY_INFO, CORRECT, type Category } from "./scorer.js";
 import { labelFor } from "./matchers/info.js";
 import type { FriendlyScoreboard } from "./report.js";
 
-const esc = (s: unknown) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]!);
+const esc = (s: unknown) =>
+  String(s ?? "").replace(
+    /[&<>"']/g,
+    (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]!,
+  );
 const ok = (c: Category) => CORRECT.has(c);
 
 const CSS = `
@@ -95,45 +99,78 @@ a { color: var(--accent); }
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 `;
 
-export function htmlReport(f: FriendlyScoreboard, set: DecoySet, o: { fragment?: boolean } = {}): string {
+export function htmlReport(
+  f: FriendlyScoreboard,
+  set: DecoySet,
+  o: { fragment?: boolean } = {},
+): string {
   const caseIds = [...new Set(f.rows.map((r) => r.case))];
   const row = (m: string, c: string) => f.rows.find((r) => r.matcher === m && r.case === c)!;
   const anyWrong = f.matchers.some((m) => m.counts["decoy-confusion"] > 0);
 
-  const people = set.coverages.map((cov) => {
-    const p = set.people.find((x) => x.id === cov.beneficiary)!;
-    const name = [p.name, p.suffix].filter(Boolean).join(" ");
-    return `<div class="idcard"><span class="who">${esc(name)}</span>
+  const people = set.coverages
+    .map((cov) => {
+      const p = set.people.find((x) => x.id === cov.beneficiary)!;
+      const name = [p.name, p.suffix].filter(Boolean).join(" ");
+      return `<div class="idcard"><span class="who">${esc(name)}</span>
       <span class="meta">Born ${esc(p.birthDate)} · ${esc(p.gender)} · ${esc(cov.relationship === "self" ? "subscriber" : cov.relationship)}</span>
       <div class="ids"><span>Member</span><span>${esc(cov.memberId)}</span><span>Subscriber</span><span>${esc(cov.subscriberId)}</span></div></div>`;
-  }).join("\n");
+    })
+    .join("\n");
   const sharedCards = [...new Set(set.coverages.map((c) => c.subscriberId))]
-    .map((s) => ({ s, n: set.coverages.filter((c) => c.subscriberId === s).length })).filter((x) => x.n > 1);
+    .map((s) => ({ s, n: set.coverages.filter((c) => c.subscriberId === s).length }))
+    .filter((x) => x.n > 1);
 
-  const decoys = caseIds.map((c) => {
-    const rs = f.rows.filter((r) => r.case === c);
-    const items = rs.map((r) => `<li class="${ok(r.category) ? "" : "miss"}"><span class="${ok(r.category) ? "tick" : "cross"}" aria-label="${ok(r.category) ? "right" : "wrong"}">${ok(r.category) ? "✓" : "✗"}</span><span class="who">${esc(labelFor(r.matcher))}</span><span class="what">${esc(r.explanation)}</span></li>`).join("");
-    return `<article class="decoy" id="${esc(c)}"><span class="eyebrow mono">${esc(c)}</span><h3>${esc(rs[0].title)}</h3>
+  const decoys = caseIds
+    .map((c) => {
+      const rs = f.rows.filter((r) => r.case === c);
+      const items = rs
+        .map(
+          (r) =>
+            `<li class="${ok(r.category) ? "" : "miss"}"><span class="${ok(r.category) ? "tick" : "cross"}" aria-label="${ok(r.category) ? "right" : "wrong"}">${ok(r.category) ? "✓" : "✗"}</span><span class="who">${esc(labelFor(r.matcher))}</span><span class="what">${esc(r.explanation)}</span></li>`,
+        )
+        .join("");
+      return `<article class="decoy" id="${esc(c)}"><span class="eyebrow mono">${esc(c)}</span><h3>${esc(rs[0].title)}</h3>
       <p>${esc(rs[0].plain)}</p><p class="answer"><b>Right answer:</b> ${esc(rs[0].rightAnswer)}</p><ul class="results">${items}</ul></article>`;
-  }).join("\n");
+    })
+    .join("\n");
 
-  const scoreItems = f.matchers.map((m) => {
-    const wrong = m.counts["decoy-confusion"] > 0;
-    return `<li><strong>${esc(m.label)}</strong>: ${m.correct} of ${m.total} right${wrong ? ` <span class="bad">✗ sent records to the wrong person</span>` : ""}</li>`;
-  }).join("");
+  const scoreItems = f.matchers
+    .map((m) => {
+      const wrong = m.counts["decoy-confusion"] > 0;
+      return `<li><strong>${esc(m.label)}</strong>: ${m.correct} of ${m.total} right${wrong ? ` <span class="bad">✗ sent records to the wrong person</span>` : ""}</li>`;
+    })
+    .join("");
   const problemRows = f.rows.filter((r) => !ok(r.category));
   const problemItems = problemRows.length
-    ? problemRows.map((r) => `<li><strong>${esc(labelFor(r.matcher))}</strong>, “${esc(r.title)}”: <span class="${r.category === "decoy-confusion" ? "bad" : ""}">${esc(r.explanation)}</span></li>`).join("")
+    ? problemRows
+        .map(
+          (r) =>
+            `<li><strong>${esc(labelFor(r.matcher))}</strong>, “${esc(r.title)}”: <span class="${r.category === "decoy-confusion" ? "bad" : ""}">${esc(r.explanation)}</span></li>`,
+        )
+        .join("")
     : "<li>None.</li>";
-  const howItWorks = f.matchers.map((m) => `<li><strong>${esc(m.label)}</strong>: ${esc(m.summary)}</li>`).join("");
+  const howItWorks = f.matchers
+    .map((m) => `<li><strong>${esc(m.label)}</strong>: ${esc(m.summary)}</li>`)
+    .join("");
 
   const head = `<tr><th scope="col">Decoy</th>${f.matchers.map((m) => `<th scope="col">${esc(m.label)}</th>`).join("")}</tr>`;
-  const body = caseIds.map((c) => `<tr><th scope="row">${esc(row(f.matchers[0].matcher, c).title)}</th>${f.matchers.map((m) => {
-    const r = row(m.matcher, c);
-    return `<td class="cell ${ok(r.category) ? "good" : "bad"}" title="${esc(r.explanation)}">${ok(r.category) ? "✓" : "✗"}<br><span style="font-weight:400">${esc(CATEGORY_INFO[r.category].label)}</span></td>`;
-  }).join("")}</tr>`).join("\n");
+  const body = caseIds
+    .map(
+      (c) =>
+        `<tr><th scope="row">${esc(row(f.matchers[0].matcher, c).title)}</th>${f.matchers
+          .map((m) => {
+            const r = row(m.matcher, c);
+            return `<td class="cell ${ok(r.category) ? "good" : "bad"}" title="${esc(r.explanation)}">${ok(r.category) ? "✓" : "✗"}<br><span style="font-weight:400">${esc(CATEGORY_INFO[r.category].label)}</span></td>`;
+          })
+          .join("")}</tr>`,
+    )
+    .join("\n");
 
-  const legend = CATEGORIES.map((c) => `<dt><span class="${ok(c) ? "tick" : "cross"}">${ok(c) ? "✓" : "✗"}</span> ${esc(CATEGORY_INFO[c].label)}</dt><dd>${esc(CATEGORY_INFO[c].meaning)}</dd>`).join("\n");
+  const legend = CATEGORIES.map(
+    (c) =>
+      `<dt><span class="${ok(c) ? "tick" : "cross"}">${ok(c) ? "✓" : "✗"}</span> ${esc(CATEGORY_INFO[c].label)}</dt><dd>${esc(CATEGORY_INFO[c].meaning)}</dd>`,
+  ).join("\n");
 
   const content = `<title>Member Match Decoy Lab</title>
 <meta name="claude:viewport-fit-sides" content="cover">
@@ -173,5 +210,7 @@ export function htmlReport(f: FriendlyScoreboard, set: DecoySet, o: { fragment?:
   <footer><span>Checked against the locked answer key <span class="mono">${esc(f.manifestDigest.slice(0, 12))}</span>. Generated by <span class="mono">npm run report</span>.</span>
     <span>Source: <a href="https://github.com/ImOnFHIR/member-match-decoy-lab">github.com/ImOnFHIR/member-match-decoy-lab</a> · Apache-2.0</span></footer>
 </main>`;
-  return o.fragment ? content + "\n" : `<!doctype html>\n<html lang="en">\n<head>\n<meta charset="utf-8">\n<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">\n${content.replace("<main", "</head>\n<body>\n<main")}\n</body>\n</html>\n`;
+  return o.fragment
+    ? content + "\n"
+    : `<!doctype html>\n<html lang="en">\n<head>\n<meta charset="utf-8">\n<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">\n${content.replace("<main", "</head>\n<body>\n<main")}\n</body>\n</html>\n`;
 }

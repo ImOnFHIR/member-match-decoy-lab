@@ -11,13 +11,20 @@ import type { Case, DecoySet } from "./decoys.js";
  * Opaque, deterministic token for a case. Case names ("D4-card-mixup") must never appear in a
  * request: they would tell any matcher, and especially the LLM, what the trap is.
  */
-export const opaque = (caseId: string) => createHash("sha256").update(`mmdl:${caseId}`).digest("hex").slice(0, 10);
+export const opaque = (caseId: string) =>
+  createHash("sha256").update(`mmdl:${caseId}`).digest("hex").slice(0, 10);
 
 export { HREX, SYN, POLICY } from "./synthetic-ns.js";
 import { HREX, SYN, POLICY } from "./synthetic-ns.js";
 
-const OLD_PLAN = { identifier: { system: `${SYN}/payer-id`, value: "SYN-PAYER-OLD" }, display: "Synthetic Old Plan" };
-const NEW_PLAN = { identifier: { system: `${SYN}/payer-id`, value: "SYN-PAYER-NEW" }, display: "Synthetic New Plan" };
+const OLD_PLAN = {
+  identifier: { system: `${SYN}/payer-id`, value: "SYN-PAYER-OLD" },
+  display: "Synthetic Old Plan",
+};
+const NEW_PLAN = {
+  identifier: { system: `${SYN}/payer-id`, value: "SYN-PAYER-NEW" },
+  display: "Synthetic New Plan",
+};
 
 type Json = Record<string, unknown>;
 
@@ -44,11 +51,15 @@ export function toMemberMatchParameters(set: DecoySet, c: Case): Json {
   };
 
   const identifier = c.request.card.memberId
-    ? [{
-        type: { coding: [{ system: "http://terminology.hl7.org/CodeSystem/v2-0203", code: "MB" }] },
-        system: `${SYN}/member-id`,
-        value: c.request.card.memberId,
-      }]
+    ? [
+        {
+          type: {
+            coding: [{ system: "http://terminology.hl7.org/CodeSystem/v2-0203", code: "MB" }],
+          },
+          system: `${SYN}/member-id`,
+          value: c.request.card.memberId,
+        },
+      ]
     : undefined;
 
   const coverage: Json = {
@@ -60,7 +71,11 @@ export function toMemberMatchParameters(set: DecoySet, c: Case): Json {
     ...(c.request.card.subscriberId ? { subscriberId: c.request.card.subscriberId } : {}),
     beneficiary: { reference: `Patient/${patientId}` },
     // The card does not state the relationship; HRex requires the element, so mark it absent.
-    relationship: { coding: [{ system: "http://terminology.hl7.org/CodeSystem/data-absent-reason", code: "unknown" }] },
+    relationship: {
+      coding: [
+        { system: "http://terminology.hl7.org/CodeSystem/data-absent-reason", code: "unknown" },
+      ],
+    },
     payor: [OLD_PLAN],
   };
 
@@ -78,8 +93,19 @@ export function toMemberMatchParameters(set: DecoySet, c: Case): Json {
         id: "consent",
         meta: { profile: [`${HREX}/hrex-consent`] },
         status: "active",
-        scope: { coding: [{ system: "http://terminology.hl7.org/CodeSystem/consentscope", code: "patient-privacy" }] },
-        category: [{ coding: [{ system: "http://terminology.hl7.org/CodeSystem/v3-ActCode", code: "IDSCL" }] }],
+        scope: {
+          coding: [
+            {
+              system: "http://terminology.hl7.org/CodeSystem/consentscope",
+              code: "patient-privacy",
+            },
+          ],
+        },
+        category: [
+          {
+            coding: [{ system: "http://terminology.hl7.org/CodeSystem/v3-ActCode", code: "IDSCL" }],
+          },
+        ],
         patient: { reference: `Patient/${patientId}` },
         performer: [{ reference: `Patient/${patientId}` }],
         sourceReference: { reference: `${SYN}/DocumentReference/consent-${opaque(c.id)}` },
@@ -88,10 +114,36 @@ export function toMemberMatchParameters(set: DecoySet, c: Case): Json {
           type: "permit",
           period,
           actor: [
-            { role: { coding: [{ system: "http://terminology.hl7.org/CodeSystem/provenance-participant-type", code: "performer" }] }, reference: OLD_PLAN },
-            { role: { coding: [{ system: "http://terminology.hl7.org/CodeSystem/v3-ParticipationType", code: "IRCP" }] }, reference: NEW_PLAN },
+            {
+              role: {
+                coding: [
+                  {
+                    system: "http://terminology.hl7.org/CodeSystem/provenance-participant-type",
+                    code: "performer",
+                  },
+                ],
+              },
+              reference: OLD_PLAN,
+            },
+            {
+              role: {
+                coding: [
+                  {
+                    system: "http://terminology.hl7.org/CodeSystem/v3-ParticipationType",
+                    code: "IRCP",
+                  },
+                ],
+              },
+              reference: NEW_PLAN,
+            },
           ],
-          action: [{ coding: [{ system: "http://terminology.hl7.org/CodeSystem/consentaction", code: "disclose" }] }],
+          action: [
+            {
+              coding: [
+                { system: "http://terminology.hl7.org/CodeSystem/consentaction", code: "disclose" },
+              ],
+            },
+          ],
         },
       },
     });

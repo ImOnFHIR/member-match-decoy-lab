@@ -6,9 +6,27 @@
  */
 import { esc } from "./render.js";
 
-type Schema = { type?: string | string[]; title?: string; description?: string; properties?: Record<string, Schema>; items?: Schema; anyOf?: Schema[]; oneOf?: Schema[]; enum?: unknown[]; const?: unknown; minimum?: number; maximum?: number; default?: unknown; examples?: unknown[]; format?: string };
+type Schema = {
+  type?: string | string[];
+  title?: string;
+  description?: string;
+  properties?: Record<string, Schema>;
+  items?: Schema;
+  anyOf?: Schema[];
+  oneOf?: Schema[];
+  enum?: unknown[];
+  const?: unknown;
+  minimum?: number;
+  maximum?: number;
+  default?: unknown;
+  examples?: unknown[];
+  format?: string;
+};
 
-export interface Choice { value: string; label: string }
+export interface Choice {
+  value: string;
+  label: string;
+}
 
 export type Widget =
   | { kind: "chips"; choices: Choice[] }
@@ -21,7 +39,8 @@ export type Widget =
 
 const choicesOf = (s?: Schema): Choice[] | null => {
   const alts = s?.anyOf ?? s?.oneOf;
-  if (alts?.length && alts.every((a) => a.const !== undefined)) return alts.map((a) => ({ value: String(a.const), label: a.title ?? String(a.const) }));
+  if (alts?.length && alts.every((a) => a.const !== undefined))
+    return alts.map((a) => ({ value: String(a.const), label: a.title ?? String(a.const) }));
   if (s?.enum?.length) return s.enum.map((e) => ({ value: String(e), label: String(e) }));
   return null;
 };
@@ -29,12 +48,17 @@ const typeOf = (s: Schema) => (Array.isArray(s.type) ? s.type.find((t) => t !== 
 
 export function widgetFor(s: Schema): Widget {
   const t = typeOf(s);
-  if (t === "array") { const c = choicesOf(s.items); return c ? { kind: "chips", choices: c } : { kind: "paste" }; }
+  if (t === "array") {
+    const c = choicesOf(s.items);
+    return c ? { kind: "chips", choices: c } : { kind: "paste" };
+  }
   const c = choicesOf(s);
   if (c) return { kind: "select", choices: c };
   if (t === "integer" || t === "number") {
     const integer = t === "integer";
-    return s.minimum !== undefined && s.maximum !== undefined ? { kind: "range", min: s.minimum, max: s.maximum, integer } : { kind: "number", integer };
+    return s.minimum !== undefined && s.maximum !== undefined
+      ? { kind: "range", min: s.minimum, max: s.maximum, integer }
+      : { kind: "number", integer };
   }
   if (t === "boolean") return { kind: "switch" };
   if (t === "object" || s.format === "json") return { kind: "paste" };
@@ -46,7 +70,9 @@ const id = (k: string) => `f-${k.replace(/[^a-zA-Z0-9_-]/g, "_")}`;
 function field(key: string, s: Schema, value: unknown, required: boolean): string {
   const w = widgetFor(s);
   const label = esc(s.title ?? key);
-  const help = s.description ? `<p class="f-help" id="${id(key)}-help">${esc(s.description)}</p>` : "";
+  const help = s.description
+    ? `<p class="f-help" id="${id(key)}-help">${esc(s.description)}</p>`
+    : "";
   const aria = s.description ? ` aria-describedby="${id(key)}-help"` : "";
   const req = required ? ' <span class="f-req">required</span>' : "";
   switch (w.kind) {
@@ -72,35 +98,59 @@ function field(key: string, s: Schema, value: unknown, required: boolean): strin
 }
 
 /** The form fields. Fields listed in `advanced` go under "More settings". */
-export function renderForm(schema: Schema & { required?: string[] }, values: Record<string, unknown> = {}, advanced: string[] = []): string {
+export function renderForm(
+  schema: Schema & { required?: string[] },
+  values: Record<string, unknown> = {},
+  advanced: string[] = [],
+): string {
   const props = Object.entries(schema.properties ?? {});
   const req = new Set(schema.required ?? []);
-  const html = (keys: [string, Schema][]) => keys.map(([k, s]) => field(k, s, values[k], req.has(k))).join("");
+  const html = (keys: [string, Schema][]) =>
+    keys.map(([k, s]) => field(k, s, values[k], req.has(k))).join("");
   const simple = props.filter(([k]) => !advanced.includes(k));
   const adv = props.filter(([k]) => advanced.includes(k));
-  return html(simple) + (adv.length ? `<details class="f-advanced"><summary>More settings</summary>${html(adv)}</details>` : "");
+  return (
+    html(simple) +
+    (adv.length
+      ? `<details class="f-advanced"><summary>More settings</summary>${html(adv)}</details>`
+      : "")
+  );
 }
 
 /** Form entries (name, value) → tool arguments. Empty fields are left out so tool defaults apply. */
-export function formToArgs(schema: Schema, entries: [string, string][]): { args: Record<string, unknown>; problems: string[] } {
+export function formToArgs(
+  schema: Schema,
+  entries: [string, string][],
+): { args: Record<string, unknown>; problems: string[] } {
   const args: Record<string, unknown> = {};
   const problems: string[] = [];
   for (const [key, s] of Object.entries(schema.properties ?? {})) {
     const vals = entries.filter(([k]) => k === key).map(([, v]) => v);
     const w = widgetFor(s);
     const label = s.title ?? key;
-    if (w.kind === "chips") { if (vals.length) args[key] = vals; continue; }
+    if (w.kind === "chips") {
+      if (vals.length) args[key] = vals;
+      continue;
+    }
     const v = vals[0];
-    if (w.kind === "switch") { if (v === "true") args[key] = true; continue; }
+    if (w.kind === "switch") {
+      if (v === "true") args[key] = true;
+      continue;
+    }
     if (v === undefined || v.trim() === "") continue;
     if (w.kind === "range" || w.kind === "number") {
       const n = Number(v);
       if (!Number.isFinite(n)) problems.push(`${label}: enter a number`);
-      else if (w.kind === "range" && (n < w.min || n > w.max)) problems.push(`${label}: choose from ${w.min} to ${w.max}`);
+      else if (w.kind === "range" && (n < w.min || n > w.max))
+        problems.push(`${label}: choose from ${w.min} to ${w.max}`);
       else if (w.integer && !Number.isInteger(n)) problems.push(`${label}: enter a whole number`);
       else args[key] = n;
     } else if (w.kind === "paste") {
-      try { args[key] = typeOf(s) === "string" ? v : JSON.parse(v); } catch { problems.push(`${label}: this isn't valid JSON`); }
+      try {
+        args[key] = typeOf(s) === "string" ? v : JSON.parse(v);
+      } catch {
+        problems.push(`${label}: this isn't valid JSON`);
+      }
     } else args[key] = v;
   }
   return { args, problems };
@@ -114,8 +164,12 @@ export function argsSummary(schema: Schema, args: Record<string, unknown>): stri
     const v = args[key];
     if (v === undefined) continue;
     const w = widgetFor(s);
-    const name = (x: unknown) => ("choices" in w ? w.choices.find((c) => c.value === String(x))?.label : undefined) ?? String(x);
-    parts.push(`${label}: ${Array.isArray(v) ? v.map(name).join(", ") : typeof v === "object" ? "pasted" : name(v)}`);
+    const name = (x: unknown) =>
+      ("choices" in w ? w.choices.find((c) => c.value === String(x))?.label : undefined) ??
+      String(x);
+    parts.push(
+      `${label}: ${Array.isArray(v) ? v.map(name).join(", ") : typeof v === "object" ? "pasted" : name(v)}`,
+    );
   }
   return parts.length ? parts.join(" · ") : "Default settings";
 }
