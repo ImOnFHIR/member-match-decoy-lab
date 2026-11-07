@@ -1,0 +1,3 @@
+# Commits that only reformatted code. GitHub and `git blame` skip them.
+# Prettier, layout only
+32670aa40799b99cdde0c8441fd6ce1ef1409e03
