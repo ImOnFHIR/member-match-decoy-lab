@@ -2,6 +2,27 @@
 
 Newest session first.
 
+## 2026-11-08 session (shared console moved out)
+Completed:
+- The tool contract, ToolView v1, renderer, form and dev console moved to their own repo, ImOnFHIR/mcp-tool-console (Nick, 2026-11-07: "move to its own repo"). This repo installs it pinned to 9abccf7.
+- Deleted here: `src/tool-meta.ts`, `src/ui/{view,render,form,styles}.ts`, `src/ui/browser/console-main.ts`, `src/console/*`, `docs/tool-view.schema.json`, `test/helpers/fake-mcp.ts`. Imports now point at the package.
+- Stays here: the in-Claude view (`src/ui/browser/view-main.ts`, built by `scripts/ui-build.mjs`), `test/views/` (conformance views), `test/ui-render.test.ts` (this repo's views and live schema through the pinned renderer).
+- `test/console.test.ts` is now two tests: this repo's server in the package's console. The console's own rules are tested in mcp-tool-console.
+- That move fixed four safety gaps codex review found in the moved code (also present here before): schema bounds and table-cell statuses could inject HTML, a committed config could pass environment variables, and the cost tick carried over between runs.
+- Claude Desktop: this server is added to its config (backup kept beside it). The Desktop test itself waits on Nick.
+- Nick, 2026-11-07: the imonfhir page is Nick's to plan with the imonfhir UX agent. No imonfhir work from this repo, and no handoff brief.
+
+Remaining:
+- **Don't merge until mcp-tool-console is public.** It was created private (Nick's choice). Until it's public, nobody else can install this repo.
+- Claude Desktop test: say "run the decoy test" and record card or plain text.
+- Phone-width check of the console: still CSS-only.
+- Tasks 10–11.
+
+Deviations:
+- `npm test` count drops from 190 to 176: 14 console tests moved with the console.
+
+Tests: `npm test` 176/176; decoys:lint ✓; leak:check 0 violations (105 files); manifest:check ✓ (afd4a0787ca3, unchanged); validate:fhir 6/6, 0 errors. `dist/ui/view.html` 539 KB (+189 bytes from the escaping fix). Smoke test from another folder: one tool, view resource listed, result view present. `mcp-tool-console` command starts this server and serves its page. No AI calls; spend unchanged.
+
 ## 2026-11-07 session
 Completed:
 - This file brought up to date and reordered newest first, as AGENTS.md asks. Older sections are unchanged apart from order.

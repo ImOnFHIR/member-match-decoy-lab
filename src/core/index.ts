@@ -12,9 +12,9 @@ import { MATCHER_INFO, relaxedConfidence, DEFAULT_RELAXED_CONFIDENCE } from "../
 import { scoreOne, tally, type Answer } from "../scorer.js";
 import { befriend, renderSummary, type FriendlyScoreboard } from "../report.js";
 import { toView } from "../report-view.js";
-import type { ToolView } from "../ui/view.js";
+import type { ToolView } from "mcp-tool-console";
 
-export { checkView, type ToolView } from "../ui/view.js";
+export { checkView, type ToolView } from "mcp-tool-console";
 export { MATCHER_INFO, DEFAULT_RELAXED_CONFIDENCE } from "../matchers/info.js";
 export { CATEGORY_INFO, CATEGORIES } from "../scorer.js";
 export { SYNTHETIC_BANNER } from "../index.js";

@@ -124,7 +124,7 @@ test("mcp: tool _meta declares about, free cost, form hints and presets that run
   assert.deepEqual(meta["com.imonfhir/form"].advanced, ["relaxed_confidence", "detail"]);
   const presets = meta["com.imonfhir/presets"];
   assert.ok(presets.some((p: any) => p.label === "Try: the borrowed card"));
-  const { checkView } = await import("../src/ui/view.js");
+  const { checkView } = await import("mcp-tool-console");
   for (const p of presets) {
     const r: any = await client.callTool({ name: "score_member_match", arguments: p.args });
     assert.notEqual(r.isError, true, `${p.id}: ${JSON.stringify(r.content)}`);

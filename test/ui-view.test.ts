@@ -1,8 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { checkView, type ToolView } from "../src/ui/view.js";
-import { describe as describeTool } from "../src/tool-meta.js";
+import { checkView, describe as describeTool, type ToolView } from "mcp-tool-console";
 import { ABOUT, createMcpServer } from "../src/mcp-server.js";
 import { toView } from "../src/report-view.js";
 import { befriend } from "../src/report.js";
