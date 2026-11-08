@@ -1,9 +1,9 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync, readdirSync } from "node:fs";
-import { renderView, requiredText, esc } from "../src/ui/render.js";
-import { renderForm, formToArgs, widgetFor, argsSummary } from "../src/ui/form.js";
-import type { ToolView } from "../src/ui/view.js";
+import { renderView, requiredText, esc } from "mcp-tool-console/render";
+import { renderForm, formToArgs, widgetFor, argsSummary } from "mcp-tool-console/form";
+import type { ToolView } from "mcp-tool-console";
 
 const views = readdirSync("test/views").map(
   (f) => [f, JSON.parse(readFileSync(`test/views/${f}`, "utf8")) as ToolView] as const,

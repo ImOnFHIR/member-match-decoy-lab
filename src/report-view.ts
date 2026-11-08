@@ -2,7 +2,7 @@
 import type { FriendlyScoreboard } from "./report.js";
 import { CATEGORIES, CATEGORY_INFO, CORRECT } from "./scorer.js";
 import { labelFor, infoFor } from "./matchers/info.js";
-import { LIMITS, type Bullet, type Status, type ToolView } from "./ui/view.js";
+import { LIMITS, type Bullet, type Status, type ToolView } from "mcp-tool-console";
 
 const clip = (s: string): { text: string; detail?: string } =>
   s.length <= LIMITS.bulletChars

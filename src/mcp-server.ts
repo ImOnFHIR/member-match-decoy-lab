@@ -14,7 +14,7 @@ import { CATEGORIES } from "./scorer.js";
 import { loadDecoys } from "./decoys.js";
 import { befriend, renderText, renderSummary } from "./report.js";
 import { toView } from "./report-view.js";
-import { describe, toolMeta, resultMeta, type About, type Preset } from "./tool-meta.js";
+import { describe, toolMeta, resultMeta, type About, type Preset } from "mcp-tool-console";
 import { existsSync, readFileSync } from "node:fs";
 
 /** The in-Claude view (MCP Apps). Built by `npm run ui:build`; if it isn't built, the tool simply has no view. */
