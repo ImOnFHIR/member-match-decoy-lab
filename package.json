@@ -49,7 +49,7 @@
     "@anthropic-ai/sdk": "1.4.0",
     "@modelcontextprotocol/ext-apps": "1.7.5",
     "@modelcontextprotocol/sdk": "1.32.2",
-    "mcp-tool-console": "github:ImOnFHIR/mcp-tool-console#9abccf770e512dbc9b24d980d22c1072cd96e723",
+    "mcp-tool-console": "git+https://github.com/ImOnFHIR/mcp-tool-console.git#9abccf770e512dbc9b24d980d22c1072cd96e723",
     "zod": "4.6.7"
   }
 }

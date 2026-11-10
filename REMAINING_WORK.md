@@ -2,6 +2,19 @@
 
 Newest session first.
 
+## 2026-11-10 session (re-land of the shared-console move)
+Completed:
+- The 2026-11-08 move (PR #3) never reached `main`. PR #3 was opened against `docs/remaining-work-2026-11-07`. That branch had merged to `main` as PR #2 ninety-one seconds earlier, so PR #3's merge commit `d08b6a7` landed on an orphaned branch, and it is still not an ancestor of `main`. This branch takes the same two commits (`db10d68`, `bace5c9`), merges `main` in, and targets `main`.
+- mcp-tool-console is public, so anyone can install this repo again.
+- `package.json` pins the console as `git+https://github.com/ImOnFHIR/mcp-tool-console.git#9abccf7…` (full SHA). npm still writes the lockfile's `resolved` as `git+ssh://` for any GitHub dependency. That is harmless: with no SSH key, npm falls back to https, and a clean `npm ci` with no credentials succeeds.
+- Same pin as PR #3 (`9abccf7`). Moving to the console's newer `main` is its own reviewed change.
+
+Remaining:
+- After this merges: delete the branches `docs/remaining-work-2026-11-07` and `feat/use-mcp-tool-console` (maintainer).
+- The console pin bump, the `package` command and the committed package parts (separate PRs).
+
+Tests: see the PR body (counts are derived from the run, not typed here).
+
 ## 2026-11-08 session (shared console moved out)
 Completed:
 - The tool contract, ToolView v1, renderer, form and dev console moved to their own repo, ImOnFHIR/mcp-tool-console (Nick, 2026-11-07: "move to its own repo"). This repo installs it pinned to 9abccf7.
@@ -13,7 +26,7 @@ Completed:
 - Nick, 2026-11-07: the imonfhir page is Nick's to plan with the imonfhir UX agent. No imonfhir work from this repo, and no handoff brief.
 
 Remaining:
-- **Don't merge until mcp-tool-console is public.** It was created private (Nick's choice). Until it's public, nobody else can install this repo.
+- ~~**Don't merge until mcp-tool-console is public.**~~ Done 2026-11-10: the repo is public (see the 2026-11-10 re-land section above).
 - Claude Desktop test: say "run the decoy test" and record card or plain text.
 - Phone-width check of the console: still CSS-only.
 - Tasks 10–11.
