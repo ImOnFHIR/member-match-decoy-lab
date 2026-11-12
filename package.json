@@ -21,7 +21,7 @@
     "score": "npm run -s build && node dist/src/score-cli.js",
     "golden:update": "npm run -s build && node scripts/golden-update.mjs",
     "report": "npm run -s build && node dist/src/report-cli.js",
-    "package": "npm run -s build && node scripts/package.mjs",
+    "package": "npm run -s ui:build && node scripts/package.mjs",
     "ui:build": "npm run -s build && tsc -p tsconfig.ui.json && node scripts/ui-build.mjs",
     "console": "npm run -s build && mcp-tool-console",
     "format": "prettier --write \"**/*.{ts,mts,cts,js,mjs,cjs}\"",

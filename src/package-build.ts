@@ -4,9 +4,12 @@
 //                                    package.json, tools/*.json, views/**, runs/**, PROVENANCE.json
 //                                    (sha256 of every file, and packageDigest). test/package.test.ts
 //                                    rebuilds it and fails on any difference.
+//   manifest/browser.sha256.json     COMMITTED. The sha256 of core.js and data.json. mcp-server.ts
+//                                    advertises it as the tool's `_meta["com.imonfhir/browser"]`, so
+//                                    the package's packageDigest covers the browser code.
 //   dist/package/decoy-lab/browser/  BUILT. core.js (the scorer, browser-safe), data.json (decoys,
 //                                    locked answer key, the 6 requests), LICENSE, NOTICE and a
-//                                    PROVENANCE.json that names the committed package's digest.
+//                                    PROVENANCE.json (each file's sha256, the package's digest).
 //
 // Node only. Recorded AI runs stay in fixtures/runs/ as scripts/record-ai-run.mjs writes them; this
 // module converts them to the package's recorded-run shape on the way in.
@@ -96,19 +99,16 @@ const sha256 = (b: Buffer | string) => createHash("sha256").update(b).digest("he
 export const NOTICE =
   "member-match-decoy-lab\nCopyright 2026 ImOnFHIR. Licensed under the Apache License, Version 2.0.\nhttps://github.com/ImOnFHIR/member-match-decoy-lab\nSynthetic data only; not a production matching recommendation.\n";
 
-/**
- * The browser half, into `outDir` (replaced). Its PROVENANCE.json records each file's sha256, the
- * lock digest, the commit and whether the tree was dirty, and the committed package's digest, so a
- * consumer can check the two halves belong together.
- */
-export async function buildBrowser(
-  outDir: string,
-  meta: { commit: string; dirty: boolean; packageDigest: string },
-): Promise<Record<string, string>> {
+/** The browser files whose sha256 the package pins (through the tool's `_meta`). */
+export const PINNED_BROWSER_FILES = ["core.js", "data.json"] as const;
+/** Committed. mcp-server.ts advertises it as `_meta["com.imonfhir/browser"]`. */
+export const BROWSER_DIGEST = join("manifest", "browser.sha256.json");
+
+/** Builds the browser files into `outDir` (replaced) and returns every file's sha256. */
+export async function buildBrowserFiles(outDir: string): Promise<Record<string, string>> {
   rmSync(outDir, { recursive: true, force: true });
   mkdirSync(outDir, { recursive: true });
-  const data = loadCoreData(".");
-  writeFileSync(join(outDir, "data.json"), JSON.stringify(data) + "\n");
+  writeFileSync(join(outDir, "data.json"), JSON.stringify(loadCoreData(".")) + "\n");
   await build({
     entryPoints: ["src/core/index.ts"],
     bundle: true,
@@ -124,21 +124,37 @@ export async function buildBrowser(
   });
   copyFileSync("LICENSE", join(outDir, "LICENSE"));
   writeFileSync(join(outDir, "NOTICE"), NOTICE);
-  const files = Object.fromEntries(
+  return Object.fromEntries(
     readdirSync(outDir)
       .toSorted()
       .map((f) => [f, sha256(readFileSync(join(outDir, f)))]),
   );
+}
+
+/** The text of manifest/browser.sha256.json for these browser file hashes. */
+export const browserDigestText = (files: Record<string, string>) =>
+  canonical(Object.fromEntries(PINNED_BROWSER_FILES.map((f) => [f, files[f]])));
+
+/**
+ * The browser half's PROVENANCE.json: each file's sha256, the lock, the commit and whether the tree
+ * was dirty, and the package's digest. The binding a consumer can trust runs the other way: the
+ * pinned packageDigest covers tools/score_member_match.json, whose `_meta["com.imonfhir/browser"]`
+ * holds the sha256 of core.js and data.json.
+ */
+export function writeBrowserProvenance(
+  outDir: string,
+  files: Record<string, string>,
+  meta: { commit: string; dirty: boolean; packageDigest: string },
+) {
   writeFileSync(
     join(outDir, "PROVENANCE.json"),
     canonical({
       source: "https://github.com/ImOnFHIR/member-match-decoy-lab",
       commit: meta.commit,
       dirty: meta.dirty,
-      lockDigest: data.lockDigest,
+      lockDigest: loadCoreData(".").lockDigest,
       packageDigest: meta.packageDigest,
       files,
     }),
   );
-  return files;
 }

@@ -10,12 +10,16 @@ import { buildPackage, readRuns } from "mcp-tool-console/package";
 import { loadConsoleConfig } from "mcp-tool-console/console";
 import { loadCoreData } from "../src/core/data-node.js";
 import {
+  BROWSER_DIGEST,
   PACKAGE_DIR,
+  PINNED_BROWSER_FILES,
   RUNS_SOURCE,
   SERVER_ID,
   TOOL,
-  buildBrowser,
+  browserDigestText,
+  buildBrowserFiles,
   toPackageRun,
+  writeBrowserProvenance,
   writePackageRuns,
 } from "../src/package-build.js";
 
@@ -73,17 +77,37 @@ test("package: the committed package/decoy-lab is exactly a fresh build", async 
   assert.ok(built.called.length > 0, "no preset ran");
 });
 
-test("browser half: every file matches its PROVENANCE, which names the committed package", async () => {
+test("browser half: the package pins core.js and data.json, and a fresh build matches the pin", async () => {
   const dir = tmp("browser");
+  const files = await buildBrowserFiles(dir);
+  assert.equal(
+    readFileSync(BROWSER_DIGEST, "utf8"),
+    browserDigestText(files),
+    `${BROWSER_DIGEST} is stale: npm run package`,
+  );
+  // The committed tool entry advertises exactly those hashes, so the pinned packageDigest covers
+  // the browser code: swap core.js and its hash no longer matches what the package pins.
+  const tool = JSON.parse(readFileSync(join(PACKAGE_DIR, "tools", `${TOOL}.json`), "utf8"));
+  const pin = tool._meta["com.imonfhir/browser"];
+  assert.deepEqual(pin, JSON.parse(readFileSync(BROWSER_DIGEST, "utf8")));
+  assert.deepEqual(Object.keys(pin).toSorted(), [...PINNED_BROWSER_FILES].toSorted());
+  for (const f of PINNED_BROWSER_FILES)
+    assert.equal(sha256(readFileSync(join(dir, f))), pin[f], `${f} differs from the package's pin`);
+
+  // Its own PROVENANCE.json: every file's sha256, the lock, and the package's digest.
   const pkg = JSON.parse(readFileSync(join(PACKAGE_DIR, "PROVENANCE.json"), "utf8"));
-  await buildBrowser(dir, { commit: "test", dirty: true, packageDigest: pkg.packageDigest });
+  writeBrowserProvenance(dir, files, {
+    commit: "test",
+    dirty: true,
+    packageDigest: pkg.packageDigest,
+  });
   const prov = JSON.parse(readFileSync(join(dir, "PROVENANCE.json"), "utf8"));
   const seen = walk(dir).filter((f) => f !== "PROVENANCE.json");
   assert.deepEqual(seen.toSorted(), ["LICENSE", "NOTICE", "core.js", "data.json"]);
   assert.deepEqual(Object.keys(prov.files).toSorted(), seen.toSorted());
   for (const f of seen) assert.equal(sha256(readFileSync(join(dir, f))), prov.files[f], f);
-  assert.equal(prov.packageDigest, pkg.packageDigest);
   assert.match(prov.packageDigest, /^sha256:[0-9a-f]{64}$/);
+  assert.equal(prov.packageDigest, pkg.packageDigest);
   assert.equal(
     prov.lockDigest,
     readFileSync("manifest/ground-truth.sha256", "utf8").split(/\s+/)[0],

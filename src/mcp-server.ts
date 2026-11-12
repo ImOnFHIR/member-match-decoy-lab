@@ -24,6 +24,9 @@ export const VIEW_MIME = "text/html;profile=mcp-app";
 /** Repo root, so the server works whatever directory the MCP client starts it from. */
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..", "..");
 const VIEW_FILE = `${ROOT}/dist/ui/view.html`;
+// The browser half's sha256 (core.js, data.json), committed by `npm run package`. Advertised in the
+// tool's `_meta`, so the package's pinned packageDigest covers the browser code too.
+const BROWSER_DIGEST_FILE = `${ROOT}/manifest/browser.sha256.json`;
 const set = loadDecoys(`${ROOT}/decoys/decoys.json`);
 const FREE = MATCHER_INFO.filter((m) => !m.costsMoney);
 
@@ -172,6 +175,9 @@ export function createMcpServer(): McpServer {
           cost: { free: true },
           form: { advanced: ["relaxed_confidence", "detail"] },
         }),
+        ...(existsSync(BROWSER_DIGEST_FILE)
+          ? { "com.imonfhir/browser": JSON.parse(readFileSync(BROWSER_DIGEST_FILE, "utf8")) }
+          : {}),
         // MCP Apps: both key forms, as @modelcontextprotocol/ext-apps registerAppTool writes them.
         ...(existsSync(VIEW_FILE)
           ? { ui: { resourceUri: VIEW_URI }, "ui/resourceUri": VIEW_URI }
