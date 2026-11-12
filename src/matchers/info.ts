@@ -13,15 +13,15 @@ export interface MatcherInfo {
 export const MATCHER_INFO: MatcherInfo[] = [
   {
     id: "identity-strict",
-    label: "Identity matcher, strict",
+    label: "Scored identity matcher, strict",
     costsMoney: false,
-    short: "Nick's matcher (C-057); accepts look-alikes only at 90%+.",
+    short: "Scores look-alikes on name and birth date; accepts only at 90%+.",
     summary:
-      "Nick's event-sourced identity matcher (C-057) at its own setting: accepts a look-alike only when it is at least 90% sure; otherwise sends it to human review.",
+      "Checks the member ID first, then scores how alike the name and birth date are. Accepts a look-alike only when at least 90% sure; otherwise sends it to human review.",
   },
   {
     id: "identity-relaxed",
-    label: "Identity matcher, relaxed",
+    label: "Scored identity matcher, relaxed",
     costsMoney: false,
     short: "Same matcher; accepts look-alikes at a level you set.",
     summary: "The same matcher, but it accepts a look-alike at a confidence you set (default 85%).",
