@@ -17,6 +17,10 @@
         "A test bench for HRex $member-match: does a matcher send someone's records to the wrong person?"
       ]
     },
+    "com.imonfhir/browser": {
+      "core.js": "b2b32baea580ef54582fe4a14403bc221fba704db652324c4441753528ef4db6",
+      "data.json": "b945fd929cbfe402f762117c322a8816ed71738142a08b59fb9628dde335a820"
+    },
     "com.imonfhir/cost": {
       "free": true
     },
