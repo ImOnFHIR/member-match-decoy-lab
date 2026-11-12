@@ -1,0 +1,15 @@
+{
+  "files": {
+    "package.json": "a4a40854705dc13cd2d7ebc23d20b4aa074958c3a146fb69255014868a8b8952",
+    "runs/score_member_match/ai-2026-11-04.json": "b305f32621e4668325ac131facf891e100b5fe6c4721525370bd275e138a0852",
+    "tools/score_member_match.json": "97125f599d2240ff45748be5e625cee46225f37b7a9d8e916231dc4813da7661",
+    "views/score_member_match/borrowed-card.json": "e8e88594d3f71f711a6e20ed18ac1c3bf1f6a80f8db9123fe0850e0066d57d07",
+    "views/score_member_match/consent.json": "00f1df1fae8fb413ad538a9dbf69d2630a993f5d61ac3975d9e472316a854e8a",
+    "views/score_member_match/everything.json": "e0231ea4723c0fa02570878725f3e523e16e2b520717fdf1a3550cbab02c43f4",
+    "views/score_member_match/father-son.json": "2895bf480c04f2debd2ab92ebe8e068d696530c5427f6b5bc922fd14f98268e2",
+    "views/score_member_match/stricter.json": "f8fe96ce2be9f39e5894af994a483e8aadde94733c3d89dce785822460cf875f",
+    "views/score_member_match/twins.json": "48fdad446a6857867133f434195395a475a9792168a5912d7de016bf650eecc1"
+  },
+  "packageDigest": "sha256:4911f888330987a65c0f454d39ff4a45f20623195a5a7aa6c7a7850ee5f11c56",
+  "v": 1
+}
