@@ -11,6 +11,6 @@
     "skipLibCheck": true,
     "types": ["node"]
   },
-  "include": ["mcp.ts", "src/**/*.ts", "test/**/*.ts"],
+  "include": ["mcp.ts", "mcp-http.ts", "src/**/*.ts", "test/**/*.ts"],
   "exclude": ["src/ui/browser/**"]
 }
