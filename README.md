@@ -91,6 +91,8 @@ npm run leak:check     # leak guard; needs a banlist outside this repo (LEAK_GUA
 npm run console    # prints a local link: http://127.0.0.1:4317/#token=…
 ```
 
+The console, the result view format (ToolView) and the renderer come from [mcp-tool-console](https://github.com/ImOnFHIR/mcp-tool-console), pinned to a commit in `package.json`. That repo's README covers the full contract and the console's safety rules.
+
 - **One full-width page per tool:** what it is, what it does and how to use it; example buttons ("Try: the borrowed card"); a plain form; Run. After a run, the result comes first and the settings fold into one line.
 - **Technical details** (bottom right): the raw request and response, the tool definition, the server log, and the matching Inspector command.
 - **Safe by default:**

@@ -3,8 +3,8 @@
  * Uses the result's _meta view; if a host drops _meta, rebuilds the card from structuredContent.
  */
 import { App } from "@modelcontextprotocol/ext-apps";
-import { renderView, esc } from "../render.js";
-import { checkView, type ToolView } from "../view.js";
+import { renderView, esc } from "mcp-tool-console/render";
+import { checkView, type ToolView } from "mcp-tool-console";
 import { toView } from "../../report-view.js";
 
 const root = document.getElementById("root")!;

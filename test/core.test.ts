@@ -11,7 +11,7 @@ import { loadCoreData } from "../src/core/data-node.js";
 import { CONFORMANCE_RUNS } from "../src/core/conformance.js";
 import { runScoreboard } from "../src/run.js";
 import { buildMatchers } from "../src/matchers/registry.js";
-import { checkView } from "../src/ui/view.js";
+import { checkView } from "mcp-tool-console";
 
 const data = loadCoreData(".");
 const strip = (rows: any[]) =>
