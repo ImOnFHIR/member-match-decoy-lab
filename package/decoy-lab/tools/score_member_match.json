@@ -1,0 +1,381 @@
+{
+  "_meta": {
+    "com.imonfhir/about": {
+      "howToUse": [
+        "Run it with no settings to see the result.",
+        "Set detail to \"full\" to see every answer explained."
+      ],
+      "safeToRun": [
+        "Synthetic data. Read-only. Free. Nothing leaves this machine."
+      ],
+      "whatItDoes": [
+        "Sends 6 synthetic test requests, each with a hidden trap, to up to 4 matchers.",
+        "Checks every answer against a locked answer key.",
+        "Tells you who got it right, who refused safely, and who sent records to the wrong person."
+      ],
+      "whatItIs": [
+        "A test bench for HRex $member-match: does a matcher send someone's records to the wrong person?"
+      ]
+    },
+    "com.imonfhir/browser": {
+      "core.js": "b2b32baea580ef54582fe4a14403bc221fba704db652324c4441753528ef4db6",
+      "data.json": "b945fd929cbfe402f762117c322a8816ed71738142a08b59fb9628dde335a820"
+    },
+    "com.imonfhir/cost": {
+      "free": true
+    },
+    "com.imonfhir/form": {
+      "advanced": [
+        "relaxed_confidence",
+        "detail"
+      ]
+    },
+    "com.imonfhir/presets": [
+      {
+        "args": {},
+        "id": "everything",
+        "label": "Run everything"
+      },
+      {
+        "args": {
+          "cases": [
+            "D4-card-mixup"
+          ]
+        },
+        "id": "borrowed-card",
+        "label": "Try: the borrowed card"
+      },
+      {
+        "args": {
+          "cases": [
+            "D2-twins"
+          ]
+        },
+        "id": "twins",
+        "label": "Try: the twins"
+      },
+      {
+        "args": {
+          "cases": [
+            "D1-senior-junior"
+          ]
+        },
+        "id": "father-son",
+        "label": "Try: father and son"
+      },
+      {
+        "args": {
+          "cases": [
+            "D3-consent-expired",
+            "D3b-consent-unsegmentable"
+          ]
+        },
+        "id": "consent",
+        "label": "Try: the consent problems"
+      },
+      {
+        "args": {
+          "relaxed_confidence": 90
+        },
+        "id": "stricter",
+        "label": "Try: a stricter relaxed matcher (90%)"
+      }
+    ],
+    "ui": {
+      "resourceUri": "ui://member-match-decoy-lab/view.html"
+    },
+    "ui/resourceUri": "ui://member-match-decoy-lab/view.html"
+  },
+  "annotations": {
+    "destructiveHint": false,
+    "idempotentHint": true,
+    "openWorldHint": false,
+    "readOnlyHint": true
+  },
+  "description": "WHAT IT IS\n• A test bench for HRex $member-match: does a matcher send someone's records to the wrong person?\n\nWHAT IT DOES\n• Sends 6 synthetic test requests, each with a hidden trap, to up to 4 matchers.\n• Checks every answer against a locked answer key.\n• Tells you who got it right, who refused safely, and who sent records to the wrong person.\n\nSETTINGS (all optional)\n• matchers: which matchers to test. Default: all 4.\n• cases: which test requests to run. Default: all 6.\n• relaxed_confidence: 75 to 100. Default 85.\n• detail: \"summary\" (default) or \"full\".\n\nHOW TO USE\n• Run it with no settings to see the result.\n• Set detail to \"full\" to see every answer explained.\n\nMATCHERS\n• identity-strict: Nick's matcher (C-057); accepts look-alikes only at 90%+.\n• identity-relaxed: Same matcher; accepts look-alikes at a level you set.\n• id-first: Trusts the ID on the card first.\n• check-every-field: ID, name, birth date and gender must all agree.\n\nTEST REQUESTS\n• D0-control: Control: clean card, clean demographics\n• D1-senior-junior: Senior and Junior on one card\n• D2-twins: Twins on one policy, initial only\n• D3-consent-expired: Right person, consent the server can't honour\n• D3b-consent-unsegmentable: Right person, consent limited to non-sensitive data\n• D4-card-mixup: John's demographics, Jon's card\n\nSAFE TO RUN\n• Synthetic data. Read-only. Free. Nothing leaves this machine.",
+  "execution": {
+    "taskSupport": "forbidden"
+  },
+  "inputSchema": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "properties": {
+      "cases": {
+        "description": "Which test requests to run. Leave empty for all 6.",
+        "examples": [
+          [
+            "D4-card-mixup"
+          ]
+        ],
+        "items": {
+          "anyOf": [
+            {
+              "const": "D0-control",
+              "title": "Control: clean card, clean demographics",
+              "type": "string"
+            },
+            {
+              "const": "D1-senior-junior",
+              "title": "Senior and Junior on one card",
+              "type": "string"
+            },
+            {
+              "const": "D2-twins",
+              "title": "Twins on one policy, initial only",
+              "type": "string"
+            },
+            {
+              "const": "D3-consent-expired",
+              "title": "Right person, consent the server can't honour",
+              "type": "string"
+            },
+            {
+              "const": "D3b-consent-unsegmentable",
+              "title": "Right person, consent limited to non-sensitive data",
+              "type": "string"
+            },
+            {
+              "const": "D4-card-mixup",
+              "title": "John's demographics, Jon's card",
+              "type": "string"
+            }
+          ]
+        },
+        "title": "Test requests to run",
+        "type": "array"
+      },
+      "detail": {
+        "anyOf": [
+          {
+            "const": "summary",
+            "title": "Summary: the result and the problems",
+            "type": "string"
+          },
+          {
+            "const": "full",
+            "title": "Full: every answer, explained",
+            "type": "string"
+          }
+        ],
+        "description": "\"summary\" (default): the result and the problems. \"full\": every answer, explained.",
+        "title": "How much to show"
+      },
+      "matchers": {
+        "description": "Which matchers to test. Leave empty for all 4.",
+        "examples": [
+          [
+            "id-first",
+            "check-every-field"
+          ]
+        ],
+        "items": {
+          "anyOf": [
+            {
+              "const": "identity-strict",
+              "title": "Identity matcher, strict",
+              "type": "string"
+            },
+            {
+              "const": "identity-relaxed",
+              "title": "Identity matcher, relaxed",
+              "type": "string"
+            },
+            {
+              "const": "id-first",
+              "title": "ID-first rules",
+              "type": "string"
+            },
+            {
+              "const": "check-every-field",
+              "title": "Check-every-field rules",
+              "type": "string"
+            }
+          ]
+        },
+        "title": "Matchers to test",
+        "type": "array"
+      },
+      "relaxed_confidence": {
+        "description": "How sure (75 to 100%) the relaxed matcher must be to accept a look-alike. Default 85.",
+        "examples": [
+          90
+        ],
+        "maximum": 100,
+        "minimum": 75,
+        "title": "Relaxed matcher confidence (%)",
+        "type": "integer"
+      }
+    },
+    "type": "object"
+  },
+  "name": "score_member_match",
+  "outputSchema": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "additionalProperties": false,
+    "properties": {
+      "banner": {
+        "type": "string"
+      },
+      "headline": {
+        "description": "One sentence: did any matcher send records to the wrong person?",
+        "type": "string"
+      },
+      "manifestDigest": {
+        "description": "Fingerprint of the locked answer key this run was checked against",
+        "type": "string"
+      },
+      "matchers": {
+        "items": {
+          "additionalProperties": false,
+          "properties": {
+            "correct": {
+              "type": "number"
+            },
+            "counts": {
+              "additionalProperties": {
+                "type": "number"
+              },
+              "propertyNames": {
+                "enum": [
+                  "true-match",
+                  "correct-no-match",
+                  "correct-multiple",
+                  "consent-constrained",
+                  "decoy-confusion",
+                  "consent-ignored",
+                  "missed-match",
+                  "error"
+                ],
+                "type": "string"
+              },
+              "required": [
+                "true-match",
+                "correct-no-match",
+                "correct-multiple",
+                "consent-constrained",
+                "decoy-confusion",
+                "consent-ignored",
+                "missed-match",
+                "error"
+              ],
+              "type": "object"
+            },
+            "label": {
+              "type": "string"
+            },
+            "matcher": {
+              "type": "string"
+            },
+            "summary": {
+              "type": "string"
+            },
+            "total": {
+              "type": "number"
+            }
+          },
+          "required": [
+            "matcher",
+            "label",
+            "summary",
+            "counts",
+            "correct",
+            "total"
+          ],
+          "type": "object"
+        },
+        "type": "array"
+      },
+      "rows": {
+        "items": {
+          "additionalProperties": false,
+          "properties": {
+            "case": {
+              "type": "string"
+            },
+            "category": {
+              "enum": [
+                "true-match",
+                "correct-no-match",
+                "correct-multiple",
+                "consent-constrained",
+                "decoy-confusion",
+                "consent-ignored",
+                "missed-match",
+                "error"
+              ],
+              "type": "string"
+            },
+            "expected": {
+              "type": "string"
+            },
+            "expectedMember": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "explanation": {
+              "type": "string"
+            },
+            "matcher": {
+              "type": "string"
+            },
+            "observed": {
+              "type": "string"
+            },
+            "plain": {
+              "type": "string"
+            },
+            "reasonMismatch": {
+              "type": "boolean"
+            },
+            "result": {
+              "type": "string"
+            },
+            "rightAnswer": {
+              "type": "string"
+            },
+            "subjectMemberId": {
+              "type": "string"
+            },
+            "title": {
+              "type": "string"
+            },
+            "wrongPerson": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          },
+          "required": [
+            "matcher",
+            "case",
+            "title",
+            "plain",
+            "rightAnswer",
+            "result",
+            "explanation",
+            "expected",
+            "expectedMember",
+            "observed",
+            "category",
+            "reasonMismatch",
+            "wrongPerson",
+            "subjectMemberId"
+          ],
+          "type": "object"
+        },
+        "type": "array"
+      }
+    },
+    "required": [
+      "banner",
+      "headline",
+      "manifestDigest",
+      "matchers",
+      "rows"
+    ],
+    "type": "object"
+  },
+  "title": "Member-match decoy test"
+}

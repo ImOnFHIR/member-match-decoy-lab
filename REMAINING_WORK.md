@@ -2,6 +2,27 @@
 
 Newest session first.
 
+## 2026-11-12 session (the tool package)
+Completed:
+- The console pin moved to mcp-tool-console `8b791f8`, the commit that adds its `package` command. All 176 existing tests pass on it.
+- `npm run vendor:build` is now `npm run package` (`scripts/package.mjs`, `src/package-build.ts`).
+  - `package/decoy-lab/` is committed and written by the console's command, which refuses a dirty tree.
+  - `core.js`, `data.json`, `LICENSE` and `NOTICE` stay a build output in `dist/package/decoy-lab/browser/`.
+  - The sha256 of `core.js` and `data.json` is committed in `manifest/browser.sha256.json`. The tool advertises it in `_meta["com.imonfhir/browser"]`, so the pinned `packageDigest` covers the browser code. That was a codex review finding: at first, only a self-reported PROVENANCE named the digest.
+  - `npm run package` builds the UI first, so a fresh checkout packages the same tool entry, including its MCP App link. That was also a codex review finding.
+  - `scripts/vendor-build.mjs` and its test are gone; the README has the new layout.
+- The 2026-11-04 AI run is converted to the package's recorded-run shape on the way in. The source file in `fixtures/runs/` is unchanged and keeps every rationale. The converter refuses a run scored against another lock.
+- `test/package.test.ts`:
+  - the conversion, checked with the console's own `readRuns`
+  - the refusals
+  - the committed folder against a fresh build, file for file
+  - the browser half's hashes and its link to the package
+
+Remaining:
+- A consumer site vendors the package: it pins `packageDigest`, re-checks every hash and refuses `dirty: true`.
+
+Tests: `npm test` (counts in the PR body).
+
 ## 2026-11-10 session (re-land of the shared-console move)
 Completed:
 - The 2026-11-08 move (PR #3) never reached `main`. PR #3 was opened against `docs/remaining-work-2026-11-07`. That branch had merged to `main` as PR #2 ninety-one seconds earlier, so PR #3's merge commit `d08b6a7` landed on an orphaned branch, and it is still not an ancestor of `main`. This branch takes the same two commits (`db10d68`, `bace5c9`), merges `main` in, and targets `main`.

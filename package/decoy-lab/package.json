@@ -1,0 +1,8 @@
+{
+  "id": "decoy-lab",
+  "name": "member-match-decoy-lab",
+  "tools": [
+    "score_member_match"
+  ],
+  "version": "0.1.0"
+}
