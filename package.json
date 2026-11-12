@@ -18,6 +18,7 @@
     "serve": "npm run -s build && node dist/src/serve.js",
     "spend:check": "npm run -s build && node dist/src/spend-cli.js",
     "llm:try": "npm run -s build && node dist/src/llm-try.js",
+    "start:http": "npm run -s build && node dist/mcp-http.js",
     "score": "npm run -s build && node dist/src/score-cli.js",
     "golden:update": "npm run -s build && node scripts/golden-update.mjs",
     "report": "npm run -s build && node dist/src/report-cli.js",

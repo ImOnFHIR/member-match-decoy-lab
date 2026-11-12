@@ -140,6 +140,20 @@ Claude Code config example:
 { "mcpServers": { "member-match-decoy-lab": { "command": "node", "args": ["/path/to/member-match-decoy-lab/dist/mcp.js"] } } }
 ```
 
+## Run over HTTP
+
+The same server and the same tool, over MCP Streamable HTTP: stateless, `POST /mcp`, plus `GET /healthz`. It listens on `PORT` (default 8080). It reads no API key and no spend settings, and it never runs the AI matchers, so a call is free and every call returns what the stdio server returns.
+
+```sh
+npm run start:http                       # builds, then serves http://127.0.0.1:8080/mcp
+
+docker build -t member-match-decoy-lab .
+docker run --rm -p 8080:8080 member-match-decoy-lab
+curl http://127.0.0.1:8080/healthz       # ok
+```
+
+There is no sign-in in the server. Put it behind something that has one before it leaves your machine.
+
 ## Licence
 
 Apache-2.0. See [LICENSE](LICENSE).

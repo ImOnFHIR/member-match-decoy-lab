@@ -2,6 +2,14 @@
 
 Newest session first.
 
+## 2026-11-12 session (HTTP mode)
+Completed:
+- `src/mcp-http.ts` + `mcp-http.ts`: the same `createMcpServer()` over MCP Streamable HTTP. Stateless (a fresh server and transport per request), `POST /mcp`, `GET /healthz`, 1 MB body cap, 30 s request timeout, plain JSON errors. `npm run start:http`.
+- `Dockerfile` and `.dockerignore`: multi-stage `node:22-slim`, non-root, `HEALTHCHECK`, no env file and no `.git` in the image. No API key or spend config.
+- `test/mcp-http.test.ts`: tool list and call results equal stdio; `/healthz`; 404; AI matcher refused; bad JSON and oversize body.
+- `tsconfig.json` includes the new entry. `package/decoy-lab/**` and its `packageDigest` are unchanged.
+Remains: no sign-in in the server; the tunnel and Access in front of it are the deployer's.
+
 ## 2026-11-12 session (the tool package)
 Completed:
 - The console pin moved to mcp-tool-console `8b791f8`, the commit that adds its `package` command. All 176 existing tests pass on it.
