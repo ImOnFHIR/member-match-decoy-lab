@@ -1,6 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
+import { readFileSync, readdirSync } from "node:fs";
+import { join } from "node:path";
 import { checkView, describe as describeTool, type ToolView } from "mcp-tool-console";
 import { ABOUT, createMcpServer } from "../src/mcp-server.js";
 import { toView } from "../src/report-view.js";
@@ -8,6 +9,7 @@ import { befriend } from "../src/report.js";
 import { runScoreboard } from "../src/run.js";
 import { buildMatchers } from "../src/matchers/registry.js";
 import { loadDecoys } from "../src/decoys.js";
+import { MATCHER_INFO } from "../src/matchers/info.js";
 
 const ok: ToolView = { v: 1, status: "good", headline: "All good." };
 
@@ -15,6 +17,21 @@ test("tool-meta: describe() reproduces the tool description exactly", () => {
   const desc = (createMcpServer() as any)._registeredTools["score_member_match"].description;
   assert.equal(desc, readFileSync("fixtures/golden/tool-description.txt", "utf8"));
   assert.ok(describeTool(ABOUT).startsWith("WHAT IT IS\n• "));
+});
+
+// What a visitor reads names the matcher by what it does: never a person, an internal component
+// id, or "event-sourced" (the ported matcher has no event store). PROVENANCE.md keeps the history.
+const NOT_PUBLIC = /\bNick\b|\bC-\d{3}\b|event-sourced/;
+test("public text: no person, internal id or event-sourced claim in what the tool shows", () => {
+  const desc = (createMcpServer() as any)._registeredTools["score_member_match"].description;
+  for (const t of [desc, ...MATCHER_INFO.flatMap((m) => [m.label, m.short, m.summary])])
+    assert.doesNotMatch(t, NOT_PUBLIC, t);
+  const walk = (d: string): string[] =>
+    readdirSync(d, { withFileTypes: true }).flatMap((e) =>
+      e.isDirectory() ? walk(join(d, e.name)) : [join(d, e.name)],
+    );
+  for (const file of [...walk("package/decoy-lab"), ...walk("test/views")])
+    assert.doesNotMatch(readFileSync(file, "utf8"), NOT_PUBLIC, file);
 });
 
 test("checkView: a minimal view is valid", () => assert.deepEqual(checkView(ok), []));
