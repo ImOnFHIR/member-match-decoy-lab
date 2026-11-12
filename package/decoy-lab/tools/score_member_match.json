@@ -18,7 +18,7 @@
       ]
     },
     "com.imonfhir/browser": {
-      "core.js": "b2b32baea580ef54582fe4a14403bc221fba704db652324c4441753528ef4db6",
+      "core.js": "f5358dfe1301c64b4fdbefb07032a953f9aa9ac181c536a0c79cafa0225ae44e",
       "data.json": "b945fd929cbfe402f762117c322a8816ed71738142a08b59fb9628dde335a820"
     },
     "com.imonfhir/cost": {
@@ -92,7 +92,7 @@
     "openWorldHint": false,
     "readOnlyHint": true
   },
-  "description": "WHAT IT IS\n• A test bench for HRex $member-match: does a matcher send someone's records to the wrong person?\n\nWHAT IT DOES\n• Sends 6 synthetic test requests, each with a hidden trap, to up to 4 matchers.\n• Checks every answer against a locked answer key.\n• Tells you who got it right, who refused safely, and who sent records to the wrong person.\n\nSETTINGS (all optional)\n• matchers: which matchers to test. Default: all 4.\n• cases: which test requests to run. Default: all 6.\n• relaxed_confidence: 75 to 100. Default 85.\n• detail: \"summary\" (default) or \"full\".\n\nHOW TO USE\n• Run it with no settings to see the result.\n• Set detail to \"full\" to see every answer explained.\n\nMATCHERS\n• identity-strict: Nick's matcher (C-057); accepts look-alikes only at 90%+.\n• identity-relaxed: Same matcher; accepts look-alikes at a level you set.\n• id-first: Trusts the ID on the card first.\n• check-every-field: ID, name, birth date and gender must all agree.\n\nTEST REQUESTS\n• D0-control: Control: clean card, clean demographics\n• D1-senior-junior: Senior and Junior on one card\n• D2-twins: Twins on one policy, initial only\n• D3-consent-expired: Right person, consent the server can't honour\n• D3b-consent-unsegmentable: Right person, consent limited to non-sensitive data\n• D4-card-mixup: John's demographics, Jon's card\n\nSAFE TO RUN\n• Synthetic data. Read-only. Free. Nothing leaves this machine.",
+  "description": "WHAT IT IS\n• A test bench for HRex $member-match: does a matcher send someone's records to the wrong person?\n\nWHAT IT DOES\n• Sends 6 synthetic test requests, each with a hidden trap, to up to 4 matchers.\n• Checks every answer against a locked answer key.\n• Tells you who got it right, who refused safely, and who sent records to the wrong person.\n\nSETTINGS (all optional)\n• matchers: which matchers to test. Default: all 4.\n• cases: which test requests to run. Default: all 6.\n• relaxed_confidence: 75 to 100. Default 85.\n• detail: \"summary\" (default) or \"full\".\n\nHOW TO USE\n• Run it with no settings to see the result.\n• Set detail to \"full\" to see every answer explained.\n\nMATCHERS\n• identity-strict: Scores look-alikes on name and birth date; accepts only at 90%+.\n• identity-relaxed: Same matcher; accepts look-alikes at a level you set.\n• id-first: Trusts the ID on the card first.\n• check-every-field: ID, name, birth date and gender must all agree.\n\nTEST REQUESTS\n• D0-control: Control: clean card, clean demographics\n• D1-senior-junior: Senior and Junior on one card\n• D2-twins: Twins on one policy, initial only\n• D3-consent-expired: Right person, consent the server can't honour\n• D3b-consent-unsegmentable: Right person, consent limited to non-sensitive data\n• D4-card-mixup: John's demographics, Jon's card\n\nSAFE TO RUN\n• Synthetic data. Read-only. Free. Nothing leaves this machine.",
   "execution": {
     "taskSupport": "forbidden"
   },
@@ -171,12 +171,12 @@
           "anyOf": [
             {
               "const": "identity-strict",
-              "title": "Identity matcher, strict",
+              "title": "Scored identity matcher, strict",
               "type": "string"
             },
             {
               "const": "identity-relaxed",
-              "title": "Identity matcher, relaxed",
+              "title": "Scored identity matcher, relaxed",
               "type": "string"
             },
             {
