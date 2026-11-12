@@ -101,6 +101,23 @@ The console, the result view format (ToolView) and the renderer come from [mcp-t
   - never passes API keys to the servers it starts
 - **More servers:** add them in `console.local.json` (gitignored), same shape as `console.config.json`.
 
+## The tool package
+
+`npm run package` makes the package other sites pin, in two halves:
+
+- `package/decoy-lab/` is **committed**. mcp-tool-console's `package` command writes it: `package.json`, `tools/score_member_match.json` (the `tools/list` entry, `_meta` included), `views/score_member_match/<preset>.json` (each free preset, run for real), `runs/score_member_match/ai-2026-11-04.json` (the recorded AI run) and `PROVENANCE.json` (the sha256 of every file, plus `packageDigest`). A consumer pins `packageDigest`. `test/package.test.ts` rebuilds the folder and fails on any difference.
+- `dist/package/decoy-lab/browser/` is **built**, never committed: `core.js` (the scorer, browser-safe), `data.json` (the decoys, the locked answer key and the six requests), `LICENSE`, `NOTICE`, and a `PROVENANCE.json` that records each file's sha256 and the committed package's `packageDigest`.
+
+The command refuses an uncommitted change to a tracked file and writes nothing. So: commit your change, run `npm run package`, then commit `package/decoy-lab/`.
+
+Recorded AI runs stay in `fixtures/runs/` as `scripts/record-ai-run.mjs` writes them, with each matcher's rationale and cost. The package needs one fixed shape (`v, recorded, tool, args, structuredContent, view, model, costUsd, lockDigest`), so `src/package-build.ts` converts each run on the way in:
+
+- `structuredContent` is the scoreboard.
+- `args` names the AI matchers that ran.
+- `costUsd` is their costs added up.
+
+A run scored against a different answer-key lock is refused.
+
 ## Use it from an MCP client
 
 `node dist/mcp.js` (after `npm run build`) is an MCP server with one read-only tool, **`score_member_match`** ("Test member-match matchers against look-alike decoys"). It takes three optional settings:

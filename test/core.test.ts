@@ -1,9 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { execFileSync } from "node:child_process";
-import { createHash } from "node:crypto";
-import { readFileSync, readdirSync, writeFileSync, mkdirSync } from "node:fs";
-import { join } from "node:path";
+import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
 import vm from "node:vm";
 import { build } from "esbuild";
 import { scoreDecoys } from "../src/core/index.js";
@@ -92,36 +89,4 @@ test("conformance views: test/views/*.json match a fresh run and are valid", asy
       `${path} is stale: UPDATE_VIEWS=1 npm test -- core`,
     );
   }
-});
-
-test("vendor bundle: every file matches PROVENANCE and the lock", () => {
-  execFileSync(process.execPath, ["scripts/vendor-build.mjs"], { stdio: "pipe" });
-  const dir = "dist/vendor/member-match-decoy-lab";
-  const prov = JSON.parse(readFileSync(join(dir, "PROVENANCE.json"), "utf8"));
-  const seen: string[] = [];
-  const walk = (d: string, pre = "") => {
-    for (const e of readdirSync(d, { withFileTypes: true })) {
-      const p = join(d, e.name),
-        rel = pre + e.name;
-      if (e.isDirectory()) walk(p, rel + "/");
-      else if (rel !== "PROVENANCE.json") seen.push(rel);
-    }
-  };
-  walk(dir);
-  assert.deepEqual(seen.sort(), Object.keys(prov.files).sort());
-  for (const f of seen)
-    assert.equal(
-      createHash("sha256")
-        .update(readFileSync(join(dir, f)))
-        .digest("hex"),
-      prov.files[f],
-      f,
-    );
-  assert.equal(
-    prov.lockDigest,
-    readFileSync("manifest/ground-truth.sha256", "utf8").split(/\s+/)[0],
-  );
-  const tool = JSON.parse(readFileSync(join(dir, "tool.json"), "utf8"));
-  assert.equal(tool.name, "score_member_match");
-  assert.ok(tool.presets.length && tool.about.whatItIs.length && tool.inputSchema.properties.cases);
 });
