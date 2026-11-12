@@ -2,6 +2,19 @@
 
 Newest session first.
 
+## 2026-11-10 session (test workflow)
+Completed:
+- `.github/workflows/ci.yml`: the repo's first test workflow. Until now it had none. Every "Push on main" run in the Actions history was GitHub's default-setup CodeQL, not the tests, so the 190 tests had never run in Actions.
+- Job `check`: `npm ci`, `format:check`, `lint`, `test`, `decoys:lint`, `manifest:check`, on the Node version in `.nvmrc`.
+- Job `leak-guard`: `leak:check` with the full history checked out. The banlist lives outside this repo, so the job reads it from the repository secrets `LEAK_GUARD_BANLIST_JSON` and `NEUTRALITY_HMAC_KEY`. With no secret it fails closed, the same as a local run with no banlist. It prints only the summary line, because a hit names the blocked term and this repo's logs are public.
+
+Remaining:
+- The two secrets are the maintainer's to add. Until they exist, `leak-guard` is red and `check` is the test signal.
+- PRs from forks get no secrets, so `leak-guard` fails on them. The maintainer runs `leak:check` locally before merging one.
+- The branch that adopts the shared console (`feat/use-mcp-tool-console`) still needs re-landing against `main`. It waits until that package can be installed without credentials.
+
+Tests: `npm test` 190/190; `decoys:lint`, `manifest:check` and `leak:check` (local banlist) pass.
+
 ## 2026-11-07 session
 Completed:
 - This file brought up to date and reordered newest first, as AGENTS.md asks. Older sections are unchanged apart from order.
