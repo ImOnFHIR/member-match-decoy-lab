@@ -17,7 +17,7 @@ HOW TO USE
 • Set detail to "full" to see every answer explained.
 
 MATCHERS
-• identity-strict: Nick's matcher (C-057); accepts look-alikes only at 90%+.
+• identity-strict: Scores look-alikes on name and birth date; accepts only at 90%+.
 • identity-relaxed: Same matcher; accepts look-alikes at a level you set.
 • id-first: Trusts the ID on the card first.
 • check-every-field: ID, name, birth date and gender must all agree.

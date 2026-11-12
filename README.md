@@ -12,8 +12,8 @@ Status: v0 under construction (target 2026-12-02). Progress is in [REMAINING_WOR
 
 | Matcher | Right | What it got wrong |
 |---|---|---|
-| Identity matcher, strict | 5 of 6 | Refused Rowan Quill Jr, who was the right answer (safe, but a miss) |
-| Identity matcher, relaxed | 6 of 6 | |
+| Scored identity matcher, strict | 5 of 6 | Refused Rowan Quill Jr, who was the right answer (safe, but a miss) |
+| Scored identity matcher, relaxed | 6 of 6 | |
 | ID-first rules | 5 of 6 | **Sent Jon Roe's records in answer to a request for John Roe** |
 | Check-every-field rules | 6 of 6 | |
 
@@ -23,8 +23,8 @@ See every answer on the [scoreboard page](report/scoreboard.html) (open it in a 
 
 | Name | Id | What it does |
 |---|---|---|
-| Identity matcher, strict | `identity-strict` | Nick's event-sourced identity matcher (C-057) at its own setting: accepts a look-alike only when at least 90% sure; otherwise sends it to human review. |
-| Identity matcher, relaxed | `identity-relaxed` | The same matcher, accepting a look-alike at a confidence you set: `RELAXED_CONFIDENCE=85` (75–100, default 85). |
+| Scored identity matcher, strict | `identity-strict` | Checks the member ID first, then scores how alike the name and birth date are. Accepts a look-alike only when at least 90% sure; otherwise sends it to human review. Ported from an identity service ([provenance](src/matchers/c057/PROVENANCE.md)). |
+| Scored identity matcher, relaxed | `identity-relaxed` | The same matcher, accepting a look-alike at a confidence you set: `RELAXED_CONFIDENCE=85` (75–100, default 85). |
 | ID-first rules | `id-first` | Trusts the member or subscriber ID on the card; uses name, birth date and gender only to break ties. A common way to build member match. |
 | Check-every-field rules | `check-every-field` | Finds the card's ID, then insists that name, birth date and gender all agree. |
 | AI adjudicator, with rules | `ai-with-rules` | Claude reads the request and the member list, given the HRex matching rules. Costs a few cents per run. |

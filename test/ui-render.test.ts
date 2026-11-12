@@ -93,7 +93,7 @@ test("form: picks the right widget for each input and labels every one", () => {
   const html = renderForm(schema, {}, ["relaxed_confidence", "detail"]);
   for (const [k, s] of Object.entries<any>(schema.properties))
     assert.ok(html.includes(esc(s.title)), `${k} label`);
-  assert.match(html, /Identity matcher, strict/);
+  assert.match(html, /Scored identity matcher, strict/);
   assert.match(html, /John&#39;s demographics, Jon&#39;s card/);
   assert.match(html, /<details class="f-advanced"><summary>More settings<\/summary>/);
   // every input has a label pointing at it
