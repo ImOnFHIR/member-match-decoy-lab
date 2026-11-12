@@ -1,0 +1,47 @@
+name: CI
+on:
+  push:
+    branches: [main]
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  check:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npm run format:check
+      - run: npm run lint
+      - run: npm test
+      - run: npm run decoys:lint
+      - run: npm run manifest:check
+
+  # The banlist lives outside this public repo (tools/check-neutrality.py), so CI reads it
+  # from repository secrets. With no secret the guard fails closed, as it does locally.
+  # Only the summary line is printed: a hit names the blocked term, and this repo's logs
+  # are public.
+  leak-guard:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # the guard also scans every commit message
+      - name: npm run leak:check (summary only)
+        env:
+          LEAK_GUARD_BANLIST_JSON: ${{ secrets.LEAK_GUARD_BANLIST_JSON }}
+          NEUTRALITY_HMAC_KEY: ${{ secrets.NEUTRALITY_HMAC_KEY }}
+        run: |
+          cfg="$RUNNER_TEMP/banlist.json"
+          if [ -n "$LEAK_GUARD_BANLIST_JSON" ]; then printf '%s' "$LEAK_GUARD_BANLIST_JSON" > "$cfg"; fi
+          export LEAK_GUARD_CONFIG="$cfg"
+          if npm run -s leak:check > "$RUNNER_TEMP/leak.log" 2>&1; then
+            tail -n 1 "$RUNNER_TEMP/leak.log"
+          else
+            echo "::error::leak guard failed: $(tail -n 1 "$RUNNER_TEMP/leak.log")"
+            exit 1
+          fi
