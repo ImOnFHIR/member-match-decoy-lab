@@ -2,6 +2,13 @@
 
 Newest session first.
 
+## 2026-11-13 session (console pin: contract 1.1)
+
+Done: `mcp-tool-console` pinned at `2dfdb58` (contract 1.1 with the "AI Interpretation" label, recorded-run envelope `v: 2`). The browser half's `core.js` bundles the console's renderer and checker, so its sha256 changed (`manifest/browser.sha256.json`; `data.json` unchanged) and the package was regenerated: `packageDigest` `sha256:657a016f…` (was `a52495a9…`). Only the tool entry (its `_meta` carries the browser digest) and `PROVENANCE.json` changed; every view and the 2026-11-04 recorded run are byte-identical, read by the console's new reader (still `v: 1`).
+- Tests: 186/186. format:check, lint, decoys:lint, leak:check, manifest:check pass. `validate:fhir` not run (no `.tools/validator_cli.jar` here; no fixture changed).
+- Mutations, each red: the old core.js hash back in the manifest -> "browser half: ... a fresh build matches the pin" and "the committed package/decoy-lab is exactly a fresh build"; the old packageDigest back in PROVENANCE.json -> "the committed package/decoy-lab is exactly a fresh build".
+- Remains: imonfhir pins `packageDigest` in `config/mcp-registry.json` and vendors the package (`scripts/vendor-tool.mts`): that's the next PR there (PR-1.6). The hosted decoy-lab container runs the old build until redeployed.
+
 ## 2026-11-12 session (HTTP mode)
 Completed:
 - `src/mcp-http.ts` + `mcp-http.ts`: the same `createMcpServer()` over MCP Streamable HTTP. Stateless (a fresh server and transport per request), `POST /mcp`, `GET /healthz`, 1 MB body cap, 30 s request timeout, plain JSON errors. `npm run start:http`.
