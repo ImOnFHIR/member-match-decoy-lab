@@ -154,6 +154,52 @@ curl http://127.0.0.1:8080/healthz       # ok
 
 There is no sign-in in the server. Put it behind something that has one before it leaves your machine.
 
+## Run inside your network
+
+The MCP server runs on your own hardware with nothing from ImOnFHIR, Cloudflare or any shared service in the path. It scores the lab's own synthetic requests, takes no data from you, stores nothing, and makes no off-machine network request. Synthetic data only.
+
+**Container.** Build it once with network access (`npm ci` fetches from the npm registry and from GitHub, because `mcp-tool-console` is a git dependency), then run it on a Docker network with `internal: true`:
+
+```sh
+docker build -t member-match-decoy-lab .
+docker network create --internal mm-internal
+docker run --rm --network mm-internal --read-only member-match-decoy-lab
+```
+
+The image runs as the non-root `node` user, listens on `PORT` (default 8080) and answers `GET /healthz`. Reach it from another container on that network at `http://<container>:8080/mcp`. The server has no sign-in; put your own proxy in front of it.
+
+**Stdio.** `npm ci && npm run build`, then `node dist/mcp.js`. Needs Node 22+.
+
+**Environment variables the MCP server reads.** One. It needs no other setting, no key and no config file.
+
+| Variable | Default | Meaning |
+|---|---|---|
+| `PORT` | `8080` | HTTP listen port (`node dist/mcp-http.js`). The stdio server reads nothing. |
+
+**Read only by the command-line tools.** The code under `src/` also reads the variables below. The MCP server never uses them: it builds the four rule-based matchers from the tool's own arguments, never from the environment. They are for `npm run score`, `npm run serve` and the spend and AI tools, which are not part of the image's entry point.
+
+| Variable | Default | Meaning |
+|---|---|---|
+| `RELAXED_CONFIDENCE` | `85` | Relaxed matcher's confidence line, 75 to 100. |
+| `LLM_MODEL` | the code's default model | Model for the AI matchers (`--ai` flags only). |
+| `LLM_EFFORT` | unset | Effort setting for the AI matchers (`--ai` flags only). |
+| `TWILIO_ACCOUNT_SID` | unset | SMS spend alert, AI runs only. |
+| `TWILIO_AUTH_TOKEN` | unset | SMS spend alert, AI runs only. |
+| `TWILIO_FROM_NUMBER` | unset | SMS spend alert, AI runs only. |
+| `SPEND_ALERT_SMS_TO` | unset | SMS spend alert, AI runs only. |
+
+`npm run serve` also reads `PORT` (default 8650, loopback only). The AI matchers use the Anthropic SDK, which reads its own API key from the environment; no key belongs in the image and the image never uses one.
+
+**Offline mode and how it is proven.** There is no offline switch because there is nothing to switch off: the MCP server's code path makes no off-machine request. This repo has no container egress probe (it is not built here). What exists is `test/self-hosting.test.ts`, which starts the real stdio server with `fetch` and TCP connects instrumented to record and refuse anything that is not loopback, runs the tool, and asserts none was attempted; a control in the same file proves the instrumentation catches a call. Running the container on an `internal: true` network is the operator's own backstop.
+
+**What it never sends.** The MCP server sends nothing to anyone: no telemetry, no model call, no alert. Logs go to standard error. Its one network use is the scorer's calls to its own in-process `$member-match` endpoint on `127.0.0.1`, a random free port that never leaves the machine (`src/run.ts`). The only network use in the repo outside it is deliberate and opt-in from the command line: `npm run score -- --ai` (and the two other `--ai-` flags) sends decision prompts of synthetic requests to the Anthropic API, and the spend guard can send an SMS through Twilio. Neither runs unless you pass the flag, and neither is reachable from the MCP server or the image's entry point.
+
+**Model endpoint.** None is needed. The MCP server never calls a model. The AI matchers are optional, command-line only, and wired to the Anthropic SDK; there is no setting in this repo for your own model endpoint.
+
+**No hosted dependency.** The code and the running image use no ImOnFHIR hosting, Cloudflare, imonfhir.com or shared console. The dev console (`npm run console`) is a local tool and is not in the image's entry point.
+
+**Honest limits.** Building the image needs the internet (npm and GitHub). The image also contains the Anthropic SDK and the AI-matcher and SMS-alert code; the MCP entry never calls them, and `test/self-hosting.test.ts` is what keeps that true.
+
 ## Licence
 
 Apache-2.0. See [LICENSE](LICENSE).
