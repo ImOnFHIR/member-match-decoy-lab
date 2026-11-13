@@ -2,7 +2,7 @@
   "files": {
     "package.json": "a4a40854705dc13cd2d7ebc23d20b4aa074958c3a146fb69255014868a8b8952",
     "runs/score_member_match/ai-2026-11-04.json": "b305f32621e4668325ac131facf891e100b5fe6c4721525370bd275e138a0852",
-    "tools/score_member_match.json": "ab590a11cfcc960729ec7ca5b43cd705fb9d514effb1f750faf0a2c9c85755f7",
+    "tools/score_member_match.json": "61c981b31f29ee45a152ee6218a73e792a921b29a23cca0e24c0e20555509118",
     "views/score_member_match/borrowed-card.json": "1bd9f16db44bbcbc699cfc04ca53c5d2fae05ad52ad09c73e0efa70c72f4b1d1",
     "views/score_member_match/consent.json": "925ec4bfd1f819a0640c64b8c11f02ac259dda0b4586af12afabd2b79a6d041e",
     "views/score_member_match/everything.json": "a92e1e986d7cbb9fb003690b545049e47f101049e71a87be1ef9b8ebadef1db9",
@@ -10,6 +10,6 @@
     "views/score_member_match/stricter.json": "3433010df4ef31e04315a9075a31063ae244f653f4ad6abc73999db49f822cbc",
     "views/score_member_match/twins.json": "a21ba150aca895e6926484256095a6ca8345b16b3d431266063cd0fa967fb55e"
   },
-  "packageDigest": "sha256:a52495a958feb4fb584deccd890ecc18b29d4f86776c99bcd13a342fcdb9a4fc",
+  "packageDigest": "sha256:657a016f61f30bfb97a9177cfed5c917067b411b135464650029b52667dae4b8",
   "v": 1
 }
